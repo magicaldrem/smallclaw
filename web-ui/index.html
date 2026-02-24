@@ -1,0 +1,4695 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmallClaw</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #f4f6fb;
+    --bg-soft: #eef2f8;
+    --panel: #ffffff;
+    --panel-2: #f8fafc;
+    --line: #dbe3ee;
+    --line-strong: #c7d3e3;
+    --text: #0f172a;
+    --muted: #5f6f86;
+    --brand: #1668e3;
+    --brand-2: #0f4fba;
+    --ok: #0f9f6e;
+    --warn: #d18b19;
+    --err: #d14b4b;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --shadow-sm: 0 2px 6px rgba(16, 32, 64, 0.06);
+    --shadow-md: 0 8px 24px rgba(16, 32, 64, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    height: 100vh;
+    font-family: 'Manrope', sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(900px 420px at 8% -15%, rgba(22, 104, 227, 0.12), transparent 65%),
+      radial-gradient(900px 420px at 100% -20%, rgba(33, 166, 255, 0.12), transparent 62%),
+      var(--bg);
+    display: grid;
+    grid-template-rows: 64px 1fr;
+    grid-template-columns: 280px 1fr minmax(380px, 34vw);
+    grid-template-areas:
+      "header header header"
+      "sidebar main right";
+    gap: 14px;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  header {
+    grid-area: header;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 14px;
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #0b1f3f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel-2);
+  }
+
+  .mode-btn {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .mode-btn.active {
+    background: var(--brand);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(22, 104, 227, 0.28);
+  }
+
+  .status-bar {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-pill {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .status-pill.stat-compact {
+    min-width: 178px;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #a9b4c5; }
+  .dot.online { background: var(--ok); box-shadow: 0 0 0 4px rgba(15, 159, 110, 0.16); }
+  .dot.offline { background: var(--err); box-shadow: 0 0 0 4px rgba(209, 75, 75, 0.14); }
+
+  aside,
+  main,
+  .right-panel {
+    min-height: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--panel);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  aside {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #sidebar-tabs {
+    display: flex;
+    padding: 8px;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+
+  .sidebar-tab {
+    flex: 1;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .sidebar-tab.active {
+    background: #eaf2ff;
+    border-color: #bdd3f6;
+    color: #0d4faf;
+  }
+
+  #sidebar-jobs,
+  #sidebar-skills { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #sidebar-skills { display: none; }
+
+  .sidebar-section {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .sidebar-action {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  #jobs-list,
+  #skills-list,
+  #skills-search-results { flex: 1; min-height: 0; overflow-y: auto; padding: 10px; }
+
+  .job-item,
+  .skill-item,
+  .skill-result,
+  .task-card,
+  .approval-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: #fff;
+    transition: all 0.15s ease;
+  }
+
+  .job-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+
+  .job-item:hover { border-color: #c2d6f4; box-shadow: 0 4px 12px rgba(15, 60, 120, 0.08); }
+  .job-item.active { border-color: #9fbef1; background: #f1f6ff; }
+
+  .job-item-title { font-size: 12px; font-weight: 700; }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    padding: 4px 8px;
+  }
+  .badge-planning { background: #e6f0ff; color: #225ab6; }
+  .badge-executing { background: #e9f8ff; color: #1d7ea7; }
+  .badge-completed { background: #e8fbf3; color: #0f8b63; }
+  .badge-failed { background: #fff0f0; color: #c33f3f; }
+  .badge-queued { background: #eef2f7; color: #607086; }
+  .badge-needs_approval { background: #fff6e9; color: #b06b00; }
+
+  .empty-state {
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-md);
+    padding: 22px 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+    background: var(--panel-2);
+  }
+
+  .agent-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fff 0%, #f9fbff 100%);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .agent-context-scroll {
+    margin-top: 10px;
+    max-height: none;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
+  }
+
+  .agent-metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .agent-metric {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+  }
+
+  .agent-metric .k {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .agent-metric .v {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 700;
+    margin-top: 3px;
+  }
+
+  .task-progress-wrap {
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    height: 8px;
+    background: #eef3fb;
+    overflow: hidden;
+  }
+
+  .task-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0f9f6e, #20b182);
+    transition: width 180ms ease;
+  }
+
+  .task-list {
+    margin-top: 0;
+    max-height: 180px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+  }
+  .agent-context-scroll .task-list {
+    max-height: none;
+    overflow: visible;
+    min-height: 52px;
+  }
+
+  .task-row {
+    padding: 7px 8px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    margin-bottom: 6px;
+    background: #fcfdff;
+  }
+
+  .task-row:last-child { margin-bottom: 0; }
+
+  .task-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .task-title {
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 700;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .task-meta {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .status-chip {
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .status-chip.pending { background: #eef2f7; color: #607086; }
+  .status-chip.planned { background: #eef2f7; color: #607086; }
+  .status-chip.running { background: #e6f0ff; color: #225ab6; }
+  .status-chip.in_progress { background: #e6f0ff; color: #225ab6; }
+  .status-chip.verifying { background: #fff6e9; color: #b06b00; }
+  .status-chip.repaired { background: #e6fff9; color: #0f8b63; }
+  .status-chip.done { background: #e8fbf3; color: #0f8b63; }
+  .status-chip.skipped { background: #f4f6fa; color: #7d8ca2; }
+  .status-chip.failed { background: #fff0f0; color: #c33f3f; }
+
+  main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    height: 100%;
+  }
+
+  #chat-view,
+  #mission-view { flex: 1; min-height: 0; height: 100%; display: flex; flex-direction: column; }
+  #mission-view { display: none; }
+
+  #chat-messages,
+  #main-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .chat-welcome,
+  .welcome {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    color: var(--muted);
+  }
+
+  .chat-welcome-icon,
+  .welcome-logo { font-size: 48px; opacity: 0.6; }
+  .chat-welcome h2 { font-size: 28px; font-weight: 800; color: #10346f; }
+
+  .msg {
+    display: flex;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .msg-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+
+  .msg.user .msg-avatar { background: #e8f1ff; border-color: #c4d9fb; }
+  .msg-body { flex: 1; min-width: 0; }
+  .msg-role { font-size: 11px; color: #4f617b; font-weight: 700; margin-bottom: 6px; }
+  .msg-content { line-height: 1.75; font-size: 14px; white-space: pre-wrap; word-break: break-word; color: #17243b; }
+  .msg.user .msg-content { color: #0f3d8a; }
+  .msg-staged { display: flex; flex-direction: column; gap: 10px; }
+  .msg-stage {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+    padding: 10px;
+  }
+  .msg-stage-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .artifact-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .artifact-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #f9fbff;
+    padding: 10px;
+  }
+  .artifact-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .artifact-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #15386f;
+    letter-spacing: 0.02em;
+  }
+  .artifact-status {
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .artifact-status.ok { background: #e8fbf3; color: #0f8b63; }
+  .artifact-status.error { background: #fff0f0; color: #c33f3f; }
+  .artifact-status.skipped { background: #f4f6fa; color: #7d8ca2; }
+  .artifact-row {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .artifact-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .artifact-btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: #1a355f;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .artifact-btn:hover { border-color: #aac6ef; background: #f2f7ff; }
+  .artifact-preview {
+    margin-top: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px;
+    font-size: 11px;
+    color: #2f3e55;
+    white-space: pre-wrap;
+    max-height: 180px;
+    overflow: auto;
+  }
+
+  .chat-input-area,
+  .mission-bar {
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, #fff, #f9fbff);
+    padding: 14px 16px;
+  }
+
+  .agent-toggle,
+  .mission-input-row,
+  .chat-input-row { display: flex; align-items: center; gap: 10px; }
+  .queued-prompts-panel {
+    display: none;
+    margin-bottom: 10px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f7faff, #f2f7ff);
+    overflow: hidden;
+  }
+  .queued-prompts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .queued-prompts-list { padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; }
+  .queued-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid #d9e4f4;
+    border-radius: 10px;
+    background: #fff;
+    padding: 7px 8px;
+    font-size: 12px;
+    color: #21324a;
+  }
+  .queued-item-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .queued-item-btn,
+  .queued-clear-btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+  }
+  .queued-item-btn:hover,
+  .queued-clear-btn:hover { border-color: #c1d2ec; color: #26487e; }
+
+  .agent-toggle { margin-bottom: 10px; }
+  .agent-toggle-right { margin-left: auto; position: relative; }
+  .agent-toggle-label { font-size: 11px; color: var(--muted); font-weight: 700; }
+
+  .toggle-switch { position: relative; width: 38px; height: 20px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: #e8eef7;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    top: 2px; left: 2px;
+    border-radius: 50%;
+    background: #6d7f97;
+    transition: all 0.2s ease;
+  }
+  .toggle-switch input:checked + .toggle-track { background: #dce9ff; border-color: #9fc1f7; }
+  .toggle-switch input:checked + .toggle-track::after { left: 20px; background: var(--brand); }
+
+  .agent-mode-badge {
+    display: none;
+    border: 1px solid #9fc1f7;
+    background: #ebf3ff;
+    color: #0d4faf;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .agent-mode-badge.visible { display: inline-block; }
+
+  #chat-input,
+  #mission-input,
+  #skill-search-input {
+    flex: 1;
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+  }
+
+  #chat-input { min-height: 44px; max-height: 150px; resize: none; line-height: 1.55; overflow-y: auto; }
+  #chat-input:focus,
+  #mission-input:focus,
+  #skill-search-input:focus { border-color: #9fc1f7; box-shadow: 0 0 0 4px rgba(22, 104, 227, 0.11); }
+
+  .btn,
+  .send-btn,
+  .skill-search-btn,
+  .skill-install-btn {
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: var(--brand);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    transition: all 0.15s ease;
+  }
+
+  .btn:hover,
+  .send-btn:hover,
+  .skill-search-btn:hover,
+  .skill-install-btn:hover { background: var(--brand-2); transform: translateY(-1px); }
+
+  .btn { padding: 10px 16px; font-size: 12px; }
+  .btn-sm { padding: 6px 10px; font-size: 11px; border-radius: 10px; }
+  .btn-green { background: var(--ok); }
+  .btn-red { background: var(--err); }
+
+  .send-btn { width: 44px; height: 44px; font-size: 16px; }
+  .send-btn:disabled,
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .quick-mode-btn {
+    border: 1px solid var(--line-strong);
+    background: #eef5ff;
+    color: #0d4faf;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .quick-mode-popover {
+    position: absolute;
+    right: 0;
+    bottom: 34px;
+    width: 240px;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    z-index: 120;
+    padding: 10px;
+    display: none;
+  }
+
+  .quick-mode-popover.open { display: block; }
+  .quick-mode-popover.clamp-left { right: auto; left: 0; }
+
+  .quick-mode-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .quick-mode-opt {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text);
+    border-radius: 9px;
+    padding: 7px 9px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .quick-mode-opt.active {
+    border-color: #9fc1f7;
+    background: #edf4ff;
+    color: #0d4faf;
+    font-weight: 700;
+  }
+
+  .chat-hint { margin-top: 8px; color: var(--muted); font-size: 11px; }
+  .chat-hint .switch-link { color: var(--brand); cursor: pointer; text-decoration: underline; }
+
+  .thinking { display: flex; align-items: center; gap: 6px; padding-top: 4px; }
+  .thinking-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--brand);
+    opacity: 0.25;
+    animation: thinkBounce 1.2s ease-in-out infinite;
+  }
+  .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes thinkBounce { 0%,80%,100%{transform:scale(0.75);opacity:0.25;} 40%{transform:scale(1);opacity:1;} }
+
+  .react-steps {
+    margin-top: 10px;
+    border-left: 2px solid #c8d9f1;
+    padding-left: 10px;
+  }
+  .react-step { font-size: 12px; margin-bottom: 8px; }
+  .react-step-thought { color: var(--muted); font-style: italic; }
+  .react-step-action { color: #0d4faf; font-weight: 700; margin-top: 3px; }
+  .react-step-result { color: var(--ok); margin-top: 3px; font-size: 11px; }
+  .react-step-result.error { color: var(--err); }
+  .react-steps-toggle { margin-top: 8px; font-size: 11px; color: #0d4faf; cursor: pointer; }
+
+  .think-block { margin-top: 8px; border: 1px solid #d5e3f8; border-radius: 12px; overflow: hidden; }
+  .think-toggle {
+    width: 100%; border: 0; cursor: pointer; text-align: left;
+    padding: 8px 10px; background: #f3f8ff; color: #23519f;
+    display: flex; align-items: center; gap: 8px; font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  }
+  .think-toggle .think-icon { transition: transform 0.2s ease; }
+  .think-toggle.open .think-icon { transform: rotate(90deg); }
+  .think-content {
+    display: none;
+    padding: 10px 12px;
+    background: #fff;
+    color: var(--muted);
+    border-top: 1px solid #dde7f6;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .mission-bar-label,
+  .section-title,
+  .right-section-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #5b6e88;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .job-detail-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .job-detail-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 12px; margin-bottom: 18px; }
+
+  .task-card { padding: 14px; margin-bottom: 8px; }
+  .task-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .task-card-title { font-weight: 700; font-size: 14px; }
+  .task-card-desc { color: var(--muted); font-size: 12px; line-height: 1.7; }
+
+  .task-criteria { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .task-criteria-item { font-size: 12px; color: var(--muted); padding: 2px 0; }
+
+  #log-panel,
+  #process-log {
+    background: #fbfdff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  #log-panel { padding: 12px; margin-top: 16px; max-height: 220px; overflow-y: auto; font-size: 11px; }
+
+  .log-line { color: var(--muted); }
+  .log-line.info { color: #2d5fb3; }
+  .log-line.success { color: var(--ok); }
+  .log-line.error { color: var(--err); }
+  .log-line.warn { color: var(--warn); }
+
+  .right-panel { grid-area: right; display: flex; flex-direction: column; }
+  .right-section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .sys-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .sys-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel-2);
+    padding: 8px 10px;
+    min-height: 62px;
+  }
+  .sys-card.full {
+    grid-column: 1 / -1;
+    min-height: 74px;
+  }
+  .sys-k {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .sys-v {
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0d2858;
+    letter-spacing: -0.01em;
+  }
+  .sys-sub {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .sys-meter {
+    margin-top: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #e5edf7;
+    overflow: hidden;
+  }
+  .sys-meter > i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1e9d7b 0%, #1b75e6 55%, #0f4fba 100%);
+    transition: width 0.35s ease;
+  }
+  #r-live-steps,
+  #r-recent-turns {
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: 52px;
+  }
+  .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #edf2f8; font-size: 12px; }
+  .info-row:last-child { border-bottom: 0; }
+  .info-key { color: var(--muted); }
+  .info-val { color: var(--text); font-weight: 700; }
+  .info-val.green { color: var(--ok); }
+  .info-val.red { color: var(--err); }
+
+  #approvals-list { max-height: 220px; overflow-y: auto; }
+  .approval-card { padding: 12px; margin-bottom: 8px; background: #fffaf0; border-color: #f1dbad; }
+  .approval-action { color: #8b5c00; font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+  .approval-reason { color: #726344; font-size: 11px; line-height: 1.6; margin-bottom: 10px; }
+  .approval-buttons { display: flex; gap: 8px; }
+
+  .skills-search-bar { padding: 10px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; background: var(--panel-2); }
+  .skill-item { padding: 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .skill-item-name { font-size: 12px; font-weight: 700; color: #14478f; }
+  .skill-remove-btn { border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+  .skill-remove-btn:hover { color: var(--err); }
+  .skill-status-row { display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap: wrap; }
+  .skill-badge {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #f5f8fd;
+    color: #4e5f78;
+    padding: 2px 7px;
+  }
+  .skill-badge.ready { background:#e8fbf3; color:#0f8b63; border-color:#bde9d4; }
+  .skill-badge.needs_setup { background:#fff6e9; color:#b06b00; border-color:#f0d49e; }
+  .skill-badge.blocked { background:#fff0f0; color:#c33f3f; border-color:#efc0c0; }
+  .skill-badge.risk-low { background:#e8fbf3; color:#0f8b63; border-color:#bde9d4; }
+  .skill-badge.risk-medium { background:#fff6e9; color:#b06b00; border-color:#f0d49e; }
+  .skill-badge.risk-high { background:#fff0f0; color:#c33f3f; border-color:#efc0c0; }
+  .skill-item-actions { display:flex; align-items:center; gap:6px; }
+  .skill-mini-btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+  }
+  .skill-mini-btn:hover { border-color:#c1d2ec; color:#26487e; }
+  .skill-mini-btn.enabled {
+    background:#e8fbf3;
+    border-color:#bde9d4;
+    color:#0f8b63;
+  }
+  .skill-details {
+    margin: 8px 10px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fbfdff;
+    padding: 10px;
+    display: none;
+  }
+  .skill-details.open { display:block; }
+  .skill-details h4 { font-size: 11px; margin: 0 0 6px; color:#17417f; }
+  .skill-details .line { font-size: 11px; color: var(--muted); margin: 2px 0; line-height: 1.5; }
+  .skill-details .line code { color:#10346f; font-family:'IBM Plex Mono', monospace; }
+  .skill-upload-btn {
+    border: 1px solid #bcd4f6;
+    background: #ebf3ff;
+    color: #0d4faf;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+  }
+  .skill-upload-btn:hover { background:#dfeeff; border-color:#a8c7f2; }
+
+  /* Skill cards - same color as chat sessions, green glow when enabled */
+  .skill-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: #fff;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .skill-card:hover {
+    border-color: #c2d6f4;
+    box-shadow: 0 4px 12px rgba(15, 60, 120, 0.08);
+  }
+  .skill-card.enabled {
+    border-color: #86d4a8;
+    background: linear-gradient(135deg, #f0faf4 0%, #e8f8ee 100%);
+    box-shadow: 0 0 0 2px rgba(15, 159, 110, 0.12), 0 2px 8px rgba(15, 159, 110, 0.1);
+  }
+  .skill-card.enabled:hover {
+    border-color: #5ec48a;
+    box-shadow: 0 0 0 2px rgba(15, 159, 110, 0.18), 0 4px 12px rgba(15, 159, 110, 0.14);
+  }
+  .skill-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .skill-card-emoji {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .skill-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .skill-card-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .skill-card.enabled .skill-card-name {
+    color: #0a6b3d;
+  }
+  .skill-card-desc {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.4;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .skill-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .skill-card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #c5d0de;
+    transition: all 0.2s ease;
+  }
+  .skill-card.enabled .skill-card-dot {
+    background: var(--ok);
+    box-shadow: 0 0 0 3px rgba(15, 159, 110, 0.16);
+  }
+
+  /* Context pinning - message selection mode */
+  .msg.pin-selectable {
+    cursor: pointer;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 4px -16px;
+    transition: all 0.2s ease;
+  }
+  .msg.pin-selectable:hover {
+    background: #f0f4fb;
+  }
+  .msg.pin-selected {
+    background: linear-gradient(135deg, #f0faf4 0%, #e8f8ee 100%) !important;
+    border: 1px solid #86d4a8;
+    box-shadow: 0 0 0 2px rgba(15, 159, 110, 0.12);
+  }
+  .context-pin-active #context-pin-btn {
+    background: #dce9ff;
+    border-color: #9fc1f7;
+    color: #0d4faf;
+  }
+  .pin-card {
+    border: 1px solid #86d4a8;
+    border-radius: 8px;
+    background: #f0faf4;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pin-card-text {
+    flex: 1;
+    font-size: 11px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pin-card-remove {
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 2px;
+  }
+  .pin-card-remove:hover { color: var(--err); }
+
+  .skill-result { padding: 10px; margin-bottom: 6px; }
+  .skill-result-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+  .skill-result-desc { font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
+  .skill-install-btn { background: #ebf3ff; color: #0d4faf; border: 1px solid #bcd4f6; padding: 5px 10px; border-radius: 999px; }
+
+  .spinner {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid #d2dded;
+    border-top-color: var(--brand);
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .pulsing { animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+
+  /* ── Canvas Panel ─────────────────────────────── */
+  #canvas-panel { box-shadow: -4px 0 24px rgba(16,32,64,0.08); }
+  #canvas-panel.canvas-drag-over { outline: 2px dashed var(--brand); outline-offset: -4px; }
+  .canvas-tab {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 10px 6px 12px;
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    border-right: 1px solid var(--line); cursor: pointer;
+    white-space: nowrap; transition: background 0.12s ease; flex-shrink: 0;
+    user-select: none;
+  }
+  .canvas-tab:hover { background: #f0f4fb; color: var(--text); }
+  .canvas-tab.active { background: #fff; color: var(--text); border-bottom: 2px solid var(--brand); }
+  .canvas-tab-close {
+    border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 0 2px; border-radius: 4px;
+    transition: all 0.12s ease;
+  }
+  .canvas-tab-close:hover { background: #fee; color: var(--err); }
+  .canvas-new-tab {
+    border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    font-size: 16px; padding: 4px 12px; flex-shrink: 0;
+    transition: color 0.12s ease;
+  }
+  .canvas-new-tab:hover { color: var(--brand); }
+  .canvas-mode-btn.active { background: var(--brand) !important; color: #fff !important; }
+  #canvas-editor-wrap .CodeMirror {
+    height: 100%; font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; line-height: 1.65;
+  }
+  #canvas-editor-wrap { height: 100%; }
+  #canvas-preview-frame { background: #fff; }
+  /* ── Stop Button ────────────────────────────────── */
+  .send-btn { transition: background 0.15s ease !important; display: flex; align-items: center; justify-content: center; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd7e8; border-radius: 999px; }
+
+  @media (max-width: 1200px) {
+    body {
+      grid-template-columns: 250px 1fr;
+      grid-template-areas:
+        "header header"
+        "main right";
+    }
+    aside { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    body {
+      padding: 8px;
+      gap: 8px;
+      grid-template-rows: 58px 1fr 280px;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "header"
+        "main"
+        "right";
+    }
+    header { border-radius: 14px; }
+    .status-bar { display: none; }
+    #chat-messages,
+    #main-content { padding: 14px; }
+    .chat-input-area,
+    .mission-bar { padding: 10px; }
+  }
+  /* ─── Heartbeat Page ─────────────────────────────── */
+  #heartbeat-view {
+    display: none;
+    flex-direction: column;
+    grid-column: 1 / -1; /* span all columns when visible */
+    grid-row: 2;
+    height: 100%;
+    overflow: hidden;
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--line);
+  }
+  .hb-topbar {
+    display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+    border-bottom: 1px solid var(--line); background: #fff;
+    flex-shrink: 0;
+  }
+  .hb-status-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #ccc; flex-shrink: 0;
+  }
+  .hb-status-dot.active {
+    background: var(--ok);
+    box-shadow: 0 0 0 3px rgba(15,159,110,0.15);
+    animation: hbPulse 2s ease infinite;
+  }
+  @keyframes hbPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(15,159,110,0.15); }
+    50% { box-shadow: 0 0 0 6px rgba(15,159,110,0.08); }
+  }
+  .hb-status-dot.paused { background: #f0ad4e; }
+  .hb-topbar-label { font-size: 13px; font-weight: 700; color: var(--text); }
+  .hb-topbar-meta { font-size: 11px; color: var(--muted); }
+  .hb-topbar-actions { margin-left: auto; display: flex; gap: 8px; }
+  .hb-btn {
+    border: 1px solid var(--line); background: #fff; color: var(--text);
+    border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 700;
+    cursor: pointer; font-family: 'Manrope',sans-serif;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .hb-btn:hover { background: #f5f7fa; }
+  .hb-btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .hb-btn.primary:hover { opacity: 0.9; }
+  .hb-btn.danger { color: var(--err); border-color: #f5c6cb; }
+
+  .hb-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .hb-section { margin-bottom: 24px; }
+  .hb-section-title {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hb-section-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .hb-section-dot.red { background: #e74c3c; }
+  .hb-section-dot.yellow { background: #f0ad4e; }
+  .hb-section-dot.green { background: var(--ok); }
+  .hb-section-dot.gray { background: #ccc; }
+
+  .hb-card {
+    border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    padding: 12px 14px; margin-bottom: 8px;
+    cursor: grab; transition: all 0.15s ease;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .hb-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .hb-card.running {
+    border-color: var(--brand); background: #f0f4ff;
+    box-shadow: 0 0 0 2px rgba(55,110,245,0.12);
+  }
+  .hb-card.completed { opacity: 0.6; }
+  .hb-card.paused { opacity: 0.7; border-style: dashed; }
+  .hb-card-drag {
+    color: var(--muted); font-size: 14px; cursor: grab; user-select: none;
+    flex-shrink: 0; padding-top: 2px;
+  }
+  .hb-card-body { flex: 1; min-width: 0; }
+  .hb-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .hb-card-meta { font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; }
+  .hb-card-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: flex-start; }
+  .hb-card-btn {
+    border: none; background: none; color: var(--muted); cursor: pointer;
+    font-size: 12px; padding: 3px 6px; border-radius: 4px;
+  }
+  .hb-card-btn:hover { background: #f0f4fa; color: var(--text); }
+  .hb-card-btn.danger:hover { color: var(--err); background: #fef0f0; }
+
+  .hb-empty {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+    font-size: 13px; line-height: 1.8;
+  }
+
+  /* Automated session indicator in sidebar */
+  .session-auto-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 9px; color: #c77d00; background: #fff8e7;
+    border: 1px solid #f0dfa0; border-radius: 4px;
+    padding: 1px 5px; font-weight: 700;
+  }
+
+  /* Add task modal */
+  .hb-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hb-modal {
+    background: #fff; border-radius: 14px; padding: 24px; width: 420px;
+    max-height: 80vh; overflow-y: auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  }
+  .hb-modal h3 { margin: 0 0 16px; font-size: 16px; }
+  .hb-modal label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin: 10px 0 4px; }
+  .hb-modal input, .hb-modal textarea, .hb-modal select {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 13px; font-family: 'Manrope',sans-serif; box-sizing: border-box;
+  }
+  .hb-modal textarea { min-height: 80px; resize: vertical; }
+  .hb-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span>🦞</span> SmallClaw
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-chat" onclick="setMode('chat')">Chat</button>
+    <button class="mode-btn" id="btn-heartbeat" onclick="setMode('heartbeat')">Heartbeat</button>
+  </div>
+
+  <div class="status-bar">
+    <button onclick="openSettings()" title="Settings" style="display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);padding:6px 12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--line-strong)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--line)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+    <div class="status-pill">
+      <div class="dot" id="ollama-dot"></div>
+      <span id="ollama-status">Checking...</span>
+    </div>
+    <div class="status-pill" id="model-pill">
+      <span id="current-model">-</span>
+    </div>
+    <div class="status-pill stat-compact" id="system-pill">
+      <span id="quick-system-stats">CPU --% • RAM --% • GPU --%</span>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside>
+  <div id="sidebar-tabs">
+    <button class="sidebar-tab active" id="tab-jobs" onclick="setSidebarTab('jobs')">Sessions</button>
+    <button class="sidebar-tab" id="tab-skills" onclick="setSidebarTab('skills')">🧩 Skills</button>
+  </div>
+
+  <!-- SESSIONS TAB -->
+  <div id="sidebar-jobs">
+    <div class="sidebar-section" style="border-top:none">
+      <span></span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="sidebar-action" onclick="newChatSession()">+ New Chat</button>
+        <button class="sidebar-action" id="sessions-edit-btn" onclick="toggleSessionsEditMode()">Edit</button>
+      </div>
+    </div>
+    <div id="jobs-list">
+      <div class="empty-state">No chats yet.<br>Start a new conversation.</div>
+    </div>
+  </div>
+
+  <!-- SKILLS TAB -->
+  <div id="sidebar-skills">
+    <div class="sidebar-section" style="border-top:none">
+      <span>Skills</span>
+      <button class="sidebar-action" onclick="openCreateSkillModal()">+ Create</button>
+    </div>
+    <div id="skills-list" style="flex:1;min-height:0;overflow-y:auto;padding:10px">
+      <div class="empty-state" style="padding:16px">Loading skills...</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <!-- CHAT VIEW (default) -->
+  <div id="chat-view">
+    <div id="chat-messages">
+      <div class="chat-welcome" id="chat-welcome">
+        <div class="chat-welcome-icon">🦞</div>
+        <h2>SmallClaw</h2>
+        <p>Chat directly with your local model. No API keys, no cloud — just you and the model.</p>
+        <div class="hint">Switch to ⚡ Mission mode for multi-step agentic tasks with tools.</div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+	      <div class="agent-toggle">
+        <span class="agent-toggle-label">Mode:</span>
+        <label class="toggle-switch" title="Toggle agent mode (gives AI access to tools)">
+          <input type="checkbox" id="agent-mode-toggle" onchange="updateAgentMode()">
+          <span class="toggle-track"></span>
+        </label>
+        <span class="agent-toggle-label" id="agent-mode-label">Chat</span>
+        <span class="agent-mode-badge" id="agent-mode-badge">AGENT</span>
+        <div class="agent-toggle-right" style="display:flex;align-items:center;gap:6px">
+          <button class="quick-mode-btn" id="context-pin-btn" onclick="toggleContextPinMode()" title="Pin messages to context">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+            <span id="context-pin-label">Context</span>
+          </button>
+          <div class="quick-mode-popover" id="context-pin-popover" style="width:280px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div class="quick-mode-title" style="margin:0">Pin Messages to Context</div>
+              <span id="context-pin-count" style="font-size:11px;color:var(--muted);font-weight:700">0/3 selected</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Click messages in chat to pin them. Pinned messages are re-injected into context with each request.</div>
+            <div id="context-pin-list" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+            <div style="display:flex;justify-content:flex-end;gap:6px">
+              <button class="skill-mini-btn" onclick="cancelContextPin()" style="display:flex;align-items:center;gap:4px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Cancel
+              </button>
+              <button class="skill-mini-btn enabled" onclick="confirmContextPin()" style="display:flex;align-items:center;gap:4px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Done
+              </button>
+            </div>
+          </div>
+          <button class="quick-mode-btn" id="quick-mode-btn" onclick="toggleQuickModePopover()" title="Web Search / Thinking settings">
+            <span id="quick-mode-label">Verified</span>
+            <span>▾</span>
+          </button>
+          <div class="quick-mode-popover" id="quick-mode-popover">
+            <div class="quick-mode-title">Web Search Rigor</div>
+            <button class="quick-mode-opt" id="rigor-fast" onclick="setQuickSearchRigor('fast')">Fast</button>
+            <button class="quick-mode-opt" id="rigor-verified" onclick="setQuickSearchRigor('verified')">Verified</button>
+            <button class="quick-mode-opt" id="rigor-strict" onclick="setQuickSearchRigor('strict')">Strict</button>
+            <div class="quick-mode-title" style="margin-top:8px">Thinking Effort</div>
+            <button class="quick-mode-opt" id="think-standard" onclick="setQuickThinkingEffort('standard')">Standard</button>
+            <button class="quick-mode-opt" id="think-extended" onclick="setQuickThinkingEffort('extended')">Extended</button>
+          </div>
+	        </div>
+	      </div>
+	      <div class="queued-prompts-panel" id="queued-prompts-panel">
+	        <div class="queued-prompts-head">
+	          <span id="queued-prompts-title">Queued prompts</span>
+	          <button class="queued-clear-btn" onclick="clearQueuedPrompts()">Clear</button>
+	        </div>
+	        <div class="queued-prompts-list" id="queued-prompts-list"></div>
+	      </div>
+	      <div class="chat-input-row">
+        <textarea
+          id="chat-input"
+          placeholder="Type a message... (Enter to send, Shift+Enter for newline)"
+          rows="1"
+          autocomplete="off"
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="handleSendStop()" title="Send">
+          <svg id="send-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="22 2 15 22 11 13 2 9"/></svg>
+          <svg id="stop-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor" style="display:none"><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        </button>
+      </div>
+      <div class="chat-hint">
+        Chatting with <span id="chat-model-name">your model</span> locally via Ollama.
+        <span id="queued-prompts-indicator" style="display:none;margin-left:8px;color:var(--brand);font-weight:700"></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- HEARTBEAT VIEW (full page overlay) -->
+<div id="heartbeat-view">
+  <div class="hb-topbar">
+    <div class="hb-status-dot" id="hb-dot"></div>
+    <span class="hb-topbar-label" id="hb-label">Heartbeat OFF</span>
+    <span class="hb-topbar-meta" id="hb-meta">Every 30m · 8:00 AM–10:00 PM</span>
+    <div class="hb-topbar-actions">
+      <button class="hb-btn" id="hb-toggle-btn" onclick="toggleHeartbeatEnabled()">Enable</button>
+      <button class="hb-btn primary" onclick="openTaskModal()">+ Add Task</button>
+    </div>
+  </div>
+  <div class="hb-content" id="hb-content">
+    <div class="hb-empty" id="hb-empty">
+      <div style="font-size:32px;margin-bottom:12px;opacity:0.3">🕓</div>
+      <div style="font-weight:700;margin-bottom:6px">No tasks yet</div>
+      <div>Add scheduled tasks, reminders, or heartbeat checks.<br>They'll run automatically and report back here.</div>
+    </div>
+    <div id="hb-section-running" class="hb-section" style="display:none">
+      <div class="hb-section-title"><div class="hb-section-dot red"></div>NOW — Running</div>
+      <div id="hb-running-cards"></div>
+    </div>
+    <div id="hb-section-queued" class="hb-section" style="display:none">
+      <div class="hb-section-title"><div class="hb-section-dot yellow"></div>UP NEXT</div>
+      <div id="hb-queued-cards"></div>
+    </div>
+    <div id="hb-section-scheduled" class="hb-section" style="display:none">
+      <div class="hb-section-title"><div class="hb-section-dot green"></div>SCHEDULED</div>
+      <div id="hb-scheduled-cards"></div>
+    </div>
+    <div id="hb-section-completed" class="hb-section" style="display:none">
+      <div class="hb-section-title" style="cursor:pointer" onclick="document.getElementById('hb-completed-cards').style.display=document.getElementById('hb-completed-cards').style.display==='none'?'block':'none'"><div class="hb-section-dot gray"></div>COMPLETED (click to expand)</div>
+      <div id="hb-completed-cards" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div id="task-modal" style="display:none"></div>
+
+<!-- RIGHT PANEL -->
+  <div class="right-panel" id="right-panel" style="position:relative">
+  <!-- Right panel topbar with canvas toggle -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--panel);min-height:38px">
+    <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Context</span>
+    <button id="canvas-toggle-btn" onclick="toggleCanvas()" title="Toggle Canvas" style="display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;transition:all 0.15s ease">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 9l-4 3 4 3"/><path d="M16 9l4 3-4 3"/><path d="M12 6v12"/></svg>
+      Canvas
+    </button>
+  </div>
+
+  <!-- Canvas Overlay -->
+  <div id="canvas-panel" style="display:none;position:absolute;top:38px;bottom:0;left:0;right:0;z-index:20;flex-direction:column;background:var(--panel)">
+    <!-- Canvas header row: tabs left, actions right -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid var(--line);background:var(--panel-2);flex-shrink:0;min-height:38px">
+      <div id="canvas-tabs" style="display:flex;align-items:stretch;flex:1;min-width:0;overflow-x:auto"></div>
+      <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;flex-shrink:0;border-left:1px solid var(--line)">
+        <div style="display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff">
+          <button id="canvas-code-btn" onclick="setCanvasMode('code')" class="canvas-mode-btn active" style="border:0;background:transparent;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;color:var(--muted)">Code</button>
+          <button id="canvas-preview-btn" onclick="setCanvasMode('preview')" class="canvas-mode-btn" style="border:0;background:transparent;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;color:var(--muted)">Preview</button>
+        </div>
+        <button onclick="canvasSave()" title="Save (Ctrl+S)" style="display:flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;color:var(--text);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+        <button onclick="canvasAddToContext()" title="Add to chat input" style="display:flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;color:var(--text);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Add to Chat
+        </button>
+        <button onclick="toggleCanvas()" title="Close canvas" style="display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;width:28px;height:28px;cursor:pointer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Canvas body -->
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;position:relative">
+      <div id="canvas-empty-state" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);text-align:center;padding:24px;pointer-events:none">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.25"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 9l-4 3 4 3"/><path d="M16 9l4 3-4 3"/><path d="M12 6v12"/></svg>
+        <div style="font-size:13px;font-weight:700">No files open</div>
+        <div style="font-size:11px;line-height:1.7">Drop a file here or click <strong>+</strong> to create one</div>
+      </div>
+      <div id="canvas-editor-wrap" style="display:none;flex:1;min-height:0;overflow:hidden"></div>
+      <iframe id="canvas-preview-frame" style="display:none;flex:1;border:none;width:100%;min-height:0" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+  </div>
+  <!-- End Canvas Overlay -->
+
+  <div class="right-section" id="system-stats-section">
+    <div class="right-section-title">System Stats</div>
+    <div class="sys-grid">
+      <div class="sys-card">
+        <div class="sys-k">CPU</div>
+        <div class="sys-v" id="sys-cpu">--%</div>
+        <div class="sys-meter"><i id="sys-cpu-meter"></i></div>
+      </div>
+      <div class="sys-card">
+        <div class="sys-k">RAM</div>
+        <div class="sys-v" id="sys-ram">--%</div>
+        <div class="sys-meter"><i id="sys-ram-meter"></i></div>
+      </div>
+      <div class="sys-card">
+        <div class="sys-k">GPU</div>
+        <div class="sys-v" id="sys-gpu">--%</div>
+        <div class="sys-meter"><i id="sys-gpu-meter"></i></div>
+      </div>
+      <div class="sys-card">
+        <div class="sys-k">VRAM</div>
+        <div class="sys-v" id="sys-vram">--%</div>
+        <div class="sys-meter"><i id="sys-vram-meter"></i></div>
+      </div>
+      <div class="sys-card full">
+        <div class="sys-k">LLM Runtime</div>
+        <div class="sys-v" id="sys-ollama">Checking...</div>
+        <div class="sys-sub" id="sys-runtime-sub">Gateway RSS -- MB • Updated --</div>
+      </div>
+    </div>
+  </div>
+  <div class="right-section" id="agent-context-section">
+    <div class="right-section-title">Agent Context</div>
+    <div class="agent-card">
+      <div class="agent-metric-grid">
+        <div class="agent-metric">
+          <div class="k">Session Mode</div>
+          <div class="v" id="r-session-mode">-</div>
+        </div>
+        <div class="agent-metric">
+          <div class="k">Agent State</div>
+          <div class="v" id="r-agent-state">-</div>
+        </div>
+      </div>
+      <div class="agent-metric-grid">
+        <div class="agent-metric">
+          <div class="k">Overview</div>
+          <div class="v" id="r-overview-objective">-</div>
+        </div>
+        <div class="agent-metric">
+          <div class="k">Active</div>
+          <div class="v" id="r-active-objective">-</div>
+        </div>
+      </div>
+      <div class="agent-metric-grid">
+        <div class="agent-metric">
+          <div class="k">Tasks</div>
+          <div class="v" id="r-task-counts">0</div>
+        </div>
+        <div class="agent-metric">
+          <div class="k">Turns</div>
+          <div class="v" id="r-turn-counts">0</div>
+        </div>
+      </div>
+      <div class="agent-metric-grid">
+        <div class="agent-metric">
+          <div class="k">Heartbeat</div>
+          <div class="v" id="r-heartbeat-state">idle</div>
+        </div>
+        <div class="agent-metric">
+          <div class="k">Watchdog</div>
+          <div class="v" id="r-heartbeat-meta">step:-</div>
+        </div>
+      </div>
+      <div class="task-progress-wrap"><div class="task-progress-fill" id="r-task-progress-bar"></div></div>
+      <div class="agent-context-scroll" id="r-agent-context-scroll">
+        <div class="task-list" id="r-turn-execution">
+          <div style="font-size:11px;color:var(--muted)">No active turn execution yet.</div>
+        </div>
+        <div class="task-list" id="r-task-list">
+          <div style="font-size:11px;color:var(--muted)">No tasks yet.</div>
+        </div>
+        <div class="task-list" id="r-live-steps">
+          <div style="font-size:11px;color:var(--muted)">No live tool steps.</div>
+        </div>
+        <div id="r-recent-turns" style="padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);font-size:11px;line-height:1.6;color:var(--muted)">
+          Waiting for turn history...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-section">
+    <div class="right-section-title">⚠ Pending Approvals</div>
+    <div id="approvals-list">
+      <div style="color:var(--muted);font-size:11px">No pending approvals</div>
+    </div>
+  </div>
+
+  <div style="padding:10px 16px 8px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between">
+    <div class="right-section-title" style="margin:0">Quick Actions</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="clearChat()">✕ Chat</button>
+      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="newChatSession()">＋</button>
+      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="openSettings()">⚙</button>
+      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="setSidebarTab('skills')">🧩</button>
+    </div>
+  </div>
+
+  <!-- PROCESS LOG -->
+  <div style="display:flex;flex-direction:column;flex:1 1 320px;overflow:hidden;min-height:280px">
+    <div style="padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0">
+      <span style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)">Process Log</span>
+      <button onclick="clearProcessLog()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;font-family:inherit">✕ clear</button>
+    </div>
+    <div id="process-log" style="flex:1;overflow-y:auto;padding:8px 12px;font-size:11px;line-height:1.7;font-family:'JetBrains Mono',monospace">
+      <div style="color:var(--muted);text-align:center;padding:20px 0;opacity:0.5">Waiting for activity...</div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE SKILL MODAL -->
+<div id="skill-modal" style="display:none;position:fixed;inset:0;background:rgba(10,20,40,0.35);z-index:9999;align-items:center;justify-content:center;padding:18px">
+  <div style="width:min(520px,96vw);max-height:90vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-md)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)">
+      <div style="font-weight:800" id="skill-modal-title">Create Skill</div>
+      <button class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);border:1px solid var(--line)" onclick="closeSkillModal()">Close</button>
+    </div>
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:700">Name</label>
+        <input id="skill-modal-name" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;font-family:'Manrope',sans-serif" placeholder="e.g. Modern Styling" />
+      </div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1">
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:700">Emoji</label>
+          <input id="skill-modal-emoji" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;font-family:'Manrope',sans-serif" placeholder="🧩" maxlength="4" />
+        </div>
+        <div style="flex:3">
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:700">Short Description</label>
+          <input id="skill-modal-desc" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;font-family:'Manrope',sans-serif" placeholder="What does this skill do?" />
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:700">Instructions <span style="font-weight:400">(what the model should do when this skill is active)</span></label>
+        <textarea id="skill-modal-instructions" style="width:100%;min-height:180px;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;font-family:'IBM Plex Mono',monospace;line-height:1.6;resize:vertical" placeholder="When creating HTML files, always use modern CSS patterns..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)">
+      <button class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);border:1px solid var(--line)" onclick="closeSkillModal()">Cancel</button>
+      <button class="btn btn-sm" id="skill-modal-save-btn" onclick="saveSkillFromModal()">Create Skill</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(10,20,40,0.35);z-index:9999;align-items:center;justify-content:center;padding:18px">
+  <div style="width:min(980px,96vw);max-height:90vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-md)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)">
+      <div style="font-weight:800">Settings</div>
+      <button class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);border:1px solid var(--line)" onclick="closeSettings()">Close</button>
+    </div>
+
+    <div style="padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:8px">
+      <button id="settings-tab-system" class="sidebar-action" onclick="setSettingsTab('system')">System</button>
+      <button id="settings-tab-search" class="sidebar-action" onclick="setSettingsTab('search')">Search</button>
+      <button id="settings-tab-policy" class="sidebar-action" onclick="setSettingsTab('policy')">Agent Policy</button>
+      <button id="settings-tab-security" class="sidebar-action" onclick="setSettingsTab('security')">Security</button>
+      <button id="settings-tab-models" class="sidebar-action" onclick="setSettingsTab('models')">Models</button>
+      <button id="settings-tab-telegram" class="sidebar-action" onclick="setSettingsTab('telegram')">Telegram</button>
+    </div>
+
+    <div id="settings-panel-system" style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
+        <div class="right-section-title" style="margin-bottom:8px">Runtime</div>
+        <div class="info-row"><span class="info-key">Model</span><span class="info-val" id="settings-runtime-model">-</span></div>
+        <div class="info-row"><span class="info-key">Gateway</span><span class="info-val" id="settings-runtime-gateway">-</span></div>
+        <div class="info-row"><span class="info-key">Ollama</span><span class="info-val" id="settings-runtime-ollama">-</span></div>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
+        <div class="right-section-title" style="margin-bottom:8px">Notes</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7">
+          These settings apply instantly to this gateway process.
+          For small models, keep tool routing strict and memory scoped.
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-panel-search" style="display:none;padding:14px 16px;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px">
+        <div class="right-section-title" style="margin-bottom:8px">Web Search</div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Preferred Provider</label>
+        <select id="settings-provider" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:13px">
+          <option value="tavily">Tavily</option>
+          <option value="google">Google CSE</option>
+          <option value="brave">Brave</option>
+          <option value="ddg">DuckDuckGo</option>
+        </select>
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Search Rigor</label>
+        <select id="settings-search-rigor" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:13px">
+          <option value="fast">Fast</option>
+          <option value="verified">Verified</option>
+          <option value="strict">Strict</option>
+        </select>
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Tavily API Key</label>
+        <input id="settings-tavily-key" type="password" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px" />
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Google API Key</label>
+        <input id="settings-google-key" type="password" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px" />
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Google CSE ID</label>
+        <input id="settings-google-cx" type="text" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px" />
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Brave API Key</label>
+        <input id="settings-brave-key" type="password" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px" />
+      </div>
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
+        <div class="right-section-title" style="margin-bottom:8px">Behavior</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7">
+          Fast: quickest lookup, fewer checks.
+          Verified: one sanity retry + trust preference.
+          Strict: strongest source requirements on must-verify domains.
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-panel-policy" style="display:none;padding:14px 16px">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
+        <div class="right-section-title" style="margin-bottom:8px">Agent Freshness + Memory Policy</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px">
+          <input type="checkbox" id="settings-force-web-fresh" />
+          Force at least one web search for freshness/current queries
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px">
+          <input type="checkbox" id="settings-memory-fallback" />
+          Allow memory fallback when all providers fail
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <input type="checkbox" id="settings-auto-store-web-facts" />
+          Auto-store verified web facts into memory
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:10px">
+          <input type="checkbox" id="settings-nl-tool-router" />
+          Enable natural-language tool routing ("look it up", "use web", "verify that")
+        </label>
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Code Retrieval Mode</label>
+        <select id="settings-retrieval-mode" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:13px">
+          <option value="fast">Fast (smaller snippets, fewer reads)</option>
+          <option value="standard">Standard</option>
+          <option value="deep">Deep (larger snippets, more context)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="settings-panel-security" style="display:none;padding:14px 16px">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px">
+        <div class="right-section-title" style="margin-bottom:8px">File Access</div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Allowed Paths (one per line)</label>
+        <textarea id="settings-allowed-paths" style="width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:8px;font-family:'IBM Plex Mono',monospace;font-size:12px"></textarea>
+        <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Blocked Paths (one per line)</label>
+        <textarea id="settings-blocked-paths" style="width:100%;min-height:100px;border:1px solid var(--line);border-radius:10px;padding:8px;font-family:'IBM Plex Mono',monospace;font-size:12px"></textarea>
+      </div>
+    </div>
+
+    <div id="settings-panel-models" style="display:none;padding:14px 16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="border:1px solid var(--line);border-radius:12px;padding:12px">
+          <div class="right-section-title" style="margin-bottom:8px">Ollama Connection</div>
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Ollama Endpoint</label>
+          <input id="settings-ollama-endpoint" type="text" placeholder="http://localhost:11434" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace" />
+          <button class="btn btn-sm" onclick="refreshOllamaModels()" style="margin-top:8px;background:#fff;border:1px solid var(--line);color:var(--text)">Refresh Models</button>
+          <div id="ollama-model-load-msg" style="font-size:11px;color:var(--muted);margin-top:6px"></div>
+
+          <div class="right-section-title" style="margin:14px 0 8px">Primary Model</div>
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Active Model</label>
+          <select id="settings-primary-model" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:13px">
+            <option value="">— refresh to load —</option>
+          </select>
+        </div>
+        <div style="border:1px solid var(--line);border-radius:12px;padding:12px">
+          <div class="right-section-title" style="margin-bottom:8px">Role Overrides <span style="font-weight:400;color:var(--muted);font-size:11px">(optional)</span></div>
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Manager model</label>
+          <select id="settings-model-manager" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;margin-bottom:8px">
+            <option value="">(same as primary)</option>
+          </select>
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Executor model</label>
+          <select id="settings-model-executor" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;margin-bottom:8px">
+            <option value="">(same as primary)</option>
+          </select>
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Verifier model</label>
+          <select id="settings-model-verifier" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px">
+            <option value="">(same as primary)</option>
+          </select>
+          <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
+            Role overrides let you use a faster model for simple tasks and a smarter model for planning/verification.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-panel-telegram" style="display:none;padding:14px 16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="border:1px solid var(--line);border-radius:12px;padding:12px">
+          <div class="right-section-title" style="margin-bottom:8px">Telegram Bot Configuration</div>
+
+          <div id="tg-status-bar" style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:8px 10px;border-radius:8px;background:#f8f9fa;font-size:12px">
+            <div id="tg-status-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0"></div>
+            <span id="tg-status-text" style="color:var(--muted)">Not connected</span>
+          </div>
+
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Bot Token</label>
+          <input id="settings-tg-token" type="password" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+          <div style="font-size:10px;color:var(--muted);margin:4px 0 10px">Get this from <a href="https://t.me/BotFather" target="_blank" style="color:var(--brand)">@BotFather</a> on Telegram</div>
+
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Your Telegram User ID</label>
+          <input id="settings-tg-userid" type="text" placeholder="e.g. 123456789" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+          <div style="font-size:10px;color:var(--muted);margin:4px 0 14px">Get this from <a href="https://t.me/userinfobot" target="_blank" style="color:var(--brand)">@userinfobot</a> or send /start to your bot</div>
+
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">
+            <input type="checkbox" id="settings-tg-enabled" />
+            Enable Telegram channel
+          </label>
+
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" id="tg-test-btn" onclick="testTelegramToken()" style="background:#fff;border:1px solid var(--line);color:var(--text)">Test Token</button>
+            <button class="btn btn-sm" onclick="saveTelegramSettings()" style="background:var(--brand);color:#fff;border:1px solid var(--brand)">Save & Connect</button>
+            <button class="btn btn-sm" id="tg-send-test-btn" onclick="sendTelegramTestMessage()" style="background:#fff;border:1px solid var(--line);color:var(--text)" disabled>Send Test Message</button>
+          </div>
+        </div>
+
+        <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
+          <div class="right-section-title" style="margin-bottom:8px">Setup Guide</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.8">
+            <b>Step 1:</b> Open Telegram and message <a href="https://t.me/BotFather" target="_blank" style="color:var(--brand)">@BotFather</a><br>
+            <b>Step 2:</b> Send <code>/newbot</code> and follow the prompts<br>
+            <b>Step 3:</b> Copy the token and paste it here<br>
+            <b>Step 4:</b> Message <a href="https://t.me/userinfobot" target="_blank" style="color:var(--brand)">@userinfobot</a> to get your user ID<br>
+            <b>Step 5:</b> Paste your user ID and click Save & Connect<br><br>
+            <b>What happens:</b><br>
+            • Messages you send to the bot go to your local LLM<br>
+            • Heartbeat/cron results can push to your phone<br>
+            • Works from anywhere — no port forwarding needed<br>
+            • Only your user ID is allowed (others are rejected)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)">
+      <button class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);border:1px solid var(--line)" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-sm" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let ws = null;
+let selectedJobId = null;
+let allJobs = [];
+let pollInterval = null;
+let currentMode = 'chat';
+let sidebarTab = 'jobs';
+let useAgentMode = false;
+const CHAT_SESSIONS_KEY = 'smallclaw_chat_sessions_v1';
+const AGENT_SESSION_KEY = 'smallclaw_agent_session_id';
+function generateSessionId() {
+  return (crypto?.randomUUID?.() || ('sess_' + Math.random().toString(36).slice(2)));
+}
+function setAgentSessionId(id) {
+  const next = String(id || '').trim() || generateSessionId();
+  agentSessionId = next;
+  localStorage.setItem(AGENT_SESSION_KEY, next);
+  return next;
+}
+let agentSessionId = '';
+setAgentSessionId(localStorage.getItem(AGENT_SESSION_KEY) || generateSessionId());
+
+// Chat state
+let chatHistory = [];
+let chatSessions = [];
+let activeChatSessionId = null;
+let sessionsEditMode = false;
+let isThinking = false;
+let processLogEntries = [];
+let currentTurnStartIndex = -1;
+let lastAgentMode = '-';
+let lastTurnKind = '-';
+let settingsTab = 'system';
+let liveTaskSteps = [];
+let quickSearchRigor = 'verified';
+let quickThinkingEffort = localStorage.getItem('smallclaw_quick_thinking_effort') || 'standard';
+let queuedPrompts = [];
+const MAX_QUEUED_PROMPTS = 8;
+let currentPreflightStatus = '';
+let currentProgressLines = [];
+let processLogAutoFollow = true;
+let rightColumnAutoFollow = true;
+// (skills cache moved to skillsCache in v2 skills management section)
+let lastHeartbeat = {
+  state: 'idle',
+  level: '',
+  current_step: '-',
+  retry_count: 0,
+  format_violation_count: 0,
+  message: '',
+};
+let lastHeartbeatLogSignature = '';
+
+function renderQueuedPromptsPanel() {
+  const panel = document.getElementById('queued-prompts-panel');
+  const list = document.getElementById('queued-prompts-list');
+  const title = document.getElementById('queued-prompts-title');
+  if (!panel || !list || !title) return;
+  const count = queuedPrompts.length;
+  if (count === 0) {
+    panel.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+  panel.style.display = 'block';
+  title.textContent = `Queued prompts (${count})`;
+  list.innerHTML = queuedPrompts.map((q, i) => `
+    <div class="queued-item">
+      <div class="queued-item-text">${escHtml(q)}</div>
+      <button class="queued-item-btn" onclick="removeQueuedPrompt(${i})">Remove</button>
+    </div>
+  `).join('');
+}
+
+function removeQueuedPrompt(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= queuedPrompts.length) return;
+  queuedPrompts.splice(index, 1);
+  updateQueuedPromptUI();
+}
+
+function clearQueuedPrompts() {
+  if (!queuedPrompts.length) return;
+  queuedPrompts = [];
+  addProcessEntry('info', 'Cleared queued prompts.');
+  updateQueuedPromptUI();
+}
+
+function updateQueuedPromptUI() {
+  const badge = document.getElementById('queued-prompts-indicator');
+  const sendBtn = document.getElementById('send-btn');
+  const input = document.getElementById('chat-input');
+  const count = queuedPrompts.length;
+  if (badge) {
+    if (count > 0) {
+      badge.style.display = 'inline';
+      badge.textContent = `Queued: ${count}`;
+    } else {
+      badge.style.display = 'none';
+      badge.textContent = '';
+    }
+  }
+  if (sendBtn) {
+    sendBtn.disabled = false;
+    sendBtn.title = isThinking ? `Queue next prompt${count ? ` (${count} queued)` : ''}` : 'Send';
+  }
+  if (input) {
+    input.placeholder = isThinking
+      ? 'Assistant is responding. Press Enter/Send to queue next prompt.'
+      : 'Type a message... (Enter to send, Shift+Enter for newline)';
+  }
+  renderQueuedPromptsPanel();
+}
+
+function saveChatSessions() {
+  localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(chatSessions));
+}
+
+function makeSessionTitle(history) {
+  const firstUser = (history || []).find(m => m.role === 'user');
+  return firstUser ? firstUser.content.slice(0, 42) : 'New chat';
+}
+
+function loadChatSessions() {
+  try {
+    chatSessions = JSON.parse(localStorage.getItem(CHAT_SESSIONS_KEY) || '[]');
+  } catch {
+    chatSessions = [];
+  }
+  if (!Array.isArray(chatSessions)) chatSessions = [];
+  if (chatSessions.length === 0) {
+    const id = crypto?.randomUUID?.() || ('chat_' + Math.random().toString(36).slice(2));
+    chatSessions.push({ id, title: 'New chat', history: [], processLog: [], createdAt: Date.now(), updatedAt: Date.now() });
+    activeChatSessionId = id;
+    setAgentSessionId(id);
+    saveChatSessions();
+  } else if (!activeChatSessionId || !chatSessions.some(s => s.id === activeChatSessionId)) {
+    activeChatSessionId = chatSessions[0].id;
+    setAgentSessionId(activeChatSessionId);
+  }
+  if (!agentSessionId || agentSessionId !== activeChatSessionId) setAgentSessionId(activeChatSessionId);
+  syncActiveChat();
+}
+
+function syncActiveChat() {
+  const sess = chatSessions.find(s => s.id === activeChatSessionId);
+  chatHistory = sess ? (sess.history || []) : [];
+  processLogEntries = sess ? (sess.processLog || []) : [];
+  renderChatMessages();
+  renderProcessLog();
+  renderLiveStepsPanel();
+  renderSessionsList();
+  updateStats([]);
+  loadAgentSessionContext();
+}
+
+function persistActiveChat() {
+  const idx = chatSessions.findIndex(s => s.id === activeChatSessionId);
+  if (idx === -1) return;
+  chatSessions[idx].history = chatHistory;
+  chatSessions[idx].processLog = processLogEntries;
+  chatSessions[idx].title = makeSessionTitle(chatHistory);
+  chatSessions[idx].updatedAt = Date.now();
+  saveChatSessions();
+  renderSessionsList();
+  updateStats([]);
+}
+
+function newChatSession() {
+  const id = crypto?.randomUUID?.() || ('chat_' + Math.random().toString(36).slice(2));
+  chatSessions.unshift({ id, title: 'New chat', history: [], processLog: [], createdAt: Date.now(), updatedAt: Date.now() });
+  activeChatSessionId = id;
+  setAgentSessionId(id);
+  syncActiveChat();
+}
+
+function toggleSessionsEditMode() {
+  sessionsEditMode = !sessionsEditMode;
+  const btn = document.getElementById('sessions-edit-btn');
+  if (btn) btn.textContent = sessionsEditMode ? 'Done' : 'Edit';
+  renderSessionsList();
+}
+
+function deleteChatSession(id, ev) {
+  if (ev) ev.stopPropagation();
+  const idx = chatSessions.findIndex(s => s.id === id);
+  if (idx === -1) return;
+
+  chatSessions.splice(idx, 1);
+  if (chatSessions.length === 0) {
+    const newId = crypto?.randomUUID?.() || ('chat_' + Math.random().toString(36).slice(2));
+    chatSessions.push({ id: newId, title: 'New chat', history: [], processLog: [], createdAt: Date.now(), updatedAt: Date.now() });
+    activeChatSessionId = newId;
+    setAgentSessionId(newId);
+  } else if (activeChatSessionId === id) {
+    activeChatSessionId = chatSessions[0].id;
+    setAgentSessionId(activeChatSessionId);
+  }
+
+  saveChatSessions();
+  syncActiveChat();
+}
+
+function openSession(id) {
+  activeChatSessionId = id;
+  setAgentSessionId(id);
+  syncActiveChat();
+}
+
+// ---- Mode switching ----
+function setMode(mode) {
+  currentMode = mode;
+  // Toggle buttons
+  document.getElementById('btn-chat').classList.toggle('active', mode === 'chat');
+  document.getElementById('btn-heartbeat').classList.toggle('active', mode === 'heartbeat');
+  // Toggle views
+  document.getElementById('chat-view').style.display = mode === 'chat' ? 'flex' : 'none';
+  document.getElementById('heartbeat-view').style.display = mode === 'heartbeat' ? 'flex' : 'none';
+  // Toggle sidebar + right panel visibility
+  const aside = document.querySelector('aside');
+  const rightPanel = document.getElementById('right-panel');
+  if (aside) aside.style.display = mode === 'chat' ? '' : 'none';
+  if (rightPanel) rightPanel.style.display = mode === 'chat' ? '' : 'none';
+  // Load tasks when switching to heartbeat
+  if (mode === 'heartbeat') loadTasksFromServer();
+}
+
+// ─── Heartbeat / Tasks System ───────────────────────────────────────────────
+let hbJobs = [];
+let hbConfig = { enabled: false, intervalMinutes: 30, activeHoursStart: 8, activeHoursEnd: 22 };
+let editingTaskId = null;
+
+async function loadTasksFromServer() {
+  try {
+    const data = await api('/api/tasks');
+    if (data.success) {
+      hbJobs = data.jobs || [];
+      hbConfig = data.config || hbConfig;
+      renderHeartbeatPage();
+    }
+  } catch (err) { console.error('[HB] Load failed:', err); }
+}
+
+function renderHeartbeatPage() {
+  // Update topbar
+  const dot = document.getElementById('hb-dot');
+  const label = document.getElementById('hb-label');
+  const meta = document.getElementById('hb-meta');
+  const btn = document.getElementById('hb-toggle-btn');
+  if (dot) dot.className = 'hb-status-dot ' + (hbConfig.enabled ? 'active' : '');
+  if (label) label.textContent = hbConfig.enabled ? 'Heartbeat ON' : 'Heartbeat OFF';
+  if (meta) meta.textContent = `Every ${hbConfig.intervalMinutes}m \u00b7 ${hbConfig.activeHoursStart}:00\u2013${hbConfig.activeHoursEnd}:00`;
+  if (btn) { btn.textContent = hbConfig.enabled ? 'Pause' : 'Enable'; btn.className = 'hb-btn' + (hbConfig.enabled ? ' danger' : ' primary'); }
+
+  // Split jobs into sections
+  const running = hbJobs.filter(j => j.status === 'running');
+  const queued = hbJobs.filter(j => j.enabled && j.status !== 'running' && j.status !== 'completed' && j.status !== 'paused').sort((a,b) => a.priority - b.priority);
+  const paused = hbJobs.filter(j => j.status === 'paused');
+  const completed = hbJobs.filter(j => j.status === 'completed' || j.type === 'one-shot' && j.lastRun).slice(0, 15);
+
+  const empty = document.getElementById('hb-empty');
+  if (empty) empty.style.display = hbJobs.length === 0 ? '' : 'none';
+
+  renderHBSection('hb-section-running', 'hb-running-cards', running, 'running');
+  renderHBSection('hb-section-queued', 'hb-queued-cards', [...queued, ...paused], 'queued');
+  renderHBSection('hb-section-scheduled', 'hb-scheduled-cards', queued.filter(j => j.schedule), 'scheduled');
+  renderHBSection('hb-section-completed', 'hb-completed-cards', completed, 'completed');
+}
+
+function renderHBSection(sectionId, cardsId, jobs, sectionType) {
+  const section = document.getElementById(sectionId);
+  const container = document.getElementById(cardsId);
+  if (!section || !container) return;
+  section.style.display = jobs.length > 0 ? '' : 'none';
+  container.innerHTML = jobs.map(j => renderTaskCard(j, sectionType)).join('');
+}
+
+function renderTaskCard(job, sectionType) {
+  const statusClass = job.status === 'running' ? 'running' : job.status === 'completed' ? 'completed' : job.status === 'paused' ? 'paused' : '';
+  const scheduleText = job.schedule ? cronToHuman(job.schedule) : (job.runAt ? 'One-shot: ' + new Date(job.runAt).toLocaleString() : 'Manual');
+  const lastRunText = job.lastRun ? timeAgo(new Date(job.lastRun).getTime()) : 'Never';
+  const nextRunText = job.nextRun ? new Date(job.nextRun).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'}) : '-';
+  const resultSnippet = job.lastResult ? (job.lastResult.length > 60 ? job.lastResult.slice(0,60)+'...' : job.lastResult) : '';
+  const isOk = /^\s*HEARTBEAT_OK\s*$/i.test(job.lastResult || '');
+
+  return `<div class="hb-card ${statusClass}" data-job-id="${job.id}">
+    <div class="hb-card-drag">${sectionType === 'completed' ? '' : '\u2261'}</div>
+    <div class="hb-card-body">
+      <div class="hb-card-name">${escHtml(job.name)}</div>
+      <div class="hb-card-meta">
+        <span>${scheduleText}</span>
+        <span>Next: ${nextRunText}</span>
+        <span>Last: ${lastRunText}</span>
+        ${resultSnippet && !isOk ? `<span style="color:var(--text);font-weight:600">${escHtml(resultSnippet)}</span>` : ''}
+        ${isOk ? '<span style="color:var(--ok)">\u2713 OK</span>' : ''}
+      </div>
+    </div>
+    <div class="hb-card-actions">
+      ${job.status !== 'running' ? `<button class="hb-card-btn" onclick="runTaskNow('${job.id}')" title="Run now">\u25b6</button>` : '<span style="font-size:11px;color:var(--brand)">Running...</span>'}
+      <button class="hb-card-btn" onclick="editTask('${job.id}')" title="Edit">\u270e</button>
+      <button class="hb-card-btn" onclick="toggleTaskPause('${job.id}')" title="${job.status === 'paused' ? 'Resume' : 'Pause'}">${job.status === 'paused' ? '\u25b6' : '\u23f8'}</button>
+      <button class="hb-card-btn danger" onclick="deleteTask('${job.id}')" title="Delete">\u2715</button>
+      ${job.sessionId ? `<button class="hb-card-btn" onclick="viewTaskSession('${job.sessionId}')" title="View response">\u2192</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function cronToHuman(expr) {
+  if (!expr) return 'Manual';
+  const p = expr.split(/\s+/);
+  if (p.length !== 5) return expr;
+  const [min, hr, dom, , dow] = p;
+  if (min.startsWith('*/')) return `Every ${min.slice(2)}m`;
+  if (hr === '*') return `Every minute`;
+  if (dom === '*' && dow === '*') return `Daily at ${hr}:${min.padStart(2,'0')}`;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if (dow !== '*') return `${days[Number(dow)] || dow} at ${hr}:${min.padStart(2,'0')}`;
+  return expr;
+}
+
+async function toggleHeartbeatEnabled() {
+  try {
+    const data = await api('/api/tasks/config', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ enabled: !hbConfig.enabled }) });
+    if (data.success) { hbConfig = data.config; renderHeartbeatPage(); }
+  } catch (err) { console.error('[HB] Toggle failed:', err); }
+}
+
+async function runTaskNow(id) {
+  try { await api(`/api/tasks/${id}/run`, { method: 'POST' }); } catch {}
+}
+
+async function deleteTask(id) {
+  if (!confirm('Delete this task?')) return;
+  try {
+    await api(`/api/tasks/${id}`, { method: 'DELETE' });
+    hbJobs = hbJobs.filter(j => j.id !== id);
+    renderHeartbeatPage();
+  } catch {}
+}
+
+async function toggleTaskPause(id) {
+  const job = hbJobs.find(j => j.id === id);
+  if (!job) return;
+  const newStatus = job.status === 'paused' ? 'scheduled' : 'paused';
+  try {
+    const data = await api(`/api/tasks/${id}`, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status: newStatus, enabled: newStatus !== 'paused' }) });
+    if (data.success) { Object.assign(job, data.job); renderHeartbeatPage(); }
+  } catch {}
+}
+
+function viewTaskSession(sessionId) {
+  // Switch to chat mode and open the automated session
+  const session = chatSessions.find(s => s.id === sessionId);
+  if (session) {
+    setMode('chat');
+    openSession(sessionId);
+  }
+}
+
+function openTaskModal(taskId) {
+  editingTaskId = taskId || null;
+  const job = taskId ? hbJobs.find(j => j.id === taskId) : null;
+  const modal = document.getElementById('task-modal');
+  modal.style.display = '';
+  modal.innerHTML = `<div class="hb-modal-overlay" onclick="if(event.target===this)closeTaskModal()">
+    <div class="hb-modal">
+      <h3>${job ? 'Edit Task' : 'Add Task'}</h3>
+      <label>Name</label>
+      <input id="tm-name" value="${job ? escHtml(job.name) : ''}" placeholder="e.g. Check inbox for urgent emails">
+      <label>Prompt (what the LLM should do)</label>
+      <textarea id="tm-prompt" placeholder="e.g. Search for any urgent emails or messages I should know about">${job ? escHtml(job.prompt) : ''}</textarea>
+      <label>Type</label>
+      <select id="tm-type">
+        <option value="recurring" ${!job || job.type==='recurring' ? 'selected' : ''}>Recurring (cron)</option>
+        <option value="one-shot" ${job?.type==='one-shot' ? 'selected' : ''}>One-shot (run once)</option>
+        <option value="heartbeat" ${job?.type==='heartbeat' ? 'selected' : ''}>Heartbeat check</option>
+      </select>
+      <label>Schedule (cron expression)</label>
+      <input id="tm-schedule" value="${job?.schedule || '*/30 * * * *'}" placeholder="*/30 * * * * (every 30 min)">
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">Examples: */30 * * * * (every 30m), 0 9 * * * (daily 9am), 0 9 * * 1 (Mon 9am)</div>
+      <div class="hb-modal-actions">
+        <button class="hb-btn" onclick="closeTaskModal()">Cancel</button>
+        <button class="hb-btn primary" onclick="saveTask()">Save</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function editTask(id) { openTaskModal(id); }
+
+function closeTaskModal() {
+  document.getElementById('task-modal').style.display = 'none';
+  editingTaskId = null;
+}
+
+async function saveTask() {
+  const name = document.getElementById('tm-name').value.trim();
+  const prompt = document.getElementById('tm-prompt').value.trim();
+  const type = document.getElementById('tm-type').value;
+  const schedule = document.getElementById('tm-schedule').value.trim();
+  if (!name || !prompt) { alert('Name and prompt are required'); return; }
+  try {
+    if (editingTaskId) {
+      const data = await api(`/api/tasks/${editingTaskId}`, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, prompt, type, schedule }) });
+      if (data.success) {
+        const idx = hbJobs.findIndex(j => j.id === editingTaskId);
+        if (idx >= 0) hbJobs[idx] = data.job;
+      }
+    } else {
+      const data = await api('/api/tasks', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, prompt, type, schedule }) });
+      if (data.success) hbJobs.push(data.job);
+    }
+    closeTaskModal();
+    renderHeartbeatPage();
+  } catch (err) { alert('Failed to save: ' + err.message); }
+}
+
+// ---- Sidebar tabs ----
+function setSidebarTab(tab) {
+  sidebarTab = tab;
+  document.getElementById('tab-jobs').classList.toggle('active', tab === 'jobs');
+  document.getElementById('tab-skills').classList.toggle('active', tab === 'skills');
+  document.getElementById('sidebar-jobs').style.display = tab === 'jobs' ? 'flex' : 'none';
+  document.getElementById('sidebar-skills').style.display = tab === 'skills' ? 'flex' : 'none';
+  if (tab === 'skills') loadInstalledSkills();
+}
+
+// ---- Agent mode toggle ----
+function updateAgentMode() {
+  useAgentMode = document.getElementById('agent-mode-toggle').checked;
+  document.getElementById('agent-mode-label').textContent = useAgentMode ? 'Agent' : 'Chat';
+  document.getElementById('agent-mode-badge').classList.toggle('visible', useAgentMode);
+  document.getElementById('chat-input').placeholder = useAgentMode
+    ? 'Ask agent to do something... (has access to tools)'
+    : 'Type a message... (Enter to send, Shift+Enter for newline)';
+}
+
+// ---- Chat ----
+function renderThinkBlock(thinking) {
+  if (!thinking || !thinking.trim()) return '';
+  const id = 'think_' + Math.random().toString(36).slice(2);
+  const wordCount = thinking.trim().split(/\s+/).length;
+  return `
+    <div class="think-block">
+      <button class="think-toggle" id="${id}_btn" onclick="toggleThink('${id}')">
+        <span class="think-icon">▶</span>
+        <span>💭 Thought process</span>
+        <span style="margin-left:auto;opacity:0.5">${wordCount} words</span>
+      </button>
+      <div class="think-content" id="${id}_body">${escHtml(thinking)}</div>
+    </div>
+  `;
+}
+
+function toggleThink(id) {
+  const btn = document.getElementById(id + '_btn');
+  const body = document.getElementById(id + '_body');
+  if (!btn || !body) return;
+  const open = body.style.display !== 'none' && body.style.display !== '';
+  body.style.display = open ? 'none' : 'block';
+  btn.classList.toggle('open', !open);
+}
+
+function renderReactSteps(steps) {
+  if (!steps || steps.length === 0) return '';
+  const toolSteps = steps.filter(s => s.action);
+  if (toolSteps.length === 0) return '';
+
+  const getSearchDiagnostics = (s) => s?.toolData?.search_diagnostics || s?.diagnostics || null;
+  const extractUrls = (s, resultText) => {
+    const fromToolData = Array.isArray(s?.toolData?.results)
+      ? s.toolData.results.map(r => String(r?.url || '').trim()).filter(u => /^https?:\/\//i.test(u))
+      : [];
+    const fromText = String(resultText || '').match(/https?:\/\/[^\s)]+/g) || [];
+    const merged = [...fromToolData, ...fromText.map(u => String(u).trim())];
+    const out = [];
+    const seen = new Set();
+    for (const u of merged) {
+      if (!u || seen.has(u)) continue;
+      seen.add(u);
+      out.push(u);
+      if (out.length >= 5) break;
+    }
+    return out;
+  };
+  const providerSummary = (diag) => {
+    if (!diag || !Array.isArray(diag.attempted) || !diag.attempted.length) return '';
+    return diag.attempted.map(a => {
+      const p = String(a.provider || '').toLowerCase();
+      const status = String(a.status || '').toLowerCase();
+      if (status === 'success') {
+        const count = Number.isFinite(a.result_count) ? `, ${a.result_count} result${a.result_count === 1 ? '' : 's'}` : '';
+        return `${p}=success${count}`;
+      }
+      if (status === 'skipped') return `${p}=skipped${a.reason ? ` (${a.reason})` : ''}`;
+      return `${p}=failed${a.reason ? ` (${a.reason})` : ''}`;
+    }).join(' | ');
+  };
+
+  const id = 'steps_' + Math.random().toString(36).slice(2);
+  const items = toolSteps.map(s => {
+    const resultText = typeof s.toolResult === 'string' ? s.toolResult : JSON.stringify(s.toolResult || '');
+    const diag = String(s.action || '') === 'web_search' ? getSearchDiagnostics(s) : null;
+    const query = String(diag?.query || s?.params?.query || '').trim();
+    const selectedProvider = String(diag?.selected_provider || s?.toolData?.provider || '').toLowerCase();
+    const providers = diag ? providerSummary(diag) : '';
+    const urls = String(s.action || '') === 'web_search' ? extractUrls(s, resultText) : [];
+    return `
+      <div class="react-step">
+        ${s.thought ? `<div class="react-step-thought">${escHtml(s.thought.slice(0, 120))}</div>` : ''}
+        <div class="react-step-action">${escHtml(s.action)}</div>
+        ${resultText ? `<div class="react-step-result${resultText.startsWith('ERROR') ? ' error' : ''}">${escHtml(resultText.slice(0, 160))}${resultText.length > 160 ? '…' : ''}</div>` : ''}
+        ${diag ? `
+          <div style="margin-top:6px;font-size:10px;color:var(--muted);line-height:1.5">
+            ${query ? `<div><b>query</b>: ${escHtml(query)}</div>` : ''}
+            ${selectedProvider ? `<div><b>provider hit</b>: ${escHtml(selectedProvider)}</div>` : ''}
+            ${providers ? `<div><b>providers</b>: ${escHtml(providers)}</div>` : ''}
+          </div>
+        ` : ''}
+        ${String(s.action || '') === 'web_search' && !diag ? `
+          <div style="margin-top:6px;font-size:10px;color:var(--muted);line-height:1.5">
+            ${selectedProvider ? `<div><b>provider hit</b>: ${escHtml(selectedProvider)}</div>` : ''}
+          </div>
+        ` : ''}
+        ${urls.length ? `
+          <div style="margin-top:6px;font-size:10px;line-height:1.6">
+            <div style="color:var(--muted);margin-bottom:2px"><b>sources</b>:</div>
+            ${urls.slice(0, 3).map((u, i) => `<div>${i + 1}. <a href="${escHtml(u)}" target="_blank" rel="noopener noreferrer">${escHtml(u)}</a></div>`).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="react-steps-toggle" onclick="toggleSteps('${id}')">
+      ▸ ${toolSteps.length} tool step${toolSteps.length !== 1 ? 's' : ''} used
+    </div>
+    <div class="react-steps" id="${id}" style="display:none">${items}</div>
+  `;
+}
+
+function toggleSteps(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const visible = el.style.display !== 'none';
+  el.style.display = visible ? 'none' : 'block';
+  el.previousElementSibling.textContent = `${visible ? '▸' : '▾'} ${el.querySelectorAll('.react-step').length} tool step${el.querySelectorAll('.react-step').length !== 1 ? 's' : ''} used`;
+}
+
+function renderAssistantContent(content) {
+  const text = String(content || '');
+  const hasStaged = /(^|\n)(Initial chat|Execution result|Final chat):\s*/i.test(text);
+  if (!hasStaged) return `<div class="msg-content">${escHtml(text)}</div>`;
+  const chunks = text
+    .split(/\n\s*---\s*\n/g)
+    .map(s => String(s || '').trim())
+    .filter(Boolean);
+  const html = chunks.map((chunk, idx) => {
+    const m = chunk.match(/^(Initial chat|Execution result|Final chat):\s*\n?/i);
+    const title = m ? m[1] : `Section ${idx + 1}`;
+    const body = m ? chunk.slice(m[0].length).trim() : chunk;
+    return `
+      <div class="msg-stage">
+        <div class="msg-stage-title">${escHtml(title)}</div>
+        <div class="msg-content">${escHtml(body)}</div>
+      </div>
+    `;
+  }).join('');
+  return `<div class="msg-staged">${html}</div>`;
+}
+
+function renderArtifacts(artifacts) {
+  const rows = Array.isArray(artifacts) ? artifacts : [];
+  if (!rows.length) return '';
+  const cards = rows.map((a, idx) => {
+    const type = String(a?.type || '').trim();
+    const title = String(a?.title || type || `Artifact ${idx + 1}`).trim();
+    const status = String(a?.status || 'ok').toLowerCase();
+    const pathVal = String(a?.path || '').trim();
+    const fromPath = String(a?.from_path || '').trim();
+    const toPath = String(a?.to_path || '').trim();
+    const summary = String(a?.summary || '').trim();
+    const preview = String(a?.preview || '').trim();
+    const files = Array.isArray(a?.files) ? a.files.slice(0, 12).map(x => String(x || '')).filter(Boolean) : [];
+    const dirs = Array.isArray(a?.directories) ? a.directories.slice(0, 8).map(x => String(x || '')).filter(Boolean) : [];
+    const locationTarget = toPath || pathVal || fromPath;
+    return `
+      <div class="artifact-card">
+        <div class="artifact-head">
+          <div class="artifact-title">${escHtml(title)}</div>
+          <div class="artifact-status ${escHtml(status)}">${escHtml(status)}</div>
+        </div>
+        ${pathVal ? `<div class="artifact-row"><b>Path:</b> <code>${escHtml(pathVal)}</code></div>` : ''}
+        ${fromPath ? `<div class="artifact-row"><b>From:</b> <code>${escHtml(fromPath)}</code></div>` : ''}
+        ${toPath ? `<div class="artifact-row"><b>To:</b> <code>${escHtml(toPath)}</code></div>` : ''}
+        ${summary ? `<div class="artifact-row">${escHtml(summary)}</div>` : ''}
+        ${files.length ? `<div class="artifact-row"><b>Files:</b> ${escHtml(files.join(', '))}${Array.isArray(a?.files) && a.files.length > files.length ? ' ...' : ''}</div>` : ''}
+        ${dirs.length ? `<div class="artifact-row"><b>Directories:</b> ${escHtml(dirs.join(', '))}${Array.isArray(a?.directories) && a.directories.length > dirs.length ? ' ...' : ''}</div>` : ''}
+        ${preview ? `<div class="artifact-preview">${escHtml(preview)}</div>` : ''}
+        ${locationTarget ? `
+          <div class="artifact-actions">
+            <button class="artifact-btn" onclick="openInFileLocation('${escHtml(locationTarget).replace(/'/g, '&#39;')}')">Open In File Location</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+  return `<div class="artifact-list">${cards}</div>`;
+}
+
+async function openInFileLocation(targetPath) {
+  const p = String(targetPath || '').trim();
+  if (!p) return;
+  try {
+    const res = await fetch('/api/open-path', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: p }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data?.ok) {
+      throw new Error(String(data?.error || `HTTP ${res.status}`));
+    }
+    addProcessEntry('info', `Opened in file location: ${p}`);
+  } catch (err) {
+    addProcessEntry('error', `Open path failed: ${String(err?.message || err)}`);
+  }
+}
+
+function renderChatMessages() {
+  const container = document.getElementById('chat-messages');
+
+  if (chatHistory.length === 0) {
+    container.innerHTML = `
+      <div class="chat-welcome" id="chat-welcome">
+        <div class="chat-welcome-icon">🦞</div>
+        <h2>SmallClaw</h2>
+        <p>Chat directly with your local model. No API keys, no cloud — just you and the model.</p>
+        <div class="hint">Enable Agent mode when you want planning + tool execution in this chat.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = chatHistory.map((msg, idx) => {
+    const pinClass = contextPinMode ? ' pin-selectable' : '';
+    const selectedClass = (contextPinMode && pinnedMessageIndices.has(idx)) ? ' pin-selected' : '';
+    // Also show green for confirmed pins even outside pin mode
+    const confirmedClass = (!contextPinMode && confirmedPins.some(p => p.content === msg.content && p.role === (msg.role === 'user' ? 'user' : 'assistant'))) ? ' pin-selected' : '';
+    const clickHandler = contextPinMode ? ` onclick="togglePinMessage(${idx})"` : '';
+    return `
+    <div class="msg ${msg.role}${pinClass}${selectedClass}${confirmedClass}"${clickHandler}>
+      <div class="msg-avatar">${msg.role === 'user' ? '👤' : '🦞'}</div>
+      <div class="msg-body">
+        <div class="msg-role">${msg.role === 'user' ? 'You' : (msg.mode === 'agentic' ? 'SmallClaw (Agent)' : 'SmallClaw')}</div>
+        ${msg.role === 'ai' ? renderAssistantContent(msg.content) : `<div class="msg-content">${escHtml(msg.content)}</div>`}
+        ${msg.role === 'ai' ? renderArtifacts(msg.artifacts) : ''}
+        ${msg.role === 'ai' && msg.processEntries && msg.processEntries.length ? renderProcessPill(msg.processEntries) : ''}
+        ${msg.role === 'ai' ? renderThinkBlock(msg.thinking) : ''}
+        ${msg.role === 'ai' ? renderReactSteps(msg.steps) : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  if (isThinking) {
+    const progressHtml = currentProgressLines.length
+      ? `<div style="margin:6px 0 8px 0;font-size:11px;line-height:1.6;color:var(--muted)">
+          ${currentProgressLines.map((l) => `<div>• ${escHtml(l)}</div>`).join('')}
+        </div>`
+      : '';
+    container.innerHTML += `
+      <div class="msg ai" id="thinking-msg">
+        <div class="msg-avatar">🦞</div>
+        <div class="msg-body">
+          <div class="msg-role">SmallClaw${useAgentMode ? ' (Agent)' : ''}</div>
+          ${currentPreflightStatus ? `<div class="msg-content" style="margin-bottom:6px;color:#26487e">${escHtml(currentPreflightStatus)}</div>` : ''}
+          ${progressHtml}
+          <div class="thinking">
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+          </div>
+          <div style="margin-top:8px">
+            <button class="skill-install-btn" style="font-size:10px;padding:3px 9px" onclick="toggleCurrentProcess()">Process</button>
+            <div id="current-turn-process" style="display:none;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:8px;max-height:220px;overflow:auto;font-size:11px;line-height:1.6"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function pushProgressLine(line) {
+  const txt = String(line || '').trim();
+  if (!txt) return;
+  const last = currentProgressLines[currentProgressLines.length - 1] || '';
+  if (last === txt) return;
+  currentProgressLines.push(txt);
+  if (currentProgressLines.length > 8) currentProgressLines = currentProgressLines.slice(-8);
+  if (isThinking) renderChatMessages();
+}
+
+// ---- Process log ----
+function renderProcessPill(entries) {
+  const id = 'proc_' + Math.random().toString(36).slice(2);
+  return `
+    <div style="margin-top:8px">
+      <button class="skill-install-btn" style="font-size:10px;padding:3px 9px" onclick="togglePL('${id}')">Process</button>
+      <div id="${id}" style="display:none;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:8px;max-height:220px;overflow:auto;font-size:11px;line-height:1.6">
+        ${formatProcessLines(entries)}
+      </div>
+    </div>
+  `;
+}
+
+function formatProcessLines(entries) {
+  if (!entries || entries.length === 0) return '<div style="color:var(--muted)">No process details.</div>';
+  return entries.map(e => {
+    const type = escHtml(String(e.type || 'info')).toUpperCase();
+    const content = escHtml(String(e.content || ''));
+    return `<div style="margin-bottom:4px"><span style="color:var(--muted)">[${escHtml(String(e.ts || ''))}] ${type}</span> ${content}</div>`;
+  }).join('');
+}
+
+function toggleCurrentProcess() {
+  const panel = document.getElementById('current-turn-process');
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (!open) {
+    const turnEntries = currentTurnStartIndex >= 0 ? processLogEntries.slice(currentTurnStartIndex) : [];
+    panel.innerHTML = formatProcessLines(turnEntries);
+  }
+}
+
+function isNearBottom(el, threshold = 40) {
+  if (!el) return true;
+  return (el.scrollHeight - (el.scrollTop + el.clientHeight)) <= threshold;
+}
+
+function setupProcessAndRightScrollTracking() {
+  const processEl = document.getElementById('process-log');
+  if (processEl && !processEl.dataset.scrollBound) {
+    processEl.dataset.scrollBound = '1';
+    processEl.addEventListener('scroll', () => {
+      processLogAutoFollow = isNearBottom(processEl, 36);
+    });
+  }
+
+  const rightEl = document.getElementById('right-panel');
+  if (rightEl && !rightEl.dataset.scrollBound) {
+    rightEl.dataset.scrollBound = '1';
+    rightEl.addEventListener('scroll', () => {
+      rightColumnAutoFollow = isNearBottom(rightEl, 28);
+    });
+  }
+}
+
+function maybeAutoScrollRightColumn(force = false) {
+  const rightEl = document.getElementById('right-panel');
+  if (!rightEl) return;
+  if (force || rightColumnAutoFollow || isThinking) {
+    rightEl.scrollTop = rightEl.scrollHeight;
+  }
+}
+
+function updateHeartbeatUI() {
+  const stateEl = document.getElementById('r-heartbeat-state');
+  const metaEl = document.getElementById('r-heartbeat-meta');
+  if (stateEl) {
+    const state = String(lastHeartbeat.state || 'idle').toLowerCase();
+    stateEl.textContent = state || 'idle';
+    stateEl.style.color = state === 'running' || state === 'retrying'
+      ? 'var(--warn)'
+      : (state === 'stalled' ? 'var(--err)' : 'var(--text)');
+  }
+  if (metaEl) {
+    const step = String(lastHeartbeat.current_step || '-');
+    const retries = Number(lastHeartbeat.retry_count || 0);
+    const fv = Number(lastHeartbeat.format_violation_count || 0);
+    const lvl = String(lastHeartbeat.level || '').toLowerCase();
+    const lvlTag = lvl ? ` ${lvl}` : '';
+    metaEl.textContent = `step:${step} • retries:${retries} • fv:${fv}${lvlTag}`;
+  }
+}
+
+function clearProcessLog() {
+  processLogEntries.length = 0;
+  const el = document.getElementById('process-log');
+  if (el) el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px 0;opacity:0.5">Waiting for activity...</div>';
+  processLogAutoFollow = true;
+  rightColumnAutoFollow = true;
+  maybeAutoScrollRightColumn(true);
+  persistActiveChat();
+}
+
+function addProcessEntry(type, content, extra) {
+  const ts = new Date().toLocaleTimeString();
+  processLogEntries.push({ ts, type, content, extra });
+  renderProcessLog();
+  maybeAutoScrollRightColumn(isThinking || rightColumnAutoFollow);
+  persistActiveChat();
+  if (isThinking) {
+    const panel = document.getElementById('current-turn-process');
+    if (panel && panel.style.display !== 'none' && currentTurnStartIndex >= 0) {
+      panel.innerHTML = formatProcessLines(processLogEntries.slice(currentTurnStartIndex));
+    }
+  }
+}
+
+function renderProcessLog() {
+  const el = document.getElementById('process-log');
+  if (!el) return;
+  setupProcessAndRightScrollTracking();
+  const shouldFollow = processLogAutoFollow || isThinking;
+
+  if (processLogEntries.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px 0;opacity:0.5">Waiting for activity...</div>';
+    if (shouldFollow) el.scrollTop = el.scrollHeight;
+    return;
+  }
+
+  el.innerHTML = processLogEntries.map((e,i) => {
+    let icon, color, label;
+    switch(e.type) {
+      case 'user':    icon='▶'; color='var(--accent2)'; label='USER';   break;
+      case 'think':   icon='💭'; color='var(--muted)';   label='THINK';  break;
+      case 'tool':    icon='⚡'; color='var(--blue)';    label='TOOL';   break;
+      case 'result':  icon='✓'; color='var(--green)';   label='OK';     break;
+      case 'error':   icon='✗'; color='var(--red)';     label='FAIL';   break;
+      case 'final':   icon='★'; color='var(--green)';   label='FINAL';  break;
+      case 'warn':    icon='⚠'; color='var(--yellow)';  label='WARN';   break;
+      case 'step':    icon='↻'; color='var(--muted)';   label='STEP';   break;
+      case 'split':   icon='⋮'; color='var(--accent2)'; label='SPLIT';  break;
+      case 'synth':   icon='⊕'; color='var(--accent2)'; label='SYNTH';  break;
+      case 'info':    icon='·'; color='var(--muted)';   label='INFO';   break;
+      default:        icon='·'; color='var(--muted)';   label=e.type;   break;
+    }
+
+    // Think entries: show full content in a scrollable block
+    if (e.type === 'think' && e.content && e.content.length > 60) {
+      const id = 'pl_' + Math.random().toString(36).slice(2,8);
+      const preview = e.content.slice(0, 80).replace(/\n/g,' ');
+      return `
+        <div style="margin-bottom:4px">
+          <span style="color:var(--muted);font-size:10px">${e.ts}</span>
+          <span style="color:${color};margin:0 6px">${icon} ${label}</span>
+          <span style="color:var(--muted);cursor:pointer;text-decoration:underline;font-size:10px" onclick="togglePL('${id}')">${escHtml(preview)}…</span>
+        </div>
+        <div id="${id}" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:6px;white-space:pre-wrap;color:var(--muted);font-size:10px;max-height:200px;overflow-y:auto;font-style:italic">${escHtml(e.content)}</div>
+      `;
+    }
+
+    // Tool result entries: collapsible if long
+    if (e.type === 'result' && e.content && e.content.length > 120) {
+      const id = 'pl_' + Math.random().toString(36).slice(2,8);
+      const preview = e.content.slice(0, 100).replace(/\n/g,' ');
+      return `
+        <div style="margin-bottom:4px">
+          <span style="color:var(--muted);font-size:10px">${e.ts}</span>
+          <span style="color:${color};margin:0 6px">${icon} ${label}</span>
+          <span style="color:${color};cursor:pointer;font-size:10px" onclick="togglePL('${id}')">${escHtml(preview)}… <span style="opacity:0.5">[expand]</span></span>
+        </div>
+        <div id="${id}" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:6px;white-space:pre-wrap;color:var(--text);font-size:10px;max-height:300px;overflow-y:auto">${escHtml(e.content)}</div>
+      `;
+    }
+
+    // Memory suggestion: show approve/reject buttons
+    if (e.type === 'memory') {
+      const id = 'pl_mem_' + i;
+      const suggest = e.extra || {};
+      return `
+        <div style="margin-bottom:6px">
+          <span style="color:var(--muted);font-size:10px">${e.ts}</span>
+          <span style="color:${color};margin:0 6px">${icon} ${label}</span>
+          <span style="color:var(--text);">${escHtml(String(e.content || ''))}</span>
+          <div style="margin-top:6px">
+            <button class="btn btn-sm" onclick="confirmMemory(${i})">Approve</button>
+            <button class="btn btn-sm" style="margin-left:6px" onclick="rejectMemory(${i})">Reject</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // If an 'extra' object/array was provided, show a details toggle
+    if (e.extra) {
+      const id = 'pl_extra_' + i;
+      const pretty = escHtml(JSON.stringify(e.extra, null, 2));
+      return `
+        <div style="margin-bottom:3px">
+          <span style="color:var(--muted);font-size:10px">${e.ts}</span>
+          <span style="color:${color}">${icon} ${label}</span>
+          <span style="color:var(--text);margin-left:8px">${escHtml(String(e.content || ''))}</span>
+          <span style="color:var(--muted);cursor:pointer;margin-left:8px;font-size:10px" onclick="togglePL('${id}')">[details]</span>
+        </div>
+        <pre id="${id}" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:6px;color:var(--muted);font-size:11px;max-height:300px;overflow:auto">${pretty}</pre>
+      `;
+    }
+
+    return `<div style="margin-bottom:3px"><span style="color:var(--muted);font-size:10px">${e.ts}</span> <span style="color:${color}">${icon} ${label}</span>  <span style="color:var(--text)">${escHtml(String(e.content || ''))}</span></div>`;
+  }).join('');
+
+  if (shouldFollow) el.scrollTop = el.scrollHeight;
+}
+
+function togglePL(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function isFailedTurnReply(text) {
+  const t = String(text || '').trim().toLowerCase();
+  if (!t) return true;
+  if (/^blocked\b/.test(t)) return true;
+  if (/^no response received\.?$/.test(t)) return true;
+  if (/^connection error:/.test(t)) return true;
+  if (/^sorry, i didn'?t catch that/.test(t)) return true;
+  if (/could not|couldn't/.test(t) && /(verify|format|synthes|extract|read|write|tool|request)/.test(t)) return true;
+  return false;
+}
+
+// ---- Send chat (SSE version) ----
+async function sendChat(queuedMessage = null) {
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+  const raw = typeof queuedMessage === 'string' ? queuedMessage : input.value;
+  const message = String(raw || '').trim();
+  if (!message) return;
+  if (isThinking) {
+    if (typeof queuedMessage === 'string') return;
+    if (queuedPrompts.length >= MAX_QUEUED_PROMPTS) {
+      addProcessEntry('warn', `Queue full (${MAX_QUEUED_PROMPTS}). Wait for current run to finish.`);
+      return;
+    }
+    queuedPrompts.push(message);
+    addProcessEntry('info', `Queued prompt #${queuedPrompts.length}. It will run automatically next.`);
+    input.value = '';
+    input.style.height = 'auto';
+    updateQueuedPromptUI();
+    return;
+  }
+
+  chatHistory.push({ role: 'user', content: message });
+  persistActiveChat();
+  if (typeof queuedMessage !== 'string') {
+    input.value = '';
+    input.style.height = 'auto';
+  }
+  isThinking = true;
+  setButtonState(true);
+  currentPreflightStatus = '';
+  currentProgressLines = [];
+  liveTaskSteps = [];
+  lastHeartbeat = {
+    state: 'running',
+    level: '',
+    current_step: 'dispatch',
+    retry_count: 0,
+    format_violation_count: 0,
+    message: 'Turn started',
+  };
+  lastHeartbeatLogSignature = '';
+  processLogAutoFollow = true;
+  rightColumnAutoFollow = true;
+  updateHeartbeatUI();
+  renderLiveStepsPanel();
+  sendBtn.disabled = false;
+  updateQueuedPromptUI();
+  renderChatMessages();
+  maybeAutoScrollRightColumn(true);
+
+  currentTurnStartIndex = processLogEntries.length;
+  addProcessEntry('user', message);
+
+  const historyForAPI = chatHistory.slice(-13, -1).map(m => ({
+    role: m.role === 'user' ? 'user' : 'assistant',
+    content: m.content
+  }));
+
+  const allSteps = [];
+  let finalReply = '';
+  let finalArtifacts = [];
+  const turnThinkingBuffer = [];
+  const turnThinkingSeen = new Set();
+  let sawExecuteModeThisTurn = false;
+  let sawToolActivityThisTurn = false;
+  const collectTurnThinking = (value) => {
+    const text = String(value || '').trim();
+    if (!text) return;
+    const key = text.replace(/\s+/g, ' ').trim();
+    if (!key || turnThinkingSeen.has(key)) return;
+    turnThinkingSeen.add(key);
+    turnThinkingBuffer.push(text);
+  };
+
+  try {
+    // Use SSE fetch — stream steps live as they arrive
+    currentAbortController = new AbortController();
+    let partialContent = '';
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream'
+      },
+      signal: currentAbortController.signal,
+      body: JSON.stringify({ message, history: historyForAPI, useTools: useAgentMode, sessionId: agentSessionId, pinnedMessages: confirmedPins.length > 0 ? confirmedPins : undefined })
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        let event;
+        try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+        switch (event.type) {
+          case 'agent_mode':
+            lastAgentMode = event.mode || '-';
+            lastTurnKind = event.turnKind || lastTurnKind;
+            if (event.mode === 'execute') sawExecuteModeThisTurn = true;
+            addProcessEntry(
+              'info',
+              `Agent mode: ${event.mode || 'unknown'}${event.turnKind ? ` (${event.turnKind})` : ''}${event.switched_from ? ` | switched_from=${event.switched_from}` : ''}${event.route_target ? ` | route_target=${event.route_target}` : ''}${event.trigger ? ` | trigger=${event.trigger}` : ''}`
+            );
+            if (event.mode === 'execute') renderLiveStepsPanel();
+            loadAgentSessionContext();
+            break;
+
+          case 'session_mode_locked':
+            addProcessEntry('info', `Session mode locked: ${event.mode || 'unknown'}`);
+            break;
+
+          case 'decomposed':
+            addProcessEntry('split', `Split into ${event.questions.length} sub-questions: ${event.questions.map((q,i) => `Q${i+1}: ${q.slice(0,40)}`).join(' | ')}`);
+            break;
+
+          case 'thinking':
+            if (event.thinking && String(event.thinking).trim()) {
+              const thinkingText = String(event.thinking).trim();
+              collectTurnThinking(thinkingText);
+              addProcessEntry('think', thinkingText);
+            }
+            break;
+
+          case 'heartbeat': {
+            lastHeartbeat = {
+              ...lastHeartbeat,
+              state: event.state || lastHeartbeat.state,
+              level: event.level || lastHeartbeat.level,
+              current_step: event.current_step || lastHeartbeat.current_step,
+              retry_count: Number(event.retry_count || lastHeartbeat.retry_count || 0),
+              format_violation_count: Number(event.format_violation_count || lastHeartbeat.format_violation_count || 0),
+              message: event.message || lastHeartbeat.message || '',
+            };
+            updateHeartbeatUI();
+            const sig = `${lastHeartbeat.state}|${lastHeartbeat.level}|${lastHeartbeat.current_step}|${lastHeartbeat.retry_count}|${lastHeartbeat.format_violation_count}`;
+            if (sig !== lastHeartbeatLogSignature) {
+              const level = String(lastHeartbeat.level || '').toLowerCase();
+              const text = String(lastHeartbeat.message || `state=${lastHeartbeat.state} step=${lastHeartbeat.current_step}`).trim();
+              addProcessEntry(level === 'hard' ? 'warn' : 'info', `Heartbeat: ${text}`);
+              lastHeartbeatLogSignature = sig;
+            }
+            break;
+          }
+
+          case 'ui_preflight':
+            if (event.message) {
+              currentPreflightStatus = String(event.message);
+              pushProgressLine(currentPreflightStatus);
+              renderChatMessages();
+            }
+            break;
+
+          case 'tool_call': {
+            const action = String(event.action || '').trim();
+            const stepNum = Number(event.stepNum || 0);
+            sawToolActivityThisTurn = true;
+            if (action) pushProgressLine(`${stepNum ? `Step ${stepNum}: ` : ''}Running ${action}...`);
+            upsertLiveStep(action || 'tool', stepNum || (liveTaskSteps.length + 1), 'in_progress', 'running');
+            break;
+          }
+
+          case 'tool_result': {
+            const action = String(event.action || '').trim();
+            const stepNum = Number(event.stepNum || 0);
+            sawToolActivityThisTurn = true;
+            const text = String(event.result || '');
+            const ok = !/^ERROR:/i.test(text);
+            if (action) pushProgressLine(`${stepNum ? `Step ${stepNum}: ` : ''}${action} ${ok ? 'complete' : 'failed'}`);
+            upsertLiveStep(action || 'tool', stepNum || (liveTaskSteps.length + 1), ok ? 'done' : 'failed', ok ? 'completed' : text.slice(0, 120));
+            loadAgentSessionContext();
+            break;
+          }
+
+          case 'synthesizing':
+            pushProgressLine(`Synthesizing ${Number(event.count || 1)} answer(s)...`);
+            addProcessEntry('synth', `Combining ${event.count} answers...`);
+            break;
+
+          case 'step': {
+            const s = event;
+            allSteps.push(s);
+
+            // Show step number
+            if (s.stepNum && !s.isFormatViolation && !s.finalAnswer && !s.action) {
+              // just a step counter with no other info — skip
+            }
+
+            // Thinking block
+            if (s.thinking) {
+              collectTurnThinking(s.thinking);
+              addProcessEntry('think', s.thinking);
+            }
+
+            // Format violation
+            if (s.isFormatViolation) {
+              addProcessEntry('warn', 'Format violation — retrying');
+              break;
+            }
+
+            // Tool call
+            if (s.action && !s.toolResult) {
+              sawToolActivityThisTurn = true;
+              addProcessEntry('tool', `${s.action}  ${JSON.stringify(s.params || {}).slice(0, 100)}`);
+              if (s.thought) addProcessEntry('info', s.thought);
+            }
+
+            // Tool result (same step object updated)
+            if (s.action && s.toolResult) {
+              sawToolActivityThisTurn = true;
+              const toolText = typeof s.toolResult === 'string' ? s.toolResult : JSON.stringify(s.toolResult || '');
+              const isErr = toolText.startsWith('ERROR');
+              addProcessEntry(isErr ? 'error' : 'result', toolText);
+              if (s.action === 'web_search') {
+                const diag = s?.toolData?.search_diagnostics || s?.diagnostics || null;
+                if (diag) {
+                  const query = String(diag.query || s?.params?.query || '').trim();
+                  if (query) addProcessEntry('info', `Search query: ${query}`);
+                  if (Array.isArray(diag.attempted) && diag.attempted.length) {
+                    const providers = diag.attempted.map(a => {
+                      const p = String(a.provider || '').toLowerCase();
+                      const status = String(a.status || '').toLowerCase();
+                      if (status === 'success') {
+                        const count = Number.isFinite(a.result_count) ? `, ${a.result_count} result${a.result_count === 1 ? '' : 's'}` : '';
+                        return `${p}=success${count}`;
+                      }
+                      if (status === 'skipped') return `${p}=skipped${a.reason ? ` (${a.reason})` : ''}`;
+                      return `${p}=failed${a.reason ? ` (${a.reason})` : ''}`;
+                    }).join(' | ');
+                    addProcessEntry('info', `Providers: ${providers}`);
+                  }
+                }
+              }
+            }
+
+            // Final answer
+            if (s.finalAnswer) {
+              addProcessEntry('final', s.finalAnswer);
+              partialContent = s.finalAnswer; // track for stop
+            }
+            break;
+          }
+
+          case 'memory_suggest':
+            // event.suggestion: { fact, reference, source_tool, source_output, actor }
+            const s = event.suggestion || {};
+            addProcessEntry('memory', s.fact || '(memory suggestion)', s);
+            addProcessEntry('info', 'A memory suggestion was created; approve to persist.');
+            break;
+
+          case 'memory_saved':
+            addProcessEntry(event.ok ? 'result' : 'warn', event.ok
+              ? `Memory updated${event.key ? ` (${event.key})` : ''}.`
+              : 'Memory update failed.');
+            break;
+
+          case 'web_search_snippets':
+            // event: { query, snippets }
+            const q = event.query || '(search)';
+            addProcessEntry('info', `Search results: ${q}`, event.snippets || []);
+            if (event.diagnostics && Array.isArray(event.diagnostics.attempted)) {
+              const providers = event.diagnostics.attempted.map(a => {
+                const p = String(a.provider || '').toLowerCase();
+                const status = String(a.status || '').toLowerCase();
+                if (status === 'success') {
+                  const count = Number.isFinite(a.result_count) ? `, ${a.result_count} result${a.result_count === 1 ? '' : 's'}` : '';
+                  return `${p}=success${count}`;
+                }
+                if (status === 'skipped') return `${p}=skipped${a.reason ? ` (${a.reason})` : ''}`;
+                return `${p}=failed${a.reason ? ` (${a.reason})` : ''}`;
+              }).join(' | ');
+              addProcessEntry('info', `Providers: ${providers}`);
+            }
+            break;
+
+          case 'error':
+            addProcessEntry('error', event.message);
+            break;
+
+          case 'done':
+            finalReply = event.reply || '';
+            if (finalReply) partialContent = finalReply;
+            finalArtifacts = Array.isArray(event.artifacts) ? event.artifacts : [];
+            loadAgentSessionContext();
+            renderLiveStepsPanel();
+            break;
+
+          case 'turn_execution_created':
+          case 'turn_execution_updated':
+            loadAgentSessionContext();
+            break;
+        }
+      }
+    }
+
+    if (finalReply) {
+      const finalStep = allSteps.find(s => s.finalAnswer);
+      const mergedThinking = turnThinkingBuffer.join('\n\n').trim();
+      const shouldAttachThinkingPanel = sawExecuteModeThisTurn || sawToolActivityThisTurn;
+      const turnEntries = currentTurnStartIndex >= 0 ? processLogEntries.slice(currentTurnStartIndex) : [];
+      chatHistory.push({
+        role: 'ai',
+        content: finalReply,
+        artifacts: finalArtifacts,
+        steps: allSteps,
+        mode: useAgentMode ? 'agentic' : 'chat',
+        thinking: shouldAttachThinkingPanel ? (mergedThinking || finalStep?.thinking) : '',
+        processEntries: turnEntries
+      });
+    } else {
+      const turnEntries = currentTurnStartIndex >= 0 ? processLogEntries.slice(currentTurnStartIndex) : [];
+      chatHistory.push({ role: 'ai', content: 'No response received.', processEntries: turnEntries });
+    }
+    persistActiveChat();
+
+  } catch (err) {
+    const turnEntries = currentTurnStartIndex >= 0 ? processLogEntries.slice(currentTurnStartIndex) : [];
+    if (err.name === 'AbortError') {
+      addProcessEntry('warn', 'Generation stopped by user.');
+      const content = partialContent ||
+        (allSteps.length ? `[Stopped — ${allSteps.length} step${allSteps.length !== 1 ? 's' : ''} completed]` : '[Generation stopped]');
+      chatHistory.push({ role: 'ai', content, steps: allSteps, mode: useAgentMode ? 'agentic' : 'chat', processEntries: turnEntries });
+    } else {
+      lastHeartbeat = { ...lastHeartbeat, state: 'stalled', level: 'hard', message: String(err.message || 'connection_error'), current_step: 'error' };
+      updateHeartbeatUI();
+      addProcessEntry('error', err.message);
+      chatHistory.push({ role: 'ai', content: `Connection error: ${err.message}`, processEntries: turnEntries });
+    }
+    persistActiveChat();
+  }
+
+  isThinking = false;
+  currentAbortController = null;
+  setButtonState(false);
+  currentPreflightStatus = '';
+  currentProgressLines = [];
+  lastHeartbeat = { ...lastHeartbeat, state: 'idle', level: '', message: '', current_step: 'done' };
+  updateHeartbeatUI();
+  currentTurnStartIndex = -1;
+  sendBtn.disabled = false;
+  renderChatMessages();
+  updateQueuedPromptUI();
+
+  const shouldPauseQueue = isFailedTurnReply(finalReply || (chatHistory[chatHistory.length - 1]?.content || ''));
+  if (queuedPrompts.length > 0 && shouldPauseQueue) {
+    addProcessEntry('warn', 'Queue paused because the previous turn failed/blocked. Press Send to resume queued prompts.');
+  } else if (queuedPrompts.length > 0) {
+    const next = queuedPrompts.shift();
+    updateQueuedPromptUI();
+    addProcessEntry('info', `Auto-running queued prompt${queuedPrompts.length ? ` (${queuedPrompts.length} remaining)` : ''}.`);
+    setTimeout(() => { sendChat(next); }, 0);
+  }
+}
+
+function clearChat() {
+  chatHistory = [];
+  persistActiveChat();
+  renderChatMessages();
+}
+
+// Enter to send, Shift+Enter for newline
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+
+// Auto-resize textarea
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+});
+
+// ---- WebSocket ----
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'jobs_update') {
+      allJobs = msg.jobs;
+      updateStats([]);
+      if (selectedJobId) refreshJobDetail(selectedJobId);
+    }
+    if (msg.type === 'job_created') {
+      log(`Job created: ${msg.jobId}`, 'info');
+    }
+    // ── Cron/Heartbeat task events ──
+    if (msg.type === 'tasks_update') {
+      hbJobs = msg.jobs || [];
+      if (msg.config) hbConfig = msg.config;
+      if (currentMode === 'heartbeat') renderHeartbeatPage();
+    }
+    if (msg.type === 'task_running') {
+      const job = hbJobs.find(j => j.id === msg.jobId);
+      if (job) job.status = 'running';
+      if (currentMode === 'heartbeat') renderHeartbeatPage();
+      addProcessEntry('info', `🕐 Task running: ${msg.jobName}`);
+    }
+    if (msg.type === 'task_done') {
+      hbJobs = msg.jobs || hbJobs;
+      if (msg.config) hbConfig = msg.config;
+      if (currentMode === 'heartbeat') renderHeartbeatPage();
+      if (msg.automatedSession && !msg.isOk) {
+        // Add the automated session to chatSessions so it appears in the sidebar
+        const as = msg.automatedSession;
+        chatSessions.push({
+          id: as.id, title: as.title, history: as.history.map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content })),
+          processLog: [], createdAt: as.createdAt, updatedAt: as.createdAt, automated: true, jobName: as.jobName
+        });
+        saveChatSessions();
+        renderSessionsList();
+        addProcessEntry('info', `🕐 Task "${msg.jobName}" completed — check sidebar for results`);
+      } else if (msg.isOk) {
+        addProcessEntry('info', `🕐 Task "${msg.jobName}" → OK (nothing to report)`);
+      }
+    }
+    if (msg.type === 'task_sse') {
+      // Live progress from a running task — could update the NOW card
+      if (currentMode === 'heartbeat' && msg.event === 'tool_result') {
+        const card = document.querySelector(`[data-job-id="${msg.jobId}"] .hb-card-meta`);
+        if (card) card.innerHTML = `<span style="color:var(--brand)">Working: ${escHtml((msg.data?.action || '').slice(0,40))}...</span>`;
+      }
+    }
+  };
+  ws.onclose = () => setTimeout(connectWS, 2000);
+  ws.onerror = () => ws.close();
+}
+
+// ---- API ----
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  return r.json();
+}
+
+async function loadSearchSettingsSummary() {
+  try {
+    const s = await api('/api/settings/search');
+    const el = document.getElementById('r-failed');
+    if (el) el.textContent = s.preferred_provider || 'tavily';
+    quickSearchRigor = s.search_rigor || 'verified';
+    updateQuickModeUI();
+  } catch {}
+}
+
+function updateQuickModeUI() {
+  const lbl = document.getElementById('quick-mode-label');
+  if (lbl) lbl.textContent = (quickSearchRigor || 'verified').replace(/^./, c => c.toUpperCase());
+  ['fast', 'verified', 'strict'].forEach(v => {
+    const el = document.getElementById(`rigor-${v}`);
+    if (el) el.classList.toggle('active', quickSearchRigor === v);
+  });
+  ['standard', 'extended'].forEach(v => {
+    const el = document.getElementById(`think-${v}`);
+    if (el) el.classList.toggle('active', quickThinkingEffort === v);
+  });
+}
+
+function toggleQuickModePopover() {
+  const pop = document.getElementById('quick-mode-popover');
+  if (!pop) return;
+  const nextOpen = !pop.classList.contains('open');
+  pop.classList.toggle('open', nextOpen);
+  if (nextOpen) {
+    pop.classList.remove('clamp-left');
+    requestAnimationFrame(() => {
+      const rect = pop.getBoundingClientRect();
+      if (rect.left < 8) pop.classList.add('clamp-left');
+      const after = pop.getBoundingClientRect();
+      if (after.top < 8) {
+        pop.style.bottom = 'auto';
+        pop.style.top = '34px';
+      } else {
+        pop.style.top = '';
+        pop.style.bottom = '34px';
+      }
+    });
+  }
+  updateQuickModeUI();
+}
+
+async function setQuickSearchRigor(level) {
+  quickSearchRigor = level;
+  updateQuickModeUI();
+  try {
+    const s = await api('/api/settings/search');
+    const payload = {
+      preferred_provider: s.preferred_provider || 'tavily',
+      search_rigor: level,
+      tavily_api_key: s.tavily_api_key || '',
+      google_api_key: s.google_api_key || '',
+      google_cx: s.google_cx || '',
+      brave_api_key: s.brave_api_key || '',
+    };
+    await api('/api/settings/search', { method: 'POST', body: JSON.stringify(payload) });
+    addProcessEntry('info', `Search rigor set to ${level}.`);
+    await loadSearchSettingsSummary();
+  } catch (err) {
+    addProcessEntry('error', `Failed to set search rigor: ${err.message}`);
+  }
+}
+
+function setQuickThinkingEffort(level) {
+  quickThinkingEffort = level === 'extended' ? 'extended' : 'standard';
+  localStorage.setItem('smallclaw_quick_thinking_effort', quickThinkingEffort);
+  updateQuickModeUI();
+  addProcessEntry('info', `Thinking effort set to ${quickThinkingEffort} (UI preference).`);
+}
+
+function setSettingsTab(tab) {
+  settingsTab = tab;
+  const tabs = ['system', 'search', 'policy', 'security', 'models', 'telegram'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`settings-tab-${t}`);
+    const panel = document.getElementById(`settings-panel-${t}`);
+    if (btn) {
+      btn.style.background = (t === tab) ? '#eaf2ff' : '#fff';
+      btn.style.borderColor = (t === tab) ? '#bdd3f6' : 'var(--line)';
+      btn.style.color = (t === tab) ? '#0d4faf' : 'var(--muted)';
+    }
+    if (panel) {
+      if (t === tab) {
+        const gridTabs = ['system', 'search', 'models'];
+        panel.style.display = gridTabs.includes(t) ? 'block' : 'block';
+        if (t === 'telegram') loadTelegramStatus();
+        if (t === 'models') loadModelSettings();
+      } else {
+        panel.style.display = 'none';
+      }
+    }
+  });
+}
+
+async function loadModelSettings() {
+  try {
+    // Load current model config
+    const cfg = await api('/api/settings/model');
+    if (cfg) {
+      const ep = document.getElementById('settings-ollama-endpoint');
+      if (ep) ep.value = cfg.ollama_endpoint || 'http://localhost:11434';
+    }
+    // Load available models
+    await refreshOllamaModels(cfg);
+  } catch (e) {
+    const msg = document.getElementById('ollama-model-load-msg');
+    if (msg) msg.textContent = 'Could not load model config.';
+  }
+}
+
+async function refreshOllamaModels(existingCfg) {
+  const msg = document.getElementById('ollama-model-load-msg');
+  if (msg) msg.textContent = 'Loading models…';
+  try {
+    const endpoint = (document.getElementById('settings-ollama-endpoint') || {}).value || 'http://localhost:11434';
+    const data = await api('/api/ollama/models');
+    const models = (data && data.models) ? data.models.map(m => typeof m === 'string' ? m : (m.name || String(m))) : [];
+    const selects = ['settings-primary-model', 'settings-model-manager', 'settings-model-executor', 'settings-model-verifier'];
+    const cfg = existingCfg || (await api('/api/settings/model').catch(() => ({})));
+    selects.forEach((selId, i) => {
+      const sel = document.getElementById(selId);
+      if (!sel) return;
+      const prevVal = sel.value;
+      if (i === 0) {
+        sel.innerHTML = models.map(m => `<option value="${escHtml(m)}">${escHtml(m)}</option>`).join('');
+        if (cfg && cfg.primary_model) sel.value = cfg.primary_model;
+        else if (models.length) sel.value = models[0];
+      } else {
+        const roleKeys = ['', 'manager', 'executor', 'verifier'];
+        const roleKey = roleKeys[i];
+        sel.innerHTML = '<option value="">(same as primary)</option>' + models.map(m => `<option value="${escHtml(m)}">${escHtml(m)}</option>`).join('');
+        const roleVal = cfg && cfg.role_models && cfg.role_models[roleKey];
+        if (roleVal) sel.value = roleVal;
+      }
+    });
+    if (msg) msg.textContent = models.length ? `${models.length} model(s) found.` : 'No models found — is Ollama running?';
+  } catch (e) {
+    if (msg) msg.textContent = 'Failed to fetch models. Check Ollama endpoint.';
+  }
+}
+
+async function loadAgentSessionContext() {
+  try {
+    if (!agentSessionId) setAgentSessionId(activeChatSessionId);
+    const sid = encodeURIComponent(agentSessionId);
+    const data = await api(`/api/agent/session/${sid}`);
+    const set = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+    set('r-session-mode', data.mode_lock || '-');
+    set('r-agent-state', `${data.mode || '-'} / ${lastTurnKind !== '-' ? lastTurnKind : 'n/a'}`);
+    set('r-overview-objective', (data.overview_objective || '(none)').slice(0, 56));
+    set('r-active-objective', (data.active_objective || '(none)').slice(0, 56));
+    const tc = data.task_counts || {};
+    const tr = data.turn_counts || {};
+    const ec = data.execution_counts || {};
+    const useExecutionCounts = Number(ec.total || 0) > 0 || data.current_turn_execution;
+    if (useExecutionCounts) {
+      const doneExec = Number(ec.done || 0) + Number(ec.repaired || 0);
+      set('r-task-counts', `${doneExec}/${ec.total || 0} completed`);
+      set('r-turn-counts', `${ec.running || 0} running • ${ec.failed || 0} failed`);
+    } else {
+      set('r-task-counts', `${tc.done || 0}/${tc.total || 0} done`);
+      set('r-turn-counts', `${tr.completed || 0} done • ${tr.open || 0} open`);
+    }
+    const total = useExecutionCounts ? Number(ec.total || 0) : Number(tc.total || 0);
+    const done = useExecutionCounts ? (Number(ec.done || 0) + Number(ec.repaired || 0)) : Number(tc.done || 0);
+    const pct = total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
+    const bar = document.getElementById('r-task-progress-bar');
+    if (bar) bar.style.width = `${pct}%`;
+
+    const execPanel = document.getElementById('r-turn-execution');
+    if (execPanel) {
+      const cur = data.current_turn_execution;
+      if (!cur || typeof cur !== 'object') {
+        execPanel.innerHTML = '<div style="font-size:11px;color:var(--muted)">No active turn execution yet.</div>';
+      } else {
+        const objective = escHtml(String(cur.objective_raw || '(no objective)').slice(0, 220));
+        const status = escHtml(String(cur.status || 'planned'));
+        const mode = escHtml(String(cur.mode || 'unknown'));
+        const turnKind = escHtml(String(cur.turn_kind || 'unknown'));
+        const steps = Array.isArray(cur.steps) ? cur.steps : [];
+        const verification = cur.verification && typeof cur.verification === 'object' ? cur.verification : null;
+        const trace = cur.decision_trace && typeof cur.decision_trace === 'object' ? cur.decision_trace : null;
+        const traceEvents = Array.isArray(trace?.events) ? trace.events : [];
+        const stepRows = steps.map((s, idx) => {
+          const stepTitle = escHtml(String(s.title || s.type || `Step ${idx + 1}`));
+          const stepStatus = escHtml(String(s.status || 'pending'));
+          const outputs = s.outputs && typeof s.outputs === 'object'
+            ? `<div class="task-meta">${escHtml(JSON.stringify(s.outputs).slice(0, 160))}</div>`
+            : '';
+          return `
+            <div class="task-row">
+              <div class="task-top">
+                <div class="task-title">${idx + 1}. ${stepTitle}</div>
+                <span class="status-chip ${stepStatus}">${stepStatus.replace('_', ' ')}</span>
+              </div>
+              ${outputs}
+            </div>
+          `;
+        }).join('');
+        const verifyHtml = verification
+          ? `<div class="task-meta">verify: <strong>${escHtml(String(verification.status || 'pass'))}</strong>${Array.isArray(verification.repairs_applied) && verification.repairs_applied.length ? ` • repairs: ${verification.repairs_applied.length}` : ''}${Array.isArray(verification.errors) && verification.errors.length ? ` • errors: ${verification.errors.length}` : ''}</div>`
+          : '<div class="task-meta">verify: (not run)</div>';
+        const traceHtml = traceEvents.length
+          ? `
+            <div class="task-row">
+              <div class="task-top">
+                <div class="task-title">Decision Trace</div>
+                <span class="status-chip done">${traceEvents.length}</span>
+              </div>
+              ${traceEvents.slice(-10).map((ev) => {
+                const stage = escHtml(String(ev?.stage || 'trace'));
+                const msg = escHtml(String(ev?.message || '').slice(0, 180));
+                return `<div class="task-meta">[${stage}] ${msg}</div>`;
+              }).join('')}
+            </div>
+          `
+          : '';
+        execPanel.innerHTML = `
+          <div class="task-row">
+            <div class="task-top">
+              <div class="task-title">Current Turn</div>
+              <span class="status-chip ${status}">${status.replace('_', ' ')}</span>
+            </div>
+            <div class="task-meta">${objective}</div>
+            <div class="task-meta">mode: <strong>${mode}</strong> • kind: <strong>${turnKind}</strong></div>
+            ${verifyHtml}
+          </div>
+          ${stepRows || '<div style="font-size:11px;color:var(--muted)">No execution steps.</div>'}
+          ${traceHtml}
+        `;
+      }
+    }
+
+    const taskList = document.getElementById('r-task-list');
+    if (taskList) {
+      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      if (!tasks.length) {
+        taskList.innerHTML = '<div style="font-size:11px;color:var(--muted)">No tasks yet.</div>';
+      } else {
+        taskList.innerHTML = tasks.slice(0, 20).map(t => {
+          const title = escHtml(String(t.title || '').slice(0, 120));
+          const status = escHtml(String(t.status || 'pending'));
+          const tool = escHtml(String(t.tool || 'tool'));
+          return `
+            <div class="task-row">
+              <div class="task-top">
+                <div class="task-title">${title}</div>
+                <span class="status-chip ${status}">${status.replace('_', ' ')}</span>
+              </div>
+              <div class="task-meta">tool: ${tool}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    const rt = document.getElementById('r-recent-turns');
+    if (rt) {
+      const recentExec = Array.isArray(data.recent_turn_executions) ? data.recent_turn_executions : [];
+      if (recentExec.length) {
+        rt.innerHTML = recentExec.slice(0, 10).map((e, idx) => {
+          const status = escHtml(String(e.status || 'planned'));
+          const objective = escHtml(String(e.objective_raw || '').slice(0, 120));
+          const tools = Array.isArray(e.tool_calls) ? e.tool_calls.length : 0;
+          const traceCount = Array.isArray(e?.decision_trace?.events) ? e.decision_trace.events.length : 0;
+          const repairs = Array.isArray(e?.verification?.repairs_applied) ? e.verification.repairs_applied.length : 0;
+          return `<div style="margin-bottom:6px"><span style="color:var(--muted)">#${idx + 1} [${status}]</span> ${objective || '(objective)'}<div style="font-size:10px;color:var(--muted)">tools: ${tools}${traceCount ? ` • trace: ${traceCount}` : ''}${repairs ? ` • repairs: ${repairs}` : ''}</div></div>`;
+        }).join('');
+      } else {
+        const turns = data.recent_turns || [];
+        if (!turns.length) {
+          rt.innerHTML = 'No turn objectives yet.';
+        } else {
+          rt.innerHTML = turns.map(t => {
+            const kind = escHtml(String(t.kind || 'turn'));
+            const status = escHtml(String(t.status || 'open'));
+            const text = escHtml(String(t.text || '').slice(0, 120));
+            return `<div style="margin-bottom:6px"><span style="color:var(--muted)">[${kind}/${status}]</span> ${text}</div>`;
+          }).join('');
+        }
+      }
+    }
+
+    const toggle = document.getElementById('agent-mode-toggle');
+    const label = document.getElementById('agent-mode-label');
+    if (toggle) {
+      const locked = data.mode_lock === 'agent' || data.mode_lock === 'chat';
+      toggle.disabled = !!locked;
+      if (data.mode_lock === 'agent') {
+        toggle.checked = true;
+        useAgentMode = true;
+      } else if (data.mode_lock === 'chat') {
+        toggle.checked = false;
+        useAgentMode = false;
+      }
+    }
+    if (label) {
+      label.textContent = useAgentMode ? 'Agent' : 'Chat';
+    }
+    maybeAutoScrollRightColumn(rightColumnAutoFollow && isThinking);
+  } catch {
+    const rt = document.getElementById('r-recent-turns');
+    if (rt) rt.innerHTML = 'Unable to load session context.';
+  }
+}
+
+function renderLiveStepsPanel() {
+  const el = document.getElementById('r-live-steps');
+  if (!el) return;
+  if (!liveTaskSteps.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted)">No live tool steps.</div>';
+    return;
+  }
+  el.innerHTML = liveTaskSteps.slice(-20).map((s) => {
+    const action = escHtml(String(s.action || 'tool'));
+    const status = escHtml(String(s.status || 'pending'));
+    const stepNum = Number(s.stepNum || 0);
+    const meta = s.meta ? `<div class="task-meta">${escHtml(String(s.meta).slice(0, 140))}</div>` : '';
+    return `
+      <div class="task-row">
+        <div class="task-top">
+          <div class="task-title">${stepNum ? `Step ${stepNum}: ` : ''}${action}</div>
+          <span class="status-chip ${status}">${status.replace('_', ' ')}</span>
+        </div>
+        ${meta}
+      </div>
+    `;
+  }).join('');
+}
+
+function upsertLiveStep(action, stepNum, status, meta = '') {
+  const key = `${String(action || '')}:${Number(stepNum || 0)}`;
+  const idx = liveTaskSteps.findIndex(s => s.key === key);
+  const row = { key, action: String(action || ''), stepNum: Number(stepNum || 0), status: String(status || 'pending'), meta: String(meta || '') };
+  if (idx >= 0) liveTaskSteps[idx] = { ...liveTaskSteps[idx], ...row };
+  else liveTaskSteps.push(row);
+  renderLiveStepsPanel();
+}
+
+async function openSettings() {
+  document.getElementById('settings-modal').style.display = 'flex';
+  setSettingsTab(settingsTab || 'system');
+  try {
+    const status = await api('/api/status');
+    document.getElementById('settings-runtime-model').textContent = status.currentModel || '-';
+    document.getElementById('settings-runtime-gateway').textContent = status.gateway || '-';
+    document.getElementById('settings-runtime-ollama').textContent = status.ollama ? 'Online' : 'Offline';
+  } catch {}
+  try {
+    const paths = await api('/api/settings/paths');
+    document.getElementById('settings-allowed-paths').value = (paths.allowed_paths || []).join('\n');
+    document.getElementById('settings-blocked-paths').value = (paths.blocked_paths || []).join('\n');
+  } catch {}
+  try {
+    const s = await api('/api/settings/search');
+    document.getElementById('settings-provider').value = s.preferred_provider || 'tavily';
+    document.getElementById('settings-search-rigor').value = s.search_rigor || 'verified';
+    document.getElementById('settings-tavily-key').value = s.tavily_api_key || '';
+    document.getElementById('settings-google-key').value = s.google_api_key || '';
+    document.getElementById('settings-google-cx').value = s.google_cx || '';
+    document.getElementById('settings-brave-key').value = s.brave_api_key || '';
+  } catch {}
+  try {
+    const p = await api('/api/settings/agent');
+    document.getElementById('settings-force-web-fresh').checked = p.force_web_for_fresh !== false;
+    document.getElementById('settings-memory-fallback').checked = p.memory_fallback_on_search_failure !== false;
+    document.getElementById('settings-auto-store-web-facts').checked = p.auto_store_web_facts !== false;
+    document.getElementById('settings-nl-tool-router').checked = p.natural_language_tool_router !== false;
+    document.getElementById('settings-retrieval-mode').value = p.retrieval_mode || 'standard';
+  } catch {}
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').style.display = 'none';
+}
+
+// ─── Telegram Settings Functions ───────────────────────────────────────
+let telegramStatusLoaded = false;
+
+async function loadTelegramStatus() {
+  try {
+    const data = await api('/api/telegram/status');
+    if (!data.success) return;
+    const dot = document.getElementById('tg-status-dot');
+    const text = document.getElementById('tg-status-text');
+    const sendBtn = document.getElementById('tg-send-test-btn');
+    if (data.connected && data.polling) {
+      dot.style.background = 'var(--ok)';
+      text.textContent = `Connected as @${data.username}`;
+      text.style.color = 'var(--text)';
+      if (sendBtn) sendBtn.disabled = false;
+    } else if (data.hasToken) {
+      dot.style.background = '#f0ad4e';
+      text.textContent = 'Token saved but not connected';
+      text.style.color = '#b87b00';
+    } else {
+      dot.style.background = '#ccc';
+      text.textContent = 'Not configured';
+      text.style.color = 'var(--muted)';
+    }
+    // Populate fields if we have saved config
+    if (!telegramStatusLoaded) {
+      telegramStatusLoaded = true;
+      if (data.hasToken) document.getElementById('settings-tg-token').placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (saved)';
+      if (data.allowedUserIds?.length) document.getElementById('settings-tg-userid').value = data.allowedUserIds.join(', ');
+      document.getElementById('settings-tg-enabled').checked = data.enabled;
+    }
+  } catch (err) { console.error('[TG] Status load failed:', err); }
+}
+
+async function testTelegramToken() {
+  const token = document.getElementById('settings-tg-token').value.trim();
+  const btn = document.getElementById('tg-test-btn');
+  if (!token) { alert('Enter a bot token first'); return; }
+  btn.textContent = 'Testing...';
+  btn.disabled = true;
+  try {
+    const data = await api('/api/telegram/test', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ botToken: token }) });
+    if (data.success) {
+      const dot = document.getElementById('tg-status-dot');
+      const text = document.getElementById('tg-status-text');
+      dot.style.background = 'var(--ok)';
+      text.textContent = `Valid! Bot: @${data.bot.username} (${data.bot.firstName})`;
+      text.style.color = 'var(--ok)';
+    } else {
+      alert('Token invalid: ' + (data.error || 'unknown error'));
+    }
+  } catch (err) { alert('Test failed: ' + err.message); }
+  btn.textContent = 'Test Token';
+  btn.disabled = false;
+}
+
+async function saveTelegramSettings() {
+  const tokenInput = document.getElementById('settings-tg-token').value.trim();
+  const userIdStr = document.getElementById('settings-tg-userid').value.trim();
+  const enabled = document.getElementById('settings-tg-enabled').checked;
+  const allowedUserIds = userIdStr ? userIdStr.split(/[,\s]+/).map(Number).filter(n => !isNaN(n) && n > 0) : [];
+  const payload = { enabled, allowedUserIds };
+  if (tokenInput) payload.botToken = tokenInput; // only send if user typed a new one
+  try {
+    const data = await api('/api/telegram/config', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    if (data.success) {
+      addProcessEntry('final', 'Telegram settings saved' + (enabled ? ' — connecting...' : '.'));
+      telegramStatusLoaded = false;
+      setTimeout(loadTelegramStatus, 2000); // reload status after bot connects
+    }
+  } catch (err) { alert('Save failed: ' + err.message); }
+}
+
+async function sendTelegramTestMessage() {
+  const btn = document.getElementById('tg-send-test-btn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  try {
+    const data = await api('/api/telegram/send-test', { method: 'POST' });
+    if (data.success) {
+      addProcessEntry('final', 'Test message sent to Telegram!');
+    } else {
+      alert('Failed: ' + (data.error || 'unknown'));
+    }
+  } catch (err) { alert('Send failed: ' + err.message); }
+  btn.textContent = 'Send Test Message';
+  btn.disabled = false;
+}
+
+async function saveSettings() {
+  const allowed_paths = document.getElementById('settings-allowed-paths').value.split('\n').map(s => s.trim()).filter(Boolean);
+  const blocked_paths = document.getElementById('settings-blocked-paths').value.split('\n').map(s => s.trim()).filter(Boolean);
+  const payload = {
+    preferred_provider: document.getElementById('settings-provider').value,
+    search_rigor: document.getElementById('settings-search-rigor').value,
+    tavily_api_key: document.getElementById('settings-tavily-key').value.trim(),
+    google_api_key: document.getElementById('settings-google-key').value.trim(),
+    google_cx: document.getElementById('settings-google-cx').value.trim(),
+    brave_api_key: document.getElementById('settings-brave-key').value.trim(),
+  };
+  const policyPayload = {
+    force_web_for_fresh: document.getElementById('settings-force-web-fresh').checked,
+    memory_fallback_on_search_failure: document.getElementById('settings-memory-fallback').checked,
+    auto_store_web_facts: document.getElementById('settings-auto-store-web-facts').checked,
+    natural_language_tool_router: document.getElementById('settings-nl-tool-router').checked,
+    retrieval_mode: document.getElementById('settings-retrieval-mode').value,
+  };
+  const modelPayload = {
+    ollama_endpoint: (document.getElementById('settings-ollama-endpoint') || {}).value || 'http://localhost:11434',
+    primary_model: (document.getElementById('settings-primary-model') || {}).value || '',
+    role_models: {
+      manager: (document.getElementById('settings-model-manager') || {}).value || '',
+      executor: (document.getElementById('settings-model-executor') || {}).value || '',
+      verifier: (document.getElementById('settings-model-verifier') || {}).value || '',
+    }
+  };
+  try {
+    await api('/api/settings/paths', { method: 'POST', body: JSON.stringify({ allowed_paths, blocked_paths }) });
+    await api('/api/settings/search', { method: 'POST', body: JSON.stringify(payload) });
+    await api('/api/settings/agent', { method: 'POST', body: JSON.stringify(policyPayload) });
+    await api('/api/settings/model', { method: 'POST', body: JSON.stringify(modelPayload) });
+    await loadSearchSettingsSummary();
+    quickSearchRigor = payload.search_rigor || quickSearchRigor;
+    updateQuickModeUI();
+    addProcessEntry('final', 'Settings saved.');
+    closeSettings();
+  } catch (err) {
+    addProcessEntry('error', `Failed to save settings: ${err.message}`);
+  }
+}
+
+// Approve a memory suggestion shown in the process log
+async function confirmMemory(index) {
+  const entry = processLogEntries[index];
+  if (!entry || entry.type !== 'memory') return;
+  const suggestion = entry.extra || {};
+  try {
+    addProcessEntry('info', 'Saving memory...');
+    const res = await api('/api/memory/confirm', { method: 'POST', body: JSON.stringify(suggestion) });
+    if (res && res.ok === false) {
+      addProcessEntry('error', `Memory save failed: ${res.error || JSON.stringify(res)}`);
+      return;
+    }
+    processLogEntries[index].type = 'result';
+    processLogEntries[index].content = `Saved memory: ${String(entry.content).slice(0,200)}`;
+    renderProcessLog();
+    addProcessEntry('final', 'Memory persisted.');
+  } catch (err) {
+    addProcessEntry('error', `Failed to save memory: ${err.message}`);
+  }
+}
+
+function rejectMemory(index) {
+  const entry = processLogEntries[index];
+  if (!entry || entry.type !== 'memory') return;
+  processLogEntries[index].type = 'warn';
+  processLogEntries[index].content = 'Memory suggestion rejected.';
+  renderProcessLog();
+  addProcessEntry('info', 'Memory suggestion rejected by user.');
+}
+
+// ---- Run mission ----
+async function runMission() {
+  const input = document.getElementById('mission-input');
+  const btn = document.getElementById('run-btn');
+  const mission = input.value.trim();
+  if (!mission) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Starting...';
+
+  try {
+    const res = await api('/api/jobs', { method: 'POST', body: JSON.stringify({ mission }) });
+    if (res.error) {
+      log(`Error: ${res.error}`, 'error');
+    } else {
+      log(`Mission started → Job ${res.jobId.slice(0, 8)}...`, 'success');
+      input.value = '';
+      setTimeout(() => selectJob(res.jobId), 500);
+    }
+  } catch (err) {
+    log(`Failed: ${err.message}`, 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '▶ Run';
+}
+
+// ---- Sessions list ----
+function renderSessionsList() {
+  const el = document.getElementById('jobs-list');
+  if (!chatSessions || chatSessions.length === 0) {
+    el.innerHTML = '<div class="empty-state">No chats yet.<br>Start a new conversation.</div>';
+    return;
+  }
+  const sorted = [...chatSessions].sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
+  el.innerHTML = sorted.map(s => `
+    <div class="job-item ${s.id === activeChatSessionId ? 'active' : ''}" onclick="openSession('${s.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="job-item-title">${escHtml(s.title || 'New chat')}</div>
+        ${sessionsEditMode ? `<button class="sidebar-action" style="padding:3px 8px;font-size:10px" onclick="deleteChatSession('${s.id}', event)">Delete</button>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+        ${s.automated ? '<span class="session-auto-badge">🕐 Auto</span>' : ''}
+        <span class="badge badge-queued">${(s.history || []).length} msgs</span>
+        <span style="color:var(--muted);font-size:10px">${timeAgo(s.updatedAt || s.createdAt)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---- Select job ----
+async function selectJob(jobId) {
+  selectedJobId = jobId;
+  setMode('mission');
+  renderJobsList(allJobs);
+  await refreshJobDetail(jobId);
+  clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    const job = allJobs.find(j => j.id === jobId);
+    if (job && ['planning', 'executing', 'verifying'].includes(job.status)) {
+      await refreshJobDetail(jobId);
+    } else {
+      clearInterval(pollInterval);
+    }
+  }, 2000);
+}
+
+async function refreshJobDetail(jobId) {
+  try {
+    const data = await api(`/api/jobs/${jobId}`);
+    renderJobDetail(data);
+  } catch {}
+}
+
+function renderJobDetail(data) {
+  const { job, tasks, artifacts, state } = data;
+  const content = document.getElementById('main-content');
+  const isRunning = ['planning','executing','verifying'].includes(job.status);
+
+  content.innerHTML = `
+    <div class="job-detail-title">${escHtml(job.title)}</div>
+    <div class="job-detail-meta">
+      <span class="badge badge-${job.status}">${isRunning ? '<span class="spinner"></span>' : ''}${job.status}</span>
+      <span>ID: ${job.id.slice(0, 12)}...</span>
+      <span>${timeAgo(job.created_at)}</span>
+    </div>
+
+    ${state ? `
+    <div class="section-title">Mission</div>
+    <div style="color:var(--muted);font-size:12px;line-height:1.7;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:16px">
+      ${escHtml(state.mission)}
+    </div>` : ''}
+
+    ${tasks && tasks.length > 0 ? `
+    <div class="section-title">Tasks (${tasks.length})</div>
+    ${tasks.map(t => `
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-card-title">${escHtml(t.title)}</span>
+          <span class="badge badge-${t.status}">${t.status}</span>
+        </div>
+        <div class="task-card-desc">${escHtml(t.description || '')}</div>
+        ${t.acceptance_criteria && t.acceptance_criteria.length > 0 ? `
+        <div class="task-criteria">
+          ${t.acceptance_criteria.map(c => `<div class="task-criteria-item">${escHtml(c)}</div>`).join('')}
+        </div>` : ''}
+      </div>
+    `).join('')}` : `
+    <div class="section-title">Tasks</div>
+    <div style="color:var(--muted);font-size:12px;padding:20px 0">
+      ${isRunning ? '<span class="spinner pulsing"></span> Planning tasks...' : 'No tasks'}
+    </div>`}
+
+    ${artifacts && artifacts.length > 0 ? `
+    <div class="section-title" style="margin-top:16px">Artifacts (${artifacts.length})</div>
+    ${artifacts.map(a => `
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-card-title">📄 ${escHtml(a.path || a.type)}</span>
+          <span class="badge badge-completed">${a.type}</span>
+        </div>
+        ${a.content ? `<div class="task-card-desc" style="margin-top:6px">${escHtml(a.content.slice(0, 200))}${a.content.length > 200 ? '...' : ''}</div>` : ''}
+      </div>
+    `).join('')}` : ''}
+
+    <div id="log-panel">${logLines.map(l => `<div class="log-line ${l.type}">${l.text}</div>`).join('')}</div>
+  `;
+
+  const lp = document.getElementById('log-panel');
+  if (lp) lp.scrollTop = lp.scrollHeight;
+}
+
+// ---- Stats ----
+function updateStats(jobs) {
+  const totalEl = document.getElementById('r-total');
+  const runningEl = document.getElementById('r-running');
+  const modeEl = document.getElementById('r-completed');
+  if (totalEl) totalEl.textContent = String(chatSessions.length);
+  if (runningEl) runningEl.textContent = activeChatSessionId ? '1' : '0';
+  if (modeEl) modeEl.textContent = useAgentMode ? 'On' : 'Off';
+}
+
+// ---- Approvals ----
+async function loadApprovals() {
+  try {
+    const approvals = await api('/api/approvals');
+    const el = document.getElementById('approvals-list');
+    if (!approvals || approvals.length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:11px">No pending approvals</div>';
+      return;
+    }
+    el.innerHTML = approvals.map(a => `
+      <div class="approval-card">
+        <div class="approval-action">${escHtml(a.action)}</div>
+        <div class="approval-reason">${escHtml(a.reason || 'Approval required')}</div>
+        <div class="approval-buttons">
+          <button class="btn btn-sm btn-green" onclick="resolveApproval('${a.id}','approved')">✓ Approve</button>
+          <button class="btn btn-sm btn-red" onclick="resolveApproval('${a.id}','rejected')">✗ Reject</button>
+        </div>
+      </div>
+    `).join('');
+  } catch {}
+}
+
+async function resolveApproval(id, decision) {
+  await api(`/api/approvals/${id}`, { method: 'POST', body: JSON.stringify({ decision }) });
+  loadApprovals();
+}
+
+function fmtPercent(v, digits = 0) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '--%';
+  return `${n.toFixed(digits)}%`;
+}
+
+function fmtMemoryGb(usedGb, totalGb) {
+  const u = Number(usedGb);
+  const t = Number(totalGb);
+  if (!Number.isFinite(u) || !Number.isFinite(t) || t <= 0) return '-- / -- GB';
+  return `${u.toFixed(1)} / ${t.toFixed(1)} GB`;
+}
+
+function meterWidth(pct) {
+  const n = Number(pct);
+  if (!Number.isFinite(n)) return '0%';
+  const bounded = Math.max(0, Math.min(100, n));
+  return `${bounded}%`;
+}
+
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = String(text || '');
+}
+
+function setMeter(id, pct) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.width = meterWidth(pct);
+}
+
+let systemStatsFetchInFlight = false;
+async function loadSystemStats() {
+  if (systemStatsFetchInFlight) return;
+  systemStatsFetchInFlight = true;
+  try {
+    const stats = await api('/api/system-stats');
+    const cpu = stats?.system?.cpu_percent;
+    const ram = stats?.system?.memory_percent;
+    const gpu = stats?.gpu?.gpu_util_percent;
+    const vram = stats?.gpu?.vram_used_percent;
+    const gpuAvailable = !!stats?.gpu?.available;
+
+    setText('quick-system-stats', `CPU ${fmtPercent(cpu)} • RAM ${fmtPercent(ram)} • GPU ${gpuAvailable ? fmtPercent(gpu) : '--%'}`);
+
+    setText('sys-cpu', fmtPercent(cpu));
+    setText('sys-ram', fmtPercent(ram));
+    setText('sys-gpu', gpuAvailable ? fmtPercent(gpu) : 'N/A');
+    setText('sys-vram', gpuAvailable ? fmtPercent(vram) : 'N/A');
+    setMeter('sys-cpu-meter', cpu);
+    setMeter('sys-ram-meter', ram);
+    setMeter('sys-gpu-meter', gpuAvailable ? gpu : 0);
+    setMeter('sys-vram-meter', gpuAvailable ? vram : 0);
+
+    const ollamaRunning = !!stats?.ollama_process?.running;
+    const ollamaCount = Number(stats?.ollama_process?.process_count || 0);
+    const ollamaMemMb = Number(stats?.ollama_process?.total_memory_mb || 0);
+    const gatewayRss = Number(stats?.gateway_process?.rss_mb || 0);
+    const gpuName = String(stats?.gpu?.name || '').trim();
+    const memUsage = fmtMemoryGb(stats?.system?.memory_used_gb, stats?.system?.memory_total_gb);
+    const updated = new Date(stats?.timestamp || Date.now()).toLocaleTimeString();
+
+    const ollamaLabel = ollamaRunning
+      ? `Ollama running (${ollamaCount})`
+      : 'Ollama idle/offline';
+    setText('sys-ollama', ollamaLabel);
+    setText(
+      'sys-runtime-sub',
+      `${memUsage} • Ollama ${ollamaMemMb.toFixed(0)} MB • Gateway ${gatewayRss.toFixed(0)} MB${gpuName ? ` • ${gpuName}` : ''} • ${updated}`
+    );
+  } catch {
+    setText('quick-system-stats', 'CPU --% • RAM --% • GPU --%');
+    setText('sys-cpu', '--%');
+    setText('sys-ram', '--%');
+    setText('sys-gpu', 'N/A');
+    setText('sys-vram', 'N/A');
+    setText('sys-ollama', 'Stats unavailable');
+    setText('sys-runtime-sub', 'Could not fetch system stats right now');
+    setMeter('sys-cpu-meter', 0);
+    setMeter('sys-ram-meter', 0);
+    setMeter('sys-gpu-meter', 0);
+    setMeter('sys-vram-meter', 0);
+  } finally {
+    systemStatsFetchInFlight = false;
+  }
+}
+
+// ---- Status ----
+async function checkStatus() {
+  try {
+    const status = await api('/api/status');
+    const dot = document.getElementById('ollama-dot');
+    if (status.ollama) {
+      dot.className = 'dot online';
+      document.getElementById('ollama-status').textContent = 'Ollama Online';
+      const ro = document.getElementById('r-ollama');
+      if (ro) {
+        ro.textContent = 'Online';
+        ro.className = 'info-val green';
+      }
+    } else {
+      dot.className = 'dot offline';
+      document.getElementById('ollama-status').textContent = 'Ollama Offline';
+      const ro = document.getElementById('r-ollama');
+      if (ro) {
+        ro.textContent = 'Offline';
+        ro.className = 'info-val red';
+      }
+    }
+    const modelName = status.currentModel || '-';
+    const rm = document.getElementById('r-model');
+    if (rm) rm.textContent = modelName;
+    document.getElementById('current-model').textContent = modelName;
+    document.getElementById('chat-model-name').textContent = modelName;
+  } catch {
+    document.getElementById('ollama-dot').className = 'dot offline';
+  }
+}
+
+// ---- Refresh all ----
+async function refreshAll() {
+  renderSessionsList();
+  updateStats([]);
+  loadApprovals();
+  checkStatus();
+  loadSystemStats();
+  loadSearchSettingsSummary();
+  loadAgentSessionContext();
+}
+
+// ---- Log ----
+const logLines = [];
+function log(text, type = 'log') {
+  const ts = new Date().toLocaleTimeString();
+  logLines.push({ text: `[${ts}] ${text}`, type });
+  if (logLines.length > 100) logLines.shift();
+  const lp = document.getElementById('log-panel');
+  if (lp) {
+    lp.innerHTML = logLines.map(l => `<div class="log-line ${l.type}">${l.text}</div>`).join('');
+    lp.scrollTop = lp.scrollHeight;
+  }
+}
+
+// ---- Helpers ----
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff/3600000)}h ago`;
+  return `${Math.floor(diff/86400000)}d ago`;
+}
+
+function openOllamaInfo() { window.open('http://localhost:11434','_blank'); }
+
+// ---- Skills management (v2 - local skills system) ----
+let skillsCache = [];
+let editingSkillId = null;
+
+async function loadInstalledSkills() {
+  const el = document.getElementById('skills-list');
+  el.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:11px"><span class="spinner"></span> Loading...</div>';
+  try {
+    const data = await api('/api/skills');
+    const skills = data.skills || [];
+    skillsCache = skills;
+    if (skills.length === 0) {
+      el.innerHTML = '<div class="empty-state" style="padding:16px">No skills yet.<br>Click "+ Create" to make one!</div>';
+    } else {
+      el.innerHTML = skills.map(s => `
+        <div class="skill-card ${s.enabled ? 'enabled' : ''}" onclick="toggleSkill('${escHtml(s.id)}')">
+          <div class="skill-card-top">
+            <div class="skill-card-emoji">${escHtml(s.emoji || '🧩')}</div>
+            <div class="skill-card-info">
+              <div class="skill-card-name">${escHtml(s.name)}</div>
+              <div class="skill-card-desc">${escHtml(s.description || 'No description')}</div>
+            </div>
+            <div class="skill-card-actions">
+              <button class="skill-mini-btn" onclick="event.stopPropagation();editSkill('${escHtml(s.id)}')" title="Edit">✎</button>
+              <button class="skill-remove-btn" onclick="event.stopPropagation();deleteSkill('${escHtml(s.id)}')" title="Delete">✕</button>
+              <div class="skill-card-dot"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    el.innerHTML = `<div style="padding:12px;color:var(--err);font-size:11px">Error: ${err.message}</div>`;
+  }
+}
+
+async function toggleSkill(id) {
+  try {
+    const res = await api(`/api/skills/${encodeURIComponent(id)}/toggle`, { method: 'POST' });
+    if (res.success) {
+      addProcessEntry('info', `Skill "${res.skill.name}": ${res.skill.enabled ? 'ENABLED' : 'DISABLED'}`);
+      loadInstalledSkills();
+    }
+  } catch (err) {
+    addProcessEntry('error', `Failed to toggle skill: ${err.message}`);
+  }
+}
+
+async function deleteSkill(id) {
+  if (!confirm(`Delete skill "${id}"?`)) return;
+  try {
+    const res = await api(`/api/skills/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (res.success) {
+      addProcessEntry('info', `Skill "${id}" deleted.`);
+      loadInstalledSkills();
+    } else {
+      alert(`Delete failed: ${res.error}`);
+    }
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  }
+}
+
+function openCreateSkillModal() {
+  editingSkillId = null;
+  document.getElementById('skill-modal-title').textContent = 'Create Skill';
+  document.getElementById('skill-modal-save-btn').textContent = 'Create Skill';
+  document.getElementById('skill-modal-name').value = '';
+  document.getElementById('skill-modal-emoji').value = '';
+  document.getElementById('skill-modal-desc').value = '';
+  document.getElementById('skill-modal-instructions').value = '';
+  document.getElementById('skill-modal').style.display = 'flex';
+  document.getElementById('skill-modal-name').focus();
+}
+
+async function editSkill(id) {
+  try {
+    const res = await api(`/api/skills/${encodeURIComponent(id)}`);
+    if (!res.success) { alert('Skill not found'); return; }
+    const s = res.skill;
+    editingSkillId = id;
+    document.getElementById('skill-modal-title').textContent = 'Edit Skill';
+    document.getElementById('skill-modal-save-btn').textContent = 'Save Changes';
+    document.getElementById('skill-modal-name').value = s.name || '';
+    document.getElementById('skill-modal-emoji').value = s.emoji || '';
+    document.getElementById('skill-modal-desc').value = s.description || '';
+    document.getElementById('skill-modal-instructions').value = s.instructions || '';
+    document.getElementById('skill-modal').style.display = 'flex';
+    document.getElementById('skill-modal-name').focus();
+  } catch (err) {
+    alert(`Error loading skill: ${err.message}`);
+  }
+}
+
+function closeSkillModal() {
+  document.getElementById('skill-modal').style.display = 'none';
+  editingSkillId = null;
+}
+
+async function saveSkillFromModal() {
+  const name = document.getElementById('skill-modal-name').value.trim();
+  const emoji = document.getElementById('skill-modal-emoji').value.trim() || '🧩';
+  const description = document.getElementById('skill-modal-desc').value.trim();
+  const instructions = document.getElementById('skill-modal-instructions').value.trim();
+
+  if (!name) { alert('Name is required'); return; }
+  if (!instructions) { alert('Instructions are required'); return; }
+
+  const btn = document.getElementById('skill-modal-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    let res;
+    if (editingSkillId) {
+      // Update existing
+      res = await api(`/api/skills/${encodeURIComponent(editingSkillId)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ name, emoji, description, instructions }),
+      });
+    } else {
+      // Create new
+      res = await api('/api/skills', {
+        method: 'POST',
+        body: JSON.stringify({ name, emoji, description, instructions }),
+      });
+    }
+    if (res.success) {
+      addProcessEntry('info', `Skill "${name}" ${editingSkillId ? 'updated' : 'created'}!`);
+      closeSkillModal();
+      loadInstalledSkills();
+    } else {
+      alert(`Failed: ${res.error}`);
+    }
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editingSkillId ? 'Save Changes' : 'Create Skill';
+  }
+}
+
+// ---- Stop Button ----
+let currentAbortController = null;
+
+function handleSendStop() {
+  if (isThinking) stopGeneration();
+  else sendChat();
+}
+
+function stopGeneration() {
+  if (currentAbortController) {
+    currentAbortController.abort();
+    currentAbortController = null;
+  }
+}
+
+function setButtonState(thinking) {
+  const sendIcon = document.getElementById('send-icon');
+  const stopIcon = document.getElementById('stop-icon');
+  const btn = document.getElementById('send-btn');
+  if (!btn) return;
+  if (thinking) {
+    if (sendIcon) sendIcon.style.display = 'none';
+    if (stopIcon) stopIcon.style.display = '';
+    btn.style.background = 'var(--err)';
+    btn.title = 'Stop generation';
+  } else {
+    if (sendIcon) sendIcon.style.display = '';
+    if (stopIcon) stopIcon.style.display = 'none';
+    btn.style.background = '';
+    btn.title = 'Send';
+  }
+}
+
+// ---- Canvas Panel ----
+let canvasOpen = false;
+let canvasTabs = [];
+let activeCanvasTabId = null;
+let canvasEditor = null;
+let canvasEditorInitialized = false;
+
+const CANVAS_LANG_MAP = {
+  js:'javascript', ts:'javascript', jsx:'javascript', tsx:'javascript', mjs:'javascript',
+  html:'htmlmixed', htm:'htmlmixed',
+  css:'css', py:'python', xml:'xml',
+  json:'javascript', md:'markdown', txt:'null',
+};
+
+function getCanvasLang(filename) {
+  const ext = String(filename || '').split('.').pop().toLowerCase();
+  return CANVAS_LANG_MAP[ext] || 'null';
+}
+
+function isHtmlFile(filename) {
+  const ext = String(filename || '').split('.').pop().toLowerCase();
+  return ext === 'html' || ext === 'htm';
+}
+
+function toggleCanvas() {
+  canvasOpen = !canvasOpen;
+  const panel = document.getElementById('canvas-panel');
+  const btn = document.getElementById('canvas-toggle-btn');
+  if (!panel) return;
+  if (canvasOpen) {
+    panel.style.display = 'flex';
+    if (btn) { btn.style.background='#eaf2ff'; btn.style.borderColor='#bdd3f6'; btn.style.color='#0d4faf'; }
+    if (!canvasEditorInitialized) initCanvasEditor();
+    canvasRenderTabs();
+  } else {
+    panel.style.display = 'none';
+    if (btn) { btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; }
+  }
+}
+
+function initCanvasEditor() {
+  canvasEditorInitialized = true;
+  const wrap = document.getElementById('canvas-editor-wrap');
+  if (!wrap || typeof CodeMirror === 'undefined') return;
+  canvasEditor = CodeMirror(wrap, {
+    value: '',
+    mode: 'htmlmixed',
+    lineNumbers: true,
+    lineWrapping: true,
+    tabSize: 2,
+    indentWithTabs: false,
+    theme: 'default',
+    extraKeys: { 'Ctrl-S': () => canvasSave(), 'Cmd-S': () => canvasSave() },
+  });
+  canvasEditor.on('change', () => {
+    const tab = canvasTabs.find(t => t.id === activeCanvasTabId);
+    if (!tab) return;
+    tab.content = canvasEditor.getValue();
+    if (tab.mode === 'preview') canvasUpdatePreview();
+  });
+}
+
+function canvasNewFile() {
+  const name = prompt('File name:', 'untitled.html');
+  if (!name || !name.trim()) return;
+  const id = 'ctab_' + Math.random().toString(36).slice(2);
+  canvasTabs.push({ id, name: name.trim(), content: '', mode: 'code', language: getCanvasLang(name) });
+  canvasOpenTab(id);
+}
+
+function canvasOpenTab(id) {
+  activeCanvasTabId = id;
+  const tab = canvasTabs.find(t => t.id === id);
+  if (!tab) return;
+  if (canvasEditor) {
+    canvasEditor.setValue(tab.content || '');
+    canvasEditor.setOption('mode', tab.language || 'null');
+    setTimeout(() => canvasEditor.refresh(), 10);
+  }
+  applyCanvasViewMode(tab.mode || 'code', tab);
+  canvasRenderTabs();
+}
+
+function canvasCloseTab(id, ev) {
+  if (ev) ev.stopPropagation();
+  const idx = canvasTabs.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  canvasTabs.splice(idx, 1);
+  if (activeCanvasTabId === id) {
+    if (canvasTabs.length > 0) {
+      canvasOpenTab(canvasTabs[Math.min(idx, canvasTabs.length - 1)].id);
+    } else {
+      activeCanvasTabId = null;
+      if (canvasEditor) canvasEditor.setValue('');
+      applyCanvasViewMode('code', null);
+      canvasRenderTabs();
+    }
+  } else {
+    canvasRenderTabs();
+  }
+}
+
+function setCanvasMode(mode) {
+  const tab = canvasTabs.find(t => t.id === activeCanvasTabId);
+  if (!tab) return;
+  // sync editor -> tab before switching
+  if (canvasEditor && tab.mode !== 'preview') tab.content = canvasEditor.getValue();
+  tab.mode = mode;
+  applyCanvasViewMode(mode, tab);
+  canvasRenderTabs();
+}
+
+function applyCanvasViewMode(mode, tab) {
+  const editorWrap = document.getElementById('canvas-editor-wrap');
+  const previewFrame = document.getElementById('canvas-preview-frame');
+  const emptyState = document.getElementById('canvas-empty-state');
+  const codeModeBtn = document.getElementById('canvas-code-btn');
+  const previewModeBtn = document.getElementById('canvas-preview-btn');
+  if (!tab) {
+    if (editorWrap) editorWrap.style.display = 'none';
+    if (previewFrame) previewFrame.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'flex';
+    return;
+  }
+  if (emptyState) emptyState.style.display = 'none';
+  if (mode === 'preview') {
+    if (editorWrap) editorWrap.style.display = 'none';
+    if (previewFrame) { previewFrame.style.display = 'flex'; previewFrame.style.flex = '1'; }
+    if (codeModeBtn) codeModeBtn.classList.remove('active');
+    if (previewModeBtn) previewModeBtn.classList.add('active');
+    canvasUpdatePreview();
+  } else {
+    if (editorWrap) { editorWrap.style.display = 'flex'; editorWrap.style.flex = '1'; }
+    if (previewFrame) previewFrame.style.display = 'none';
+    if (codeModeBtn) codeModeBtn.classList.add('active');
+    if (previewModeBtn) previewModeBtn.classList.remove('active');
+    if (canvasEditor) setTimeout(() => { canvasEditor.refresh(); canvasEditor.focus(); }, 10);
+  }
+}
+
+function canvasRenderTabs() {
+  const tabsEl = document.getElementById('canvas-tabs');
+  if (!tabsEl) return;
+  tabsEl.innerHTML = canvasTabs.map(t => `
+    <div class="canvas-tab ${t.id === activeCanvasTabId ? 'active' : ''}" onclick="canvasOpenTab('${t.id}')">
+      <span>${escHtml(t.name)}</span>
+      <button class="canvas-tab-close" onclick="canvasCloseTab('${t.id}', event)" title="Close">×</button>
+    </div>
+  `).join('') + `<button class="canvas-new-tab" onclick="canvasNewFile()" title="New file">+</button>`;
+  const tab = canvasTabs.find(t => t.id === activeCanvasTabId);
+  const codeModeBtn = document.getElementById('canvas-code-btn');
+  const previewModeBtn = document.getElementById('canvas-preview-btn');
+  if (codeModeBtn) codeModeBtn.classList.toggle('active', !tab || tab.mode !== 'preview');
+  if (previewModeBtn) previewModeBtn.classList.toggle('active', !!(tab && tab.mode === 'preview'));
+}
+
+function canvasUpdatePreview() {
+  const frame = document.getElementById('canvas-preview-frame');
+  const tab = canvasTabs.find(t => t.id === activeCanvasTabId);
+  if (!frame || !tab) return;
+  const content = tab.content || '';
+  if (!isHtmlFile(tab.name) && !content.trim().startsWith('<')) {
+    frame.srcdoc = `<pre style="font-family:monospace;padding:16px;white-space:pre-wrap;word-break:break-word">${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`;
+    return;
+  }
+  frame.srcdoc = content;
+  frame.onload = () => {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) return;
+      doc.body.contentEditable = 'true';
+      doc.body.spellcheck = false;
+      doc.body.addEventListener('input', () => {
+        const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+        tab.content = html;
+        // sync back to editor so Code mode shows updated content
+        if (canvasEditor && tab.mode !== 'preview') canvasEditor.setValue(html);
+      });
+    } catch {}
+  };
+}
+
+function canvasSave() {
+  const tab = canvasTabs.find(t => t.id === activeCanvasTabId);
+  if (!tab) { addProcessEntry('warn', 'Canvas: no file open to save.'); return; }
+  if (canvasEditor && tab.mode !== 'preview') tab.content = canvasEditor.getValue();
+  const blob = new Blob([tab.content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = tab.name; a.click();
+  URL.revokeObjectURL(url);
+  addProcessEntry('info', `Canvas: saved ${tab.name}`);
+}
+
+function canvasAddToContext() {
+  const tab = canvasTabs.find(t => t.id === activeCanvasTabId);
+  if (!tab) { addProcessEntry('warn', 'Canvas: no file open.'); return; }
+  if (canvasEditor && tab.mode !== 'preview') tab.content = canvasEditor.getValue();
+  const ext = tab.name.split('.').pop() || 'txt';
+  const block = '```' + ext + '\n' + tab.content + '\n```';
+  // Send as a message to the LLM so it enters context
+  const prompt = `Here is the contents of my file "${tab.name}" for reference:\n\n${block}\n\nI've loaded this file into context. What would you like me to do with it?`;
+  const chatInput = document.getElementById('chat-input');
+  if (chatInput) {
+    chatInput.value = prompt;
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
+  }
+  sendChat();
+  addProcessEntry('info', `Canvas: sent ${tab.name} to LLM as context.`);
+}
+
+function canvasInitDrop() {
+  const panel = document.getElementById('canvas-panel');
+  if (!panel) return;
+  panel.addEventListener('dragover', (e) => { e.preventDefault(); panel.classList.add('canvas-drag-over'); });
+  panel.addEventListener('dragleave', (e) => { if (!panel.contains(e.relatedTarget)) panel.classList.remove('canvas-drag-over'); });
+  panel.addEventListener('drop', (e) => {
+    e.preventDefault();
+    panel.classList.remove('canvas-drag-over');
+    Array.from(e.dataTransfer.files).forEach(canvasLoadFile);
+  });
+}
+
+function canvasLoadFile(file) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const content = ev.target.result;
+    const id = 'ctab_' + Math.random().toString(36).slice(2);
+    canvasTabs.push({ id, name: file.name, content, mode: 'code', language: getCanvasLang(file.name) });
+    if (!canvasOpen) toggleCanvas();
+    canvasOpenTab(id);
+    addProcessEntry('info', `Canvas: opened ${file.name}`);
+  };
+  reader.readAsText(file);
+}
+
+// ---- Context Pinning ----
+const MAX_PINS = 3;
+let contextPinMode = false;
+let pinnedMessageIndices = new Set();
+let confirmedPins = []; // Array of { role, content } sent with each request
+
+function toggleContextPinMode() {
+  const pop = document.getElementById('context-pin-popover');
+  if (!pop) return;
+  const isOpen = pop.classList.contains('open');
+  // Close other popovers
+  document.getElementById('quick-mode-popover')?.classList.remove('open');
+  if (isOpen) {
+    cancelContextPin();
+  } else {
+    contextPinMode = true;
+    pop.classList.add('open');
+    document.body.classList.add('context-pin-active');
+    // Reset selection to currently confirmed pins
+    pinnedMessageIndices = new Set();
+    for (const pin of confirmedPins) {
+      const idx = chatHistory.findIndex(m => m.content === pin.content && m.role === pin.role);
+      if (idx >= 0) pinnedMessageIndices.add(idx);
+    }
+    updatePinUI();
+    renderChatMessages();
+  }
+}
+
+function cancelContextPin() {
+  contextPinMode = false;
+  pinnedMessageIndices = new Set();
+  document.getElementById('context-pin-popover')?.classList.remove('open');
+  document.body.classList.remove('context-pin-active');
+  renderChatMessages();
+}
+
+function confirmContextPin() {
+  confirmedPins = [];
+  for (const idx of pinnedMessageIndices) {
+    const msg = chatHistory[idx];
+    if (msg) confirmedPins.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content });
+  }
+  contextPinMode = false;
+  document.getElementById('context-pin-popover')?.classList.remove('open');
+  document.body.classList.remove('context-pin-active');
+  updatePinBadge();
+  renderChatMessages();
+  if (confirmedPins.length > 0) {
+    addProcessEntry('info', `${confirmedPins.length} message(s) pinned to context.`);
+  } else {
+    addProcessEntry('info', 'Context pins cleared.');
+  }
+}
+
+function togglePinMessage(index) {
+  if (!contextPinMode) return;
+  if (pinnedMessageIndices.has(index)) {
+    pinnedMessageIndices.delete(index);
+  } else if (pinnedMessageIndices.size < MAX_PINS) {
+    pinnedMessageIndices.add(index);
+  }
+  updatePinUI();
+  renderChatMessages();
+}
+
+function removePinFromList(index) {
+  pinnedMessageIndices.delete(index);
+  updatePinUI();
+  renderChatMessages();
+}
+
+function updatePinUI() {
+  const countEl = document.getElementById('context-pin-count');
+  const listEl = document.getElementById('context-pin-list');
+  if (countEl) countEl.textContent = `${pinnedMessageIndices.size}/${MAX_PINS} selected`;
+  if (listEl) {
+    if (pinnedMessageIndices.size === 0) {
+      listEl.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px">Click messages in chat to select them</div>';
+    } else {
+      listEl.innerHTML = Array.from(pinnedMessageIndices).map(idx => {
+        const msg = chatHistory[idx];
+        if (!msg) return '';
+        const icon = msg.role === 'user' ? '👤' : '🦞';
+        const text = msg.content.slice(0, 60) + (msg.content.length > 60 ? '...' : '');
+        return `<div class="pin-card">
+          <span>${icon}</span>
+          <div class="pin-card-text">${escHtml(text)}</div>
+          <button class="pin-card-remove" onclick="removePinFromList(${idx})">&times;</button>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+function updatePinBadge() {
+  const label = document.getElementById('context-pin-label');
+  if (label) {
+    label.textContent = confirmedPins.length > 0 ? `Context (${confirmedPins.length})` : 'Context';
+  }
+  const btn = document.getElementById('context-pin-btn');
+  if (btn) {
+    btn.style.borderColor = confirmedPins.length > 0 ? '#86d4a8' : '';
+    btn.style.background = confirmedPins.length > 0 ? '#f0faf4' : '';
+    btn.style.color = confirmedPins.length > 0 ? '#0a6b3d' : '';
+  }
+}
+
+// ---- Boot ----
+document.addEventListener('click', (e) => {
+  const pop = document.getElementById('quick-mode-popover');
+  const btn = document.getElementById('quick-mode-btn');
+  if (!pop || !btn) return;
+  if (!pop.contains(e.target) && !btn.contains(e.target)) pop.classList.remove('open');
+  // Also close context pin popover
+  const pinPop = document.getElementById('context-pin-popover');
+  const pinBtn = document.getElementById('context-pin-btn');
+  if (pinPop && pinBtn && !pinPop.contains(e.target) && !pinBtn.contains(e.target)) {
+    // Don't close if in pin mode and clicking on messages
+    if (contextPinMode && e.target.closest && e.target.closest('.msg')) return;
+  }
+});
+
+loadChatSessions();
+setupProcessAndRightScrollTracking();
+updateHeartbeatUI();
+connectWS();
+refreshAll();
+updateQuickModeUI();
+updateQueuedPromptUI();
+setInterval(checkStatus, 10000);
+setInterval(loadSystemStats, 3000);
+setInterval(loadApprovals, 5000);
+setMode('chat'); // Start in chat mode
+canvasInitDrop();
+</script>
+</body>
+</html>

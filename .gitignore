@@ -1,0 +1,45 @@
+# ============================================================
+# LocalClaw - .gitignore
+# ============================================================
+
+# --- SECRETS & CONFIG (NEVER COMMIT) ---
+.localclaw/config.json
+
+# --- RUNTIME DATA ---
+.localclaw/sessions/
+.localclaw/logs/
+.localclaw/memory/
+.localclaw/facts.json
+.localclaw/self_learning.json
+.localclaw/jobs.db
+
+# --- WORKSPACE RUNTIME FILES ---
+workspace/memory/
+workspace/tool_audit.log
+workspace/HEARTBEAT.md
+
+# --- DASHBOARD RUNTIME STATE ---
+ai-dashboard/dashboard-state.json
+ai-dashboard/dashboard-requests.json
+
+# --- LOGS ---
+gateway.log
+gateway.err.log
+*.log
+
+# --- TEMP FILES ---
+tmp_payload.json
+mnt/
+
+# --- NODE ---
+node_modules/
+dist/
+*.js.map
+
+# --- TEST ARTIFACTS ---
+tests/.golden-progress.log
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
