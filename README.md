@@ -293,7 +293,7 @@ ollama list
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+Feel Free to donate if this helped you save some API costs and help me get a Claude Max account to keep working on this faster lol - Cashapp $Fvnso - Venmo @Fvnso . 
 
 ## License
 
