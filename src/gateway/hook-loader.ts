@@ -71,7 +71,7 @@ export function loadWorkspaceHooks(workspacePath: string): void {
 
 export function loadBuiltinHookDirectories(workspacePath: string): void {
   // Minimal discovery order: user home hooks first, then workspace hooks.
-  const homeHooks = path.join(os.homedir(), '.localclaw', 'hooks');
+  const homeHooks = path.join(os.homedir(), '.smallclaw', 'hooks');
   registerHooksFromDir(homeHooks);
   registerHooksFromDir(path.join(workspacePath, 'hooks'));
 }

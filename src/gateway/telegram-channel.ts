@@ -1,5 +1,5 @@
 /**
- * telegram-channel.ts — Telegram Bot for LocalClaw
+ * telegram-channel.ts — Telegram Bot for SmallClaw
  *
  * Uses raw Telegram Bot API via fetch() — no external dependencies.
  * Long polling loop: zero port forwarding, works from anywhere.
@@ -223,7 +223,7 @@ export class TelegramChannel {
 
     // Handle special commands
     if (text === '/start') {
-      await this.sendMessage(chatId, `🦞 <b>LocalClaw connected!</b>\n\nYour Telegram user ID: <code>${userId}</code>\n\nJust send me a message and I'll respond using your local LLM.\n\nCommands:\n/status — check connection\n/clear — reset chat history`);
+      await this.sendMessage(chatId, `🦞 <b>SmallClaw connected!</b>\n\nYour Telegram user ID: <code>${userId}</code>\n\nJust send me a message and I'll respond using your local LLM.\n\nCommands:\n/status — check connection\n/clear — reset chat history`);
       return;
     }
     if (text === '/status') {

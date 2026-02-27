@@ -1,15 +1,18 @@
-﻿import Database from 'better-sqlite3';
+import Database from 'better-sqlite3';
 import path from 'path';
 import os from 'os';
+import fs from 'fs';
 import { Job, Task, Step, Artifact, Approval, TaskState, JobStatus, TaskStatus } from '../types';
 
-const DB_PATH = path.join(os.homedir(), '.localclaw', 'jobs.db');
+const DB_PATH = path.join(os.homedir(), '.smallclaw', 'jobs.db');
 
 export class JobDatabase {
   private db: Database.Database;
 
   constructor(dbPath?: string) {
-    this.db = new Database(dbPath || DB_PATH);
+    const resolvedPath = dbPath || DB_PATH;
+    fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+    this.db = new Database(resolvedPath);
     this.db.pragma('foreign_keys = ON');
     this.initialize();
   }

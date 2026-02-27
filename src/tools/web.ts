@@ -245,7 +245,7 @@ function selectDominantStoryCluster(query: string, ranked: SearchResultItem[]): 
 
 async function fetchCleanArticle(url: string, maxChars = 5000): Promise<string> {
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) LocalClaw/1.0' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SmallClaw/1.0' },
     signal: AbortSignal.timeout(15_000),
     redirect: 'follow',
   });
@@ -453,7 +453,7 @@ function rankResults(query: string, results: SearchResultItem[]) {
     .map(x => x.r);
 }
 
-// ── Load optional API keys from ~/.localclaw/config.json ─────────────────────
+// ── Load optional API keys from ~/.smallclaw/config.json ─────────────────────
 function getSearchConfig(): {
   preferred: 'tavily' | 'google' | 'brave' | 'ddg';
   tavilyKey?: string;
@@ -462,8 +462,8 @@ function getSearchConfig(): {
   braveKey?: string;
 } {
   try {
-    const projectCfg = path.join(process.cwd(), '.localclaw', 'config.json');
-    const cfg = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.localclaw', 'config.json');
+    const projectCfg = path.join(process.cwd(), '.smallclaw', 'config.json');
+    const cfg = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.smallclaw', 'config.json');
     if (fs.existsSync(cfg)) {
       const data = JSON.parse(fs.readFileSync(cfg, 'utf-8'));
       const preferredRaw = String(data.search?.preferred_provider || 'tavily').toLowerCase();
@@ -581,7 +581,7 @@ async function searchDDG(query: string, limit: number): Promise<ToolResult> {
   // DDG instant answer API — gives structured results without scraping HTML
   const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1&skip_disambig=1`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'LocalClaw/1.0' },
+    headers: { 'User-Agent': 'SmallClaw/1.0' },
     signal: AbortSignal.timeout(12_000),
   });
 
@@ -640,7 +640,7 @@ async function searchDDG(query: string, limit: number): Promise<ToolResult> {
 async function searchDDGHtml(query: string, limit: number): Promise<ToolResult> {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) LocalClaw/1.0' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SmallClaw/1.0' },
     signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) return { success: false, error: `DDG HTML HTTP ${res.status}` };
@@ -817,7 +817,7 @@ export async function executeWebFetch(args: { url: string; max_chars?: number })
 
   try {
     const res = await fetch(args.url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) LocalClaw/1.0' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SmallClaw/1.0' },
       signal: AbortSignal.timeout(20_000),
       redirect: 'follow',
     });
@@ -856,7 +856,7 @@ export async function executeWebFetch(args: { url: string; max_chars?: number })
 
 export const webSearchTool = {
   name: 'web_search',
-  description: 'Search the web. Uses Tavily or Brave API if configured in ~/.localclaw/config.json (search.tavily_api_key / search.brave_api_key), otherwise falls back to DuckDuckGo (no key needed).',
+  description: 'Search the web. Uses Tavily or Brave API if configured in ~/.smallclaw/config.json (search.tavily_api_key / search.brave_api_key), otherwise falls back to DuckDuckGo (no key needed).',
   execute: executeWebSearch,
   schema: {
     query: 'string (required) - Search query',

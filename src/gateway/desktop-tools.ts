@@ -304,7 +304,7 @@ async function runOcr(imagePath: string): Promise<{ text: string; confidence: nu
     const ocrEnabled = String(process.env.SMALLCLAW_DESKTOP_OCR || '1').trim() !== '0';
     if (!ocrEnabled) return null;
     const timeoutMs = clampInt(process.env.SMALLCLAW_OCR_TIMEOUT_MS, 1000, 120000, 25000);
-    const ocrCacheDir = path.join(process.cwd(), '.localclaw', 'ocr-cache');
+    const ocrCacheDir = path.join(process.cwd(), '.smallclaw', 'ocr-cache');
     fs.mkdirSync(ocrCacheDir, { recursive: true });
     const { stdout } = await execFileAsync(
       process.execPath,

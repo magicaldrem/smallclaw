@@ -1370,7 +1370,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
 
-  /* ── Canvas Panel ─────────────────────────────── */
+  /* -- Canvas Panel ------------------------------- */
   #canvas-panel { box-shadow: -4px 0 24px rgba(16,32,64,0.08); }
   #canvas-panel.canvas-drag-over { outline: 2px dashed var(--brand); outline-offset: -4px; }
   .canvas-tab {
@@ -1402,7 +1402,7 @@
   }
   #canvas-editor-wrap { height: 100%; }
   #canvas-preview-frame { background: #fff; }
-  /* ── Stop Button ────────────────────────────────── */
+  /* -- Stop Button ---------------------------------- */
   .send-btn { transition: background 0.15s ease !important; display: flex; align-items: center; justify-content: center; }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -1437,7 +1437,7 @@
     .chat-input-area,
     .mission-bar { padding: 10px; }
   }
-  /* ─── Heartbeat Page ─────────────────────────────── */
+  /* --- Heartbeat Page ------------------------------- */
   #heartbeat-view {
     display: none;
     flex-direction: column;
@@ -1567,7 +1567,7 @@
 
   <div class="mode-toggle">
     <button class="mode-btn active" id="btn-chat" onclick="setMode('chat')">Chat</button>
-    <button class="mode-btn" id="btn-bgtasks" onclick="setMode('bgtasks')">🗂 Tasks</button>
+    <button class="mode-btn" id="btn-bgtasks" onclick="setMode('bgtasks')">Tasks</button>
   </div>
 
   <div class="status-bar">
@@ -1646,7 +1646,7 @@
         <div class="chat-welcome-icon">🦞</div>
         <h2>SmallClaw</h2>
         <p>Chat directly with your local model. No API keys, no cloud — just you and the model.</p>
-        <div class="hint">Switch to ⚡ Mission mode for multi-step agentic tasks with tools.</div>
+        <div class="hint">Switch to Agent mode for multi-step agentic tasks with tools.</div>
       </div>
     </div>
 
@@ -1684,7 +1684,7 @@
           </div>
           <button class="quick-mode-btn" id="quick-mode-btn" onclick="toggleQuickModePopover()" title="Web Search / Thinking settings">
             <span id="quick-mode-label">Verified</span>
-            <span>▾</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="quick-mode-popover" id="quick-mode-popover">
             <div class="quick-mode-title">Web Search Rigor</div>
@@ -1740,7 +1740,7 @@
         onclick="openBgtHeartbeatModal()"
         style="border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer"
         title="Task heartbeat settings"
-      >⏳ heartbeat: 10min</button>
+      >? heartbeat: 10min</button>
       <button onclick="refreshBgTasks()" style="border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">Refresh</button>
     </div>
   </div>
@@ -1783,6 +1783,7 @@
         <div style="font-size:11px;color:var(--muted);margin-top:6px">Range: 1 to 1440 minutes</div>
       </div>
     </div>
+
     <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)">
       <button class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);border:1px solid var(--line)" onclick="closeBgtHeartbeatModal()">Cancel</button>
       <button class="btn btn-sm" onclick="saveBgtHeartbeatConfig()">Save</button>
@@ -1929,7 +1930,7 @@
   </div>
 
   <div class="right-section">
-    <div class="right-section-title">⚠ Pending Approvals</div>
+    <div class="right-section-title">⚠️ Pending Approvals</div>
     <div id="approvals-list">
       <div style="color:var(--muted);font-size:11px">No pending approvals</div>
     </div>
@@ -1939,8 +1940,8 @@
     <div class="right-section-title" style="margin:0">Quick Actions</div>
     <div style="display:flex;gap:6px">
       <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="clearChat()">✕ Chat</button>
-      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="newChatSession()">＋</button>
-      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="openSettings()">⚙</button>
+      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="newChatSession()">+</button>
+      <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="openSettings()">Settings</button>
       <button class="btn btn-sm" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:3px 8px" onclick="setSidebarTab('skills')">🧩</button>
     </div>
   </div>
@@ -1972,7 +1973,7 @@
       <div style="display:flex;gap:10px">
         <div style="flex:1">
           <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:700">Emoji</label>
-          <input id="skill-modal-emoji" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;font-family:'Manrope',sans-serif" placeholder="🧩" maxlength="4" />
+          <input id="skill-modal-emoji" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;font-family:'Manrope',sans-serif" placeholder="??" maxlength="4" />
         </div>
         <div style="flex:3">
           <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:700">Short Description</label>
@@ -2005,7 +2006,8 @@
       <button id="settings-tab-policy" class="sidebar-action" onclick="setSettingsTab('policy')">Agent Policy</button>
       <button id="settings-tab-security" class="sidebar-action" onclick="setSettingsTab('security')">Security</button>
       <button id="settings-tab-models" class="sidebar-action" onclick="setSettingsTab('models')">Models</button>
-      <button id="settings-tab-telegram" class="sidebar-action" onclick="setSettingsTab('telegram')">Telegram</button>
+      <button id="settings-tab-channels" class="sidebar-action" onclick="setSettingsTab('channels')">Channels</button>
+      <button id="settings-tab-integrations" class="sidebar-action" onclick="setSettingsTab('integrations')">Integrations</button>
     </div>
 
     <div id="settings-panel-system" style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -2189,12 +2191,12 @@
             <div class="right-section-title" style="margin-bottom:8px">OpenAI — GPT Plus / Codex</div>
             <div id="codex-disconnected-state">
               <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Connect your ChatGPT Plus or Pro account via OAuth. Your browser will open to authorize SmallClaw.</div>
-              <button class="btn" onclick="startCodexOAuth()" style="width:100%;background:var(--brand);color:#fff;border:none;padding:10px;border-radius:10px;font-size:13px;cursor:pointer">🔗 Connect ChatGPT Account</button>
+              <button class="btn" onclick="startCodexOAuth()" style="width:100%;background:var(--brand);color:#fff;border:none;padding:10px;border-radius:10px;font-size:13px;cursor:pointer">Connect ChatGPT Account</button>
               <div id="codex-oauth-status" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center"></div>
             </div>
             <div id="codex-connected-state" style="display:none">
               <div style="background:#f0faf4;border:1px solid #86d4a8;border-radius:10px;padding:10px;margin-bottom:12px">
-                <div style="font-size:12px;font-weight:600;color:#0a6b3d">✅ Connected</div>
+                <div style="font-size:12px;font-weight:600;color:#0a6b3d">Connected</div>
                 <div id="codex-account-id" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
               </div>
               <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Model</label>
@@ -2215,7 +2217,7 @@
 
         <!-- Right col: orchestration -->
         <div id="orch-settings-col" style="border:1px solid var(--line);border-radius:12px;padding:12px;background:linear-gradient(180deg,#fff 0%,#f9fbff 100%)">
-          <!-- ── Multi-Agent Orchestration ── -->
+          <!-- -- Multi-Agent Orchestration -- -->
           <div class="right-section-title" style="margin:16px 0 8px">Multi-Agent Orchestration <span style="font-weight:400;color:var(--muted);font-size:11px">optional</span></div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
             A secondary AI advisor helps the primary model when it gets stuck or needs planning.
@@ -2420,55 +2422,297 @@
       </div>
     </div>
 
-    <div id="settings-panel-telegram" style="display:none;padding:14px 16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="border:1px solid var(--line);border-radius:12px;padding:12px">
-          <div class="right-section-title" style="margin-bottom:8px">Telegram Bot Configuration</div>
+    <div id="settings-panel-channels" style="display:none;padding:14px 16px">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px">
+        <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
+          <div class="right-section-title" style="margin-bottom:8px">Channel Connection</div>
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Channel</label>
+          <select id="settings-channel-select" class="settings-input" onchange="onChannelTypeChange()" style="margin-bottom:10px">
+            <option value="telegram">Telegram</option>
+            <option value="discord">Discord</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
 
-          <div id="tg-status-bar" style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:8px 10px;border-radius:8px;background:#f8f9fa;font-size:12px">
+          <div id="tg-status-bar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 10px;border-radius:8px;background:#f8f9fa;font-size:12px">
             <div id="tg-status-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0"></div>
-            <span id="tg-status-text" style="color:var(--muted)">Not connected</span>
+            <span id="tg-status-text" style="color:var(--muted)">Not configured</span>
+          </div>
+          <div id="dc-status-bar" style="display:none;align-items:center;gap:8px;margin-bottom:10px;padding:8px 10px;border-radius:8px;background:#f8f9fa;font-size:12px">
+            <div id="dc-status-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0"></div>
+            <span id="dc-status-text" style="color:var(--muted)">Not configured</span>
+          </div>
+          <div id="wa-status-bar" style="display:none;align-items:center;gap:8px;margin-bottom:10px;padding:8px 10px;border-radius:8px;background:#f8f9fa;font-size:12px">
+            <div id="wa-status-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0"></div>
+            <span id="wa-status-text" style="color:var(--muted)">Not configured</span>
           </div>
 
-          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Bot Token</label>
-          <input id="settings-tg-token" type="password" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
-          <div style="font-size:10px;color:var(--muted);margin:4px 0 10px">Get this from <a href="https://t.me/BotFather" target="_blank" style="color:var(--brand)">@BotFather</a> on Telegram</div>
+          <div id="channel-form-telegram">
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Bot Token</label>
+            <input id="settings-tg-token" type="password" placeholder="123456:ABC-DEF1234..." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:10px 0 6px">Your Telegram User ID(s)</label>
+            <input id="settings-tg-userid" type="text" placeholder="e.g. 123456789, 987654321" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:10px 0 0;cursor:pointer">
+              <input type="checkbox" id="settings-tg-enabled" />
+              Enable Telegram channel
+            </label>
+          </div>
 
-          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Your Telegram User ID</label>
-          <input id="settings-tg-userid" type="text" placeholder="e.g. 123456789" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
-          <div style="font-size:10px;color:var(--muted);margin:4px 0 14px">Get this from <a href="https://t.me/userinfobot" target="_blank" style="color:var(--brand)">@userinfobot</a> or send /start to your bot</div>
+          <div id="channel-form-discord" style="display:none">
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Bot Token</label>
+            <input id="settings-dc-token" type="password" placeholder="Discord bot token" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Application ID (optional)</label>
+            <input id="settings-dc-appid" type="text" placeholder="Discord app ID" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Guild ID (optional)</label>
+            <input id="settings-dc-guildid" type="text" placeholder="Server ID" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Channel ID (for send-test)</label>
+            <input id="settings-dc-channelid" type="text" placeholder="Channel ID" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Webhook URL (optional)</label>
+            <input id="settings-dc-webhook" type="password" placeholder="https://discord.com/api/webhooks/..." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:10px 0 0;cursor:pointer">
+              <input type="checkbox" id="settings-dc-enabled" />
+              Enable Discord channel
+            </label>
+          </div>
 
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">
-            <input type="checkbox" id="settings-tg-enabled" />
-            Enable Telegram channel
-          </label>
+          <div id="channel-form-whatsapp" style="display:none">
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px">Access Token</label>
+            <input id="settings-wa-token" type="password" placeholder="Meta access token" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Phone Number ID</label>
+            <input id="settings-wa-phoneid" type="text" placeholder="WhatsApp phone number ID" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Business Account ID (optional)</label>
+            <input id="settings-wa-baid" type="text" placeholder="WABA ID" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Webhook Verify Token (optional)</label>
+            <input id="settings-wa-verify" type="password" placeholder="Verify token" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Webhook Secret (optional)</label>
+            <input id="settings-wa-secret" type="password" placeholder="Webhook secret" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:block;font-size:12px;color:var(--muted);margin:8px 0 6px">Test Recipient (E.164)</label>
+            <input id="settings-wa-recipient" type="text" placeholder="15551234567" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box" />
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:10px 0 0;cursor:pointer">
+              <input type="checkbox" id="settings-wa-enabled" />
+              Enable WhatsApp channel
+            </label>
+          </div>
 
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-sm" id="tg-test-btn" onclick="testTelegramToken()" style="background:#fff;border:1px solid var(--line);color:var(--text)">Test Token</button>
-            <button class="btn btn-sm" onclick="saveTelegramSettings()" style="background:var(--brand);color:#fff;border:1px solid var(--brand)">Save & Connect</button>
-            <button class="btn btn-sm" id="tg-send-test-btn" onclick="sendTelegramTestMessage()" style="background:#fff;border:1px solid var(--line);color:var(--text)" disabled>Send Test Message</button>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-sm" id="channel-test-btn" onclick="testSelectedChannel()" style="background:#fff;border:1px solid var(--line);color:var(--text)">Test</button>
+            <button class="btn btn-sm" onclick="saveSelectedChannelSettings()" style="background:var(--brand);color:#fff;border:1px solid var(--brand)">Save</button>
+            <button class="btn btn-sm" id="channel-send-test-btn" onclick="sendSelectedChannelTest()" style="background:#fff;border:1px solid var(--line);color:var(--text)">Send Test</button>
           </div>
         </div>
 
         <div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff">
-          <div class="right-section-title" style="margin-bottom:8px">Setup Guide</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.8">
-            <b>Step 1:</b> Open Telegram and message <a href="https://t.me/BotFather" target="_blank" style="color:var(--brand)">@BotFather</a><br>
-            <b>Step 2:</b> Send <code>/newbot</code> and follow the prompts<br>
-            <b>Step 3:</b> Copy the token and paste it here<br>
-            <b>Step 4:</b> Message <a href="https://t.me/userinfobot" target="_blank" style="color:var(--brand)">@userinfobot</a> to get your user ID<br>
-            <b>Step 5:</b> Paste your user ID and click Save & Connect<br><br>
-            <b>What happens:</b><br>
-            • Messages you send to the bot go to your local LLM<br>
-            • Heartbeat/cron results can push to your phone<br>
-            • Works from anywhere — no port forwarding needed<br>
-            • Only your user ID is allowed (others are rejected)
+          <div class="right-section-title" style="margin-bottom:8px">Instructions</div>
+          <div id="channel-guide-telegram" style="font-size:12px;color:var(--muted);line-height:1.8">
+            <b>Telegram Setup</b><br>
+            1. Create a bot via <a href="https://t.me/BotFather" target="_blank" style="color:var(--brand)">@BotFather</a>.<br>
+            2. Copy the bot token into this panel.<br>
+            3. Get your user ID(s) from <a href="https://t.me/userinfobot" target="_blank" style="color:var(--brand)">@userinfobot</a>.<br>
+            4. Add allowed IDs, then click <b>Test</b> and <b>Save</b>.<br>
+            5. Use <b>Send Test</b> to verify delivery.
+          </div>
+          <div id="channel-guide-discord" style="display:none;font-size:12px;color:var(--muted);line-height:1.8">
+            <b>Discord Setup</b><br>
+            1. Create an app + bot in Discord Developer Portal.<br>
+            2. Enable required intents (including Message Content if needed).<br>
+            3. Invite bot to your server with message permissions.<br>
+            4. Paste bot token; optionally add app/guild/channel IDs.<br>
+            5. Click <b>Test</b>, then <b>Save</b>, then <b>Send Test</b>.
+          </div>
+          <div id="channel-guide-whatsapp" style="display:none;font-size:12px;color:var(--muted);line-height:1.8">
+            <b>WhatsApp Cloud API Setup</b><br>
+            1. In Meta Developer dashboard, open WhatsApp Cloud API.<br>
+            2. Copy access token and phone number ID into this panel.<br>
+            3. Configure webhook verify token/secret (if using inbound webhooks).<br>
+            4. Add a test recipient number in E.164 format.<br>
+            5. Click <b>Test</b>, <b>Save</b>, then <b>Send Test</b>.
           </div>
         </div>
       </div>
     </div>
 
-    <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)">
+    <div id="settings-panel-integrations" style="display:none;padding:14px 16px">
+      <!-- Sub-tab row -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="itab-webhooks" onclick="setIntegTab('webhooks')" style="padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#eaf2ff;color:#0d4faf">Webhooks</button>
+        <button id="itab-mcp" onclick="setIntegTab('mcp')" style="padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted)">MCP Servers</button>
+      </div>
+
+      <!-- WEBHOOKS PANEL ----------------------------------------------- -->
+      <div id="itab-panel-webhooks">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <!-- Left: config -->
+          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff">
+            <div class="right-section-title" style="margin-bottom:10px">Webhook Endpoint</div>
+
+            <div id="wh-status-bar" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 10px;border-radius:8px;background:#f8f9fa;font-size:12px">
+              <div id="wh-status-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0"></div>
+              <span id="wh-status-text" style="color:var(--muted)">Not configured</span>
+            </div>
+
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px;cursor:pointer">
+              <input type="checkbox" id="wh-enabled" />
+              Enable webhook endpoint
+            </label>
+
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">Secret Token</label>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <input id="wh-token" type="password" placeholder="Paste or generate a secret token" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;font-family:'IBM Plex Mono',monospace" />
+              <button onclick="generateWebhookToken()" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#f8f9fa;font-size:11px;cursor:pointer;white-space:nowrap">Generate</button>
+            </div>
+
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">URL Path Prefix</label>
+            <input id="wh-path" type="text" value="/hooks" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;font-family:'IBM Plex Mono',monospace;box-sizing:border-box;margin-bottom:12px" />
+
+            <div id="wh-url-display" style="display:none;background:#f0f7ff;border:1px solid #c7dff7;border-radius:8px;padding:8px 10px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:#0d4faf;margin-bottom:12px;word-break:break-all"></div>
+
+            <div style="display:flex;gap:8px">
+              <button onclick="saveWebhookSettings()" style="padding:6px 14px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Save</button>
+              <button onclick="testWebhookEndpoint()" style="padding:6px 14px;background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;font-size:12px;cursor:pointer">Test</button>
+              <button onclick="copyWebhookCurl()" style="padding:6px 14px;background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;font-size:12px;cursor:pointer">Copy cURL</button>
+            </div>
+          </div>
+
+          <!-- Right: guide -->
+          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff">
+            <div class="right-section-title" style="margin-bottom:8px">Setup Guide</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.85">
+              <b>1. Enable + set a token</b> — any secret string you choose.<br>
+              <b>2. Save</b> and restart the gateway to activate.<br>
+              <b>3. Access from the internet?</b> Use
+              <a href="https://tailscale.com" target="_blank" style="color:var(--brand)">Tailscale</a> (recommended),
+              <a href="https://ngrok.com" target="_blank" style="color:var(--brand)">ngrok</a>, or
+              <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/" target="_blank" style="color:var(--brand)">Cloudflare Tunnel</a>.
+              <br><br>
+              <b>Endpoints:</b><br>
+              <code style="background:#f4f4f4;padding:2px 5px;border-radius:4px">POST /hooks/agent</code> — full AI run<br>
+              <code style="background:#f4f4f4;padding:2px 5px;border-radius:4px">POST /hooks/wake</code> — lightweight nudge<br>
+              <code style="background:#f4f4f4;padding:2px 5px;border-radius:4px">GET /hooks/status</code> — health check<br><br>
+              <b>Auth:</b> Send token as<br>
+              <code style="background:#f4f4f4;padding:2px 5px;border-radius:4px">Authorization: Bearer &lt;token&gt;</code><br>
+              or <code style="background:#f4f4f4;padding:2px 5px;border-radius:4px">x-smallclaw-token: &lt;token&gt;</code><br><br>
+              Works with: GitHub Actions, Stripe, Vercel, n8n, IFTTT, Home Assistant, or any script.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MCP PANEL ---------------------------------------------------- -->
+      <div id="itab-panel-mcp" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <!-- Left: server list + add form -->
+          <div>
+            <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;margin-bottom:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <div class="right-section-title">MCP Servers</div>
+                <button onclick="showMCPAddForm()" style="padding:4px 10px;border:1px solid var(--brand);border-radius:6px;background:#fff;color:var(--brand);font-size:11px;font-weight:600;cursor:pointer">+ Add Server</button>
+              </div>
+              <div id="mcp-server-list" style="font-size:12px;color:var(--muted)">Loading...</div>
+            </div>
+
+            <!-- Add/Edit form (hidden by default) -->
+            <div id="mcp-add-form" style="display:none;border:1px solid var(--brand);border-radius:12px;padding:14px;background:#f8faff">
+              <div class="right-section-title" style="margin-bottom:10px" id="mcp-form-title">Add MCP Server</div>
+
+              <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">ID <span style="color:#888">(letters/numbers/dash, no spaces)</span></label>
+              <input id="mcp-f-id" type="text" placeholder="e.g. filesystem" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;margin-bottom:8px" />
+
+              <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Display Name</label>
+              <input id="mcp-f-name" type="text" placeholder="e.g. Filesystem" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;margin-bottom:8px" />
+
+              <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Transport</label>
+              <select id="mcp-f-transport" onchange="onMCPTransportChange()" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;margin-bottom:8px">
+                <option value="stdio">stdio (local process)</option>
+                <option value="sse">HTTP/SSE (remote)</option>
+              </select>
+
+              <!-- stdio fields -->
+              <div id="mcp-stdio-fields">
+                <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Command</label>
+                <input id="mcp-f-command" type="text" placeholder="e.g. npx" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;margin-bottom:8px" />
+
+                <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Arguments <span style="color:#888">(one per line)</span></label>
+                <textarea id="mcp-f-args" placeholder="-y&#10;@modelcontextprotocol/server-filesystem&#10;C:\Users\you\Documents" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;height:64px;resize:vertical;font-family:'IBM Plex Mono',monospace;margin-bottom:8px"></textarea>
+
+                <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Environment Variables <span style="color:#888">(KEY=VALUE, one per line)</span></label>
+                <textarea id="mcp-f-env" placeholder="GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;height:52px;resize:vertical;font-family:'IBM Plex Mono',monospace;margin-bottom:8px"></textarea>
+              </div>
+
+              <!-- SSE fields -->
+              <div id="mcp-sse-fields" style="display:none">
+                <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Server URL</label>
+                <input id="mcp-f-url" type="text" placeholder="https://mcp.example.com/sse" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;margin-bottom:8px" />
+
+                <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:3px">Headers <span style="color:#888">(KEY: value, one per line)</span></label>
+                <textarea id="mcp-f-headers" placeholder="Authorization: Bearer token123" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;box-sizing:border-box;height:52px;resize:vertical;font-family:'IBM Plex Mono',monospace;margin-bottom:8px"></textarea>
+              </div>
+
+              <label style="display:flex;align-items:center;gap:7px;font-size:12px;margin-bottom:10px;cursor:pointer">
+                <input type="checkbox" id="mcp-f-enabled" checked />
+                Enable on startup
+              </label>
+
+              <div style="display:flex;gap:8px">
+                <button onclick="saveMCPServer()" style="padding:6px 14px;background:var(--brand);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Save</button>
+                <button onclick="hideMCPAddForm()" style="padding:6px 14px;background:#fff;color:var(--muted);border:1px solid var(--line);border-radius:7px;font-size:12px;cursor:pointer">Cancel</button>
+              </div>
+              <div id="mcp-form-msg" style="margin-top:8px;font-size:11px;color:var(--muted)"></div>
+            </div>
+          </div>
+
+          <!-- Right: info + popular servers -->
+          <div>
+            <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;margin-bottom:12px">
+              <div class="right-section-title" style="margin-bottom:8px">What is MCP?</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.85">
+                <b>Model Context Protocol</b> (by Anthropic) is a standard that lets AI connect to external tools and data sources.<br><br>
+                Each MCP server exposes a set of <b>tools</b> — SmallClaw discovers them automatically when you connect.
+                The AI can then call them during tasks, just like its built-in tools.<br><br>
+                Servers run <b>locally as child processes</b> (stdio) or connect to <b>remote HTTP endpoints</b> (SSE).
+                No data leaves your machine unless the tool itself calls an external API.
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff">
+              <div class="right-section-title" style="margin-bottom:8px">Popular Servers</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                  <button onclick="prefillMCPServer('filesystem')" style="text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fafafa;cursor:pointer;font-size:11px">
+                    <div style="font-weight:600;color:var(--text)">Filesystem</div>
+                    <div style="color:var(--muted)">Read/write local files</div>
+                  </button>
+                  <button onclick="prefillMCPServer('github')" style="text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fafafa;cursor:pointer;font-size:11px">
+                    <div style="font-weight:600;color:var(--text)">GitHub</div>
+                    <div style="color:var(--muted)">Repos, PRs, issues</div>
+                  </button>
+                  <button onclick="prefillMCPServer('postgres')" style="text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fafafa;cursor:pointer;font-size:11px">
+                    <div style="font-weight:600;color:var(--text)">PostgreSQL</div>
+                    <div style="color:var(--muted)">Query your DB</div>
+                  </button>
+                  <button onclick="prefillMCPServer('sqlite')" style="text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fafafa;cursor:pointer;font-size:11px">
+                    <div style="font-weight:600;color:var(--text)">SQLite</div>
+                    <div style="color:var(--muted)">Local database queries</div>
+                  </button>
+                  <button onclick="prefillMCPServer('brave')" style="text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fafafa;cursor:pointer;font-size:11px">
+                    <div style="font-weight:600;color:var(--text)">Brave Search</div>
+                    <div style="color:var(--muted)">Web search via MCP</div>
+                  </button>
+                  <button onclick="prefillMCPServer('memory')" style="text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fafafa;cursor:pointer;font-size:11px">
+                    <div style="font-weight:600;color:var(--text)">Memory</div>
+                    <div style="color:var(--muted)">Persistent knowledge store</div>
+                  </button>
+                </div>
+                <div style="margin-top:8px;font-size:11px">
+                  <a href="https://github.com/modelcontextprotocol/servers" target="_blank" style="color:var(--brand)">Browse all official servers →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+<div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)">
       <button class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);border:1px solid var(--line)" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-sm" onclick="saveSettings()">Save</button>
     </div>
@@ -2708,7 +2952,7 @@ function setMode(mode) {
   if (mode === 'bgtasks') refreshBgTasks();
 }
 
-// ─── Heartbeat / Tasks System ───────────────────────────────────────────────
+// --- Heartbeat / Tasks System -----------------------------------------------
 let hbJobs = [];
 let hbConfig = { enabled: false, intervalMinutes: 30, activeHoursStart: 8, activeHoursEnd: 22 };
 let editingTaskId = null;
@@ -2925,8 +3169,8 @@ function renderThinkBlock(thinking) {
   return `
     <div class="think-block">
       <button class="think-toggle" id="${id}_btn" onclick="toggleThink('${id}')">
-        <span class="think-icon">▶</span>
-        <span>💭 Thought process</span>
+        <span class="think-icon">...</span>
+        <span>Thought process</span>
         <span style="margin-left:auto;opacity:0.5">${wordCount} words</span>
       </button>
       <div class="think-content" id="${id}_body">${escHtml(thinking)}</div>
@@ -3016,7 +3260,7 @@ function renderReactSteps(steps) {
 
   return `
     <div class="react-steps-toggle" onclick="toggleSteps('${id}')">
-      ▸ ${toolSteps.length} tool step${toolSteps.length !== 1 ? 's' : ''} used
+      ? ${toolSteps.length} tool step${toolSteps.length !== 1 ? 's' : ''} used
     </div>
     <div class="react-steps" id="${id}" style="display:none">${items}</div>
   `;
@@ -3027,7 +3271,7 @@ function toggleSteps(id) {
   if (!el) return;
   const visible = el.style.display !== 'none';
   el.style.display = visible ? 'none' : 'block';
-  el.previousElementSibling.textContent = `${visible ? '▸' : '▾'} ${el.querySelectorAll('.react-step').length} tool step${el.querySelectorAll('.react-step').length !== 1 ? 's' : ''} used`;
+  el.previousElementSibling.textContent = `${visible ? '?' : '?'} ${el.querySelectorAll('.react-step').length} tool step${el.querySelectorAll('.react-step').length !== 1 ? 's' : ''} used`;
 }
 
 function renderAssistantContent(content) {
@@ -3132,7 +3376,7 @@ function renderChatMessages() {
     const clickHandler = contextPinMode ? ` onclick="togglePinMessage(${idx})"` : '';
     return `
     <div class="msg ${msg.role}${pinClass}${selectedClass}${confirmedClass}"${clickHandler}>
-      <div class="msg-avatar">${msg.role === 'user' ? '👤' : '🦞'}</div>
+      <div class="msg-avatar">${msg.role === 'user' ? 'U' : '🦞'}</div>
       <div class="msg-body">
         <div class="msg-role">${msg.role === 'user' ? 'You' : (msg.mode === 'agentic' ? 'SmallClaw (Agent)' : 'SmallClaw')}</div>
         ${msg.role === 'ai' ? renderAssistantContent(msg.content) : `<div class="msg-content">${escHtml(msg.content)}</div>`}
@@ -3314,16 +3558,16 @@ function renderProcessLog() {
   el.innerHTML = processLogEntries.map((e,i) => {
     let icon, color, label, labelColor;
     switch(e.type) {
-      case 'user':    icon='▶'; color='var(--accent2)'; labelColor='var(--text)';     label='USER';   break;
-      case 'think':   icon='💭'; color='#388bfd';        labelColor='#388bfd';         label='THINK';  break;
-      case 'tool':    icon='⚡'; color='#e3b341';        labelColor='#e3b341';         label='TOOL';   break;
-      case 'result':  icon='✓'; color='#bc8cff';        labelColor='#bc8cff';         label='OK';     break;
-      case 'error':   icon='✗'; color='var(--red)';     labelColor='var(--red)';      label='FAIL';   break;
-      case 'final':   icon='★'; color='#56d364';        labelColor='#56d364';         label='FINAL';  break;
-      case 'warn':    icon='⚠'; color='var(--yellow)';  labelColor='var(--yellow)';   label='WARN';   break;
-      case 'step':    icon='↻'; color='#56d364';        labelColor='#56d364';         label='STEP';   break;
-      case 'split':   icon='⋮'; color='var(--accent2)'; labelColor='var(--accent2)';  label='SPLIT';  break;
-      case 'synth':   icon='⊕'; color='var(--accent2)'; labelColor='var(--accent2)';  label='SYNTH';  break;
+      case 'user':    icon='?'; color='var(--accent2)'; labelColor='var(--text)';     label='USER';   break;
+      case 'think':   icon='??'; color='#388bfd';        labelColor='#388bfd';         label='THINK';  break;
+      case 'tool':    icon='?'; color='#e3b341';        labelColor='#e3b341';         label='TOOL';   break;
+      case 'result':  icon='?'; color='#bc8cff';        labelColor='#bc8cff';         label='OK';     break;
+      case 'error':   icon='?'; color='var(--red)';     labelColor='var(--red)';      label='FAIL';   break;
+      case 'final':   icon='?'; color='#56d364';        labelColor='#56d364';         label='FINAL';  break;
+      case 'warn':    icon='?'; color='var(--yellow)';  labelColor='var(--yellow)';   label='WARN';   break;
+      case 'step':    icon='?'; color='#56d364';        labelColor='#56d364';         label='STEP';   break;
+      case 'split':   icon='?'; color='var(--accent2)'; labelColor='var(--accent2)';  label='SPLIT';  break;
+      case 'synth':   icon='?'; color='var(--accent2)'; labelColor='var(--accent2)';  label='SYNTH';  break;
       case 'info':    icon='·'; color='#79c0ff';        labelColor='#79c0ff';         label='INFO';   break;
       default:        icon='·'; color='var(--muted)';   labelColor='var(--muted)';    label=e.type;   break;
     }
@@ -3946,7 +4190,7 @@ function connectWS() {
     if (msg.type === 'job_created') {
       log(`Job created: ${msg.jobId}`, 'info');
     }
-    // ── Cron/Heartbeat task events ──
+    // -- Cron/Heartbeat task events --
     if (msg.type === 'tasks_update') {
       hbJobs = msg.jobs || [];
       if (msg.config) hbConfig = msg.config;
@@ -3956,7 +4200,7 @@ function connectWS() {
       const job = hbJobs.find(j => j.id === msg.jobId);
       if (job) job.status = 'running';
       if (currentMode === 'heartbeat') renderHeartbeatPage();
-      addProcessEntry('info', `🕐 Task running: ${msg.jobName}`);
+      addProcessEntry('info', `Task running: ${msg.jobName}`);
     }
     if (msg.type === 'task_done') {
       hbJobs = msg.jobs || hbJobs;
@@ -3971,9 +4215,9 @@ function connectWS() {
         });
         saveChatSessions();
         renderSessionsList();
-        addProcessEntry('info', `🕐 Task "${msg.jobName}" completed — check sidebar for results`);
+        addProcessEntry('info', `Task "${msg.jobName}" completed — check sidebar for results`);
       } else if (msg.isOk) {
-        addProcessEntry('info', `🕐 Task "${msg.jobName}" → OK (nothing to report)`);
+        addProcessEntry('info', `Task "${msg.jobName}" — OK (nothing to report)`);
       }
     }
     if (msg.type === 'task_sse') {
@@ -3983,7 +4227,7 @@ function connectWS() {
         if (card) card.innerHTML = `<span style="color:var(--brand)">Working: ${escHtml((msg.data?.action || '').slice(0,40))}...</span>`;
       }
     }
-    // ── Background Task (Kanban) events ──
+    // -- Background Task (Kanban) events --
     if (msg.type === 'task_running' || msg.type === 'task_complete' || msg.type === 'task_paused' ||
         msg.type === 'task_failed' || msg.type === 'task_needs_assistance' || msg.type === 'task_step_done' || msg.type === 'task_tool_call' ||
         msg.type === 'task_heartbeat_tick' || msg.type === 'task_heartbeat_resumed') {
@@ -3995,11 +4239,11 @@ function connectWS() {
       }
       // Toast notification for completions and errors
       if (msg.type === 'task_complete') {
-        bgtToast(`✅ Task complete`, msg.summary ? msg.summary.slice(0,120) : '');
+        bgtToast(`? Task complete`, msg.summary ? msg.summary.slice(0,120) : '');
       } else if (msg.type === 'task_failed') {
-        bgtToast(`❌ Task failed`, msg.error ? msg.error.slice(0,120) : '');
+        bgtToast(`? Task failed`, msg.error ? msg.error.slice(0,120) : '');
       } else if (msg.type === 'task_needs_assistance') {
-        bgtToast(`⚠️ Task paused`, msg.reason ? String(msg.reason).slice(0, 120) : 'Needs assistance');
+        bgtToast(`Task paused`, msg.reason ? String(msg.reason).slice(0, 120) : 'Needs assistance');
       }
     }
     // Notification from task runner (status push to channel)
@@ -4021,7 +4265,28 @@ function connectWS() {
 // ---- API ----
 async function api(path, opts = {}) {
   const r = await fetch(API + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
-  return r.json();
+  const ct = String(r.headers.get('content-type') || '').toLowerCase();
+  const bodyText = await r.text();
+
+  if (!ct.includes('application/json')) {
+    const preview = bodyText.slice(0, 120).replace(/\s+/g, ' ');
+    throw new Error(`Expected JSON from ${path}, got ${ct || 'unknown'} (HTTP ${r.status}) :: ${preview}`);
+  }
+
+  let data = null;
+  try {
+    data = bodyText ? JSON.parse(bodyText) : null;
+  } catch {
+    const preview = bodyText.slice(0, 120).replace(/\s+/g, ' ');
+    throw new Error(`Invalid JSON from ${path} (HTTP ${r.status}) :: ${preview}`);
+  }
+
+  if (!r.ok) {
+    const msg = (data && (data.error || data.message)) ? String(data.error || data.message) : `HTTP ${r.status}`;
+    throw new Error(msg);
+  }
+
+  return data;
 }
 
 async function loadSearchSettingsSummary() {
@@ -4100,7 +4365,7 @@ function setQuickThinkingEffort(level) {
 
 function setSettingsTab(tab) {
   settingsTab = tab;
-  const tabs = ['system', 'search', 'policy', 'security', 'models', 'telegram'];
+  const tabs = ['system', 'search', 'policy', 'security', 'models', 'channels', 'integrations'];
   tabs.forEach(t => {
     const btn = document.getElementById(`settings-tab-${t}`);
     const panel = document.getElementById(`settings-panel-${t}`);
@@ -4113,8 +4378,9 @@ function setSettingsTab(tab) {
       if (t === tab) {
         const gridTabs = ['system', 'search', 'models'];
         panel.style.display = gridTabs.includes(t) ? 'block' : 'block';
-        if (t === 'telegram') loadTelegramStatus();
+        if (t === 'channels') loadChannelsStatus();
         if (t === 'models') loadModelSettings();
+        if (t === 'integrations') loadIntegrationsTab();
       } else {
         panel.style.display = 'none';
       }
@@ -4122,7 +4388,7 @@ function setSettingsTab(tab) {
   });
 }
 
-// ─── Provider-aware Model Settings ──────────────────────────────────────────
+// --- Provider-aware Model Settings ------------------------------------------
 
 const PROVIDER_IDS = ['ollama', 'llama_cpp', 'lm_studio', 'openai', 'openai_codex'];
 
@@ -4209,7 +4475,7 @@ async function testProviderConnection() {
 
   if (provider === 'openai') {
     const ok = await refreshOpenAIModels(false);
-    if (msg) msg.textContent = ok ? '✅ Connected' : (msg.textContent || '❌ Connection failed');
+    if (msg) msg.textContent = ok ? '? Connected' : (msg.textContent || '? Connection failed');
     return;
   }
 
@@ -4217,9 +4483,9 @@ async function testProviderConnection() {
     const llm = buildProviderPayload();
     if (llm.provider !== provider) llm.provider = provider;
     const data = await api('/api/models/test', { method: 'POST', body: JSON.stringify({ llm }) });
-    if (msg) msg.textContent = data?.success ? '✅ Connected' : '❌ ' + (data?.error || 'Connection failed');
+    if (msg) msg.textContent = data?.success ? '? Connected' : '? ' + (data?.error || 'Connection failed');
   } catch (e) {
-    if (msg) msg.textContent = '❌ ' + e.message;
+    if (msg) msg.textContent = '? ' + e.message;
   }
 }
 
@@ -4245,15 +4511,15 @@ async function refreshOpenAIModels(silent = false) {
   try {
     const data = await api('/api/openai/models', { method: 'POST', body: JSON.stringify({ api_key: apiKey }) });
     if (!data?.success) {
-      if (statusEl) statusEl.textContent = '❌ ' + (data?.error || 'Failed to fetch models');
+      if (statusEl) statusEl.textContent = '? ' + (data?.error || 'Failed to fetch models');
       return false;
     }
     const models = (data?.models || []).map(m => typeof m === 'string' ? m : (m.name || String(m)));
     updateOpenAIModelDropdown(models);
-    if (statusEl) statusEl.textContent = models.length ? `✅ ${models.length} model(s) available` : '✅ Connected';
+    if (statusEl) statusEl.textContent = models.length ? `? ${models.length} model(s) available` : '? Connected';
     return true;
   } catch (e) {
-    if (statusEl) statusEl.textContent = '❌ ' + e.message;
+    if (statusEl) statusEl.textContent = '? ' + e.message;
     return false;
   }
 }
@@ -4270,7 +4536,7 @@ function buildProviderPayload() {
   return { provider, providers };
 }
 
-// ─── Codex OAuth UI ────────────────────────────────────────────────
+// --- Codex OAuth UI ------------------------------------------------
 
 async function refreshCodexStatus() {
   try {
@@ -4300,10 +4566,10 @@ async function startCodexOAuth() {
       if (statusEl) statusEl.textContent = '';
       await refreshCodexStatus();
     } else {
-      if (statusEl) statusEl.textContent = '❌ ' + (data?.error || 'OAuth failed');
+      if (statusEl) statusEl.textContent = '? ' + (data?.error || 'OAuth failed');
     }
   } catch (e) {
-    if (statusEl) statusEl.textContent = '❌ ' + e.message;
+    if (statusEl) statusEl.textContent = '? ' + e.message;
   }
 }
 
@@ -4318,10 +4584,10 @@ async function submitManualCodexUrl() {
       if (statusEl) statusEl.textContent = '';
       await refreshCodexStatus();
     } else {
-      if (statusEl) statusEl.textContent = '❌ ' + (data?.error || 'Failed');
+      if (statusEl) statusEl.textContent = '? ' + (data?.error || 'Failed');
     }
   } catch (e) {
-    if (statusEl) statusEl.textContent = '❌ ' + e.message;
+    if (statusEl) statusEl.textContent = '? ' + e.message;
   }
 }
 
@@ -4534,9 +4800,9 @@ function upsertLiveStep(action, stepNum, status, meta = '') {
   renderLiveStepsPanel();
 }
 
-async function openSettings() {
+async function openSettings(tab) {
   document.getElementById('settings-modal').style.display = 'flex';
-  setSettingsTab(settingsTab || 'system');
+  setSettingsTab(tab || settingsTab || 'system');
   try {
     const status = await api('/api/status');
     document.getElementById('settings-runtime-model').textContent = status.currentModel || '-';
@@ -4573,93 +4839,218 @@ function closeSettings() {
   document.getElementById('settings-modal').style.display = 'none';
 }
 
-// ─── Telegram Settings Functions ───────────────────────────────────────
-let telegramStatusLoaded = false;
+// --- Channels Settings Functions ---------------------------------------
+let channelsStatusLoaded = false;
 
-async function loadTelegramStatus() {
-  try {
-    const data = await api('/api/telegram/status');
-    if (!data.success) return;
-    const dot = document.getElementById('tg-status-dot');
-    const text = document.getElementById('tg-status-text');
-    const sendBtn = document.getElementById('tg-send-test-btn');
-    if (data.connected && data.polling) {
-      dot.style.background = 'var(--ok)';
-      text.textContent = `Connected as @${data.username}`;
-      text.style.color = 'var(--text)';
-      if (sendBtn) sendBtn.disabled = false;
-    } else if (data.hasToken) {
-      dot.style.background = '#f0ad4e';
-      text.textContent = 'Token saved but not connected';
-      text.style.color = '#b87b00';
-    } else {
-      dot.style.background = '#ccc';
-      text.textContent = 'Not configured';
-      text.style.color = 'var(--muted)';
-    }
-    // Populate fields if we have saved config
-    if (!telegramStatusLoaded) {
-      telegramStatusLoaded = true;
-      if (data.hasToken) document.getElementById('settings-tg-token').placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (saved)';
-      if (data.allowedUserIds?.length) document.getElementById('settings-tg-userid').value = data.allowedUserIds.join(', ');
-      document.getElementById('settings-tg-enabled').checked = data.enabled;
-    }
-  } catch (err) { console.error('[TG] Status load failed:', err); }
+function setChannelStatus(idPrefix, state, message) {
+  const dot = document.getElementById(`${idPrefix}-status-dot`);
+  const text = document.getElementById(`${idPrefix}-status-text`);
+  if (!dot || !text) return;
+  if (state === 'ok') {
+    dot.style.background = 'var(--ok)';
+    text.style.color = 'var(--text)';
+  } else if (state === 'warn') {
+    dot.style.background = '#f0ad4e';
+    text.style.color = '#b87b00';
+  } else {
+    dot.style.background = '#ccc';
+    text.style.color = 'var(--muted)';
+  }
+  text.textContent = message || 'Not configured';
 }
 
-async function testTelegramToken() {
-  const token = document.getElementById('settings-tg-token').value.trim();
-  const btn = document.getElementById('tg-test-btn');
-  if (!token) { alert('Enter a bot token first'); return; }
-  btn.textContent = 'Testing...';
-  btn.disabled = true;
-  try {
-    const data = await api('/api/telegram/test', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ botToken: token }) });
-    if (data.success) {
-      const dot = document.getElementById('tg-status-dot');
-      const text = document.getElementById('tg-status-text');
-      dot.style.background = 'var(--ok)';
-      text.textContent = `Valid! Bot: @${data.bot.username} (${data.bot.firstName})`;
-      text.style.color = 'var(--ok)';
-    } else {
-      alert('Token invalid: ' + (data.error || 'unknown error'));
-    }
-  } catch (err) { alert('Test failed: ' + err.message); }
-  btn.textContent = 'Test Token';
-  btn.disabled = false;
+function readChannelPayload(channel) {
+  if (channel === 'telegram') {
+    const userIdStr = (document.getElementById('settings-tg-userid')?.value || '').trim();
+    const allowedUserIds = userIdStr ? userIdStr.split(/[,\s]+/).map(Number).filter(n => !isNaN(n) && n > 0) : [];
+    return {
+      enabled: !!document.getElementById('settings-tg-enabled')?.checked,
+      botToken: (document.getElementById('settings-tg-token')?.value || '').trim(),
+      allowedUserIds,
+      streamMode: 'full',
+    };
+  }
+  if (channel === 'discord') {
+    return {
+      enabled: !!document.getElementById('settings-dc-enabled')?.checked,
+      botToken: (document.getElementById('settings-dc-token')?.value || '').trim(),
+      applicationId: (document.getElementById('settings-dc-appid')?.value || '').trim(),
+      guildId: (document.getElementById('settings-dc-guildid')?.value || '').trim(),
+      channelId: (document.getElementById('settings-dc-channelid')?.value || '').trim(),
+      webhookUrl: (document.getElementById('settings-dc-webhook')?.value || '').trim(),
+    };
+  }
+  return {
+    enabled: !!document.getElementById('settings-wa-enabled')?.checked,
+    accessToken: (document.getElementById('settings-wa-token')?.value || '').trim(),
+    phoneNumberId: (document.getElementById('settings-wa-phoneid')?.value || '').trim(),
+    businessAccountId: (document.getElementById('settings-wa-baid')?.value || '').trim(),
+    verifyToken: (document.getElementById('settings-wa-verify')?.value || '').trim(),
+    webhookSecret: (document.getElementById('settings-wa-secret')?.value || '').trim(),
+    testRecipient: (document.getElementById('settings-wa-recipient')?.value || '').trim(),
+  };
 }
 
-async function saveTelegramSettings() {
-  const tokenInput = document.getElementById('settings-tg-token').value.trim();
-  const userIdStr = document.getElementById('settings-tg-userid').value.trim();
-  const enabled = document.getElementById('settings-tg-enabled').checked;
-  const allowedUserIds = userIdStr ? userIdStr.split(/[,\s]+/).map(Number).filter(n => !isNaN(n) && n > 0) : [];
-  const payload = { enabled, allowedUserIds };
-  if (tokenInput) payload.botToken = tokenInput; // only send if user typed a new one
-  try {
-    const data = await api('/api/telegram/config', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    if (data.success) {
-      addProcessEntry('final', 'Telegram settings saved' + (enabled ? ' — connecting...' : '.'));
-      telegramStatusLoaded = false;
-      setTimeout(loadTelegramStatus, 2000); // reload status after bot connects
-    }
-  } catch (err) { alert('Save failed: ' + err.message); }
+function setButtonBusy(id, busy, busyLabel, normalLabel) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = !!busy;
+  btn.textContent = busy ? busyLabel : normalLabel;
 }
 
-async function sendTelegramTestMessage() {
-  const btn = document.getElementById('tg-send-test-btn');
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
+function getSelectedChannelType() {
+  return String(document.getElementById('settings-channel-select')?.value || 'telegram');
+}
+
+function onChannelTypeChange() {
+  const ch = getSelectedChannelType();
+  const formMap = {
+    telegram: 'channel-form-telegram',
+    discord: 'channel-form-discord',
+    whatsapp: 'channel-form-whatsapp',
+  };
+  const guideMap = {
+    telegram: 'channel-guide-telegram',
+    discord: 'channel-guide-discord',
+    whatsapp: 'channel-guide-whatsapp',
+  };
+  const statusMap = {
+    telegram: 'tg-status-bar',
+    discord: 'dc-status-bar',
+    whatsapp: 'wa-status-bar',
+  };
+  ['telegram', 'discord', 'whatsapp'].forEach((k) => {
+    const form = document.getElementById(formMap[k]);
+    const guide = document.getElementById(guideMap[k]);
+    const status = document.getElementById(statusMap[k]);
+    if (form) form.style.display = (k === ch) ? 'block' : 'none';
+    if (guide) guide.style.display = (k === ch) ? 'block' : 'none';
+    if (status) status.style.display = (k === ch) ? 'flex' : 'none';
+  });
+}
+
+async function saveSelectedChannelSettings() {
+  await saveChannelSettings(getSelectedChannelType());
+}
+
+async function testSelectedChannel() {
+  await testChannel(getSelectedChannelType());
+}
+
+async function sendSelectedChannelTest() {
+  await sendChannelTest(getSelectedChannelType());
+}
+
+async function loadChannelsStatus() {
   try {
-    const data = await api('/api/telegram/send-test', { method: 'POST' });
-    if (data.success) {
-      addProcessEntry('final', 'Test message sent to Telegram!');
-    } else {
-      alert('Failed: ' + (data.error || 'unknown'));
+    const data = await api('/api/channels/status');
+    if (!data?.success) return;
+    const tg = data.telegram || {};
+    const dc = data.discord || {};
+    const wa = data.whatsapp || {};
+
+    if (tg.connected && tg.polling) setChannelStatus('tg', 'ok', `Connected as @${tg.username || 'bot'}`);
+    else if (tg.hasToken) setChannelStatus('tg', 'warn', 'Token saved, not connected');
+    else setChannelStatus('tg', 'off', 'Not configured');
+
+    if (dc.hasToken || dc.hasWebhook) setChannelStatus('dc', 'warn', 'Credentials saved');
+    else setChannelStatus('dc', 'off', 'Not configured');
+
+    if (wa.hasAccessToken && wa.phoneNumberId) setChannelStatus('wa', 'warn', 'Credentials saved');
+    else setChannelStatus('wa', 'off', 'Not configured');
+
+    if (!channelsStatusLoaded) {
+      channelsStatusLoaded = true;
+      if (tg.hasToken) document.getElementById('settings-tg-token').placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (saved)';
+      if (dc.hasToken) document.getElementById('settings-dc-token').placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (saved)';
+      if (wa.hasAccessToken) document.getElementById('settings-wa-token').placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (saved)';
+
+      document.getElementById('settings-tg-enabled').checked = !!tg.enabled;
+      document.getElementById('settings-tg-userid').value = (tg.allowedUserIds || []).join(', ');
+
+      document.getElementById('settings-dc-enabled').checked = !!dc.enabled;
+      document.getElementById('settings-dc-appid').value = dc.applicationId || '';
+      document.getElementById('settings-dc-guildid').value = dc.guildId || '';
+      document.getElementById('settings-dc-channelid').value = dc.channelId || '';
+
+      document.getElementById('settings-wa-enabled').checked = !!wa.enabled;
+      document.getElementById('settings-wa-phoneid').value = wa.phoneNumberId || '';
+      document.getElementById('settings-wa-baid').value = wa.businessAccountId || '';
+      document.getElementById('settings-wa-recipient').value = wa.testRecipient || '';
     }
-  } catch (err) { alert('Send failed: ' + err.message); }
-  btn.textContent = 'Send Test Message';
-  btn.disabled = false;
+    onChannelTypeChange();
+  } catch (err) {
+    console.error('[Channels] Status load failed:', err);
+  }
+}
+
+async function saveChannelSettings(channel) {
+  const payload = readChannelPayload(channel);
+  try {
+    const data = await api('/api/channels/config', {
+      method: 'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ channels: { [channel]: payload } }),
+    });
+    if (data?.success) {
+      addProcessEntry('final', `${channel} settings saved.`);
+      channelsStatusLoaded = false;
+      await loadChannelsStatus();
+    } else {
+      alert('Save failed: ' + (data?.error || 'unknown error'));
+    }
+  } catch (err) {
+    alert('Save failed: ' + err.message);
+  }
+}
+
+async function testChannel(channel) {
+  const btnId = document.getElementById('channel-test-btn')
+    ? 'channel-test-btn'
+    : channel === 'telegram' ? 'tg-test-btn' : channel === 'discord' ? 'dc-test-btn' : 'wa-test-btn';
+  setButtonBusy(btnId, true, 'Testing...', 'Test');
+  try {
+    const payload = readChannelPayload(channel);
+    const data = await api(`/api/channels/test/${channel}`, {
+      method: 'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (data?.success) {
+      if (channel === 'telegram') setChannelStatus('tg', 'ok', `Valid bot @${data?.bot?.username || 'telegram'}`);
+      if (channel === 'discord') setChannelStatus('dc', 'ok', `Valid bot @${data?.bot?.username || 'discord'}`);
+      if (channel === 'whatsapp') setChannelStatus('wa', 'ok', `Valid phone ${data?.account?.display_phone_number || data?.account?.id || ''}`.trim());
+      addProcessEntry('final', `${channel} connection test passed.`);
+    } else {
+      alert(`${channel} test failed: ${data?.error || 'unknown error'}`);
+    }
+  } catch (err) {
+    alert(`${channel} test failed: ${err.message}`);
+  }
+  setButtonBusy(btnId, false, 'Testing...', 'Test');
+}
+
+async function sendChannelTest(channel) {
+  const btnId = document.getElementById('channel-send-test-btn')
+    ? 'channel-send-test-btn'
+    : channel === 'telegram' ? 'tg-send-test-btn' : channel === 'discord' ? 'dc-send-test-btn' : 'wa-send-test-btn';
+  setButtonBusy(btnId, true, 'Sending...', 'Send Test');
+  try {
+    const payload = readChannelPayload(channel);
+    const data = await api(`/api/channels/send-test/${channel}`, {
+      method: 'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (data?.success) {
+      addProcessEntry('final', `Test message sent via ${channel}.`);
+    } else {
+      alert(`${channel} send-test failed: ${data?.error || 'unknown error'}`);
+    }
+  } catch (err) {
+    alert(`${channel} send-test failed: ${err.message}`);
+  }
+  setButtonBusy(btnId, false, 'Sending...', 'Send Test');
 }
 
 async function saveSettings() {
@@ -4753,7 +5144,7 @@ async function runMission() {
     if (res.error) {
       log(`Error: ${res.error}`, 'error');
     } else {
-      log(`Mission started → Job ${res.jobId.slice(0, 8)}...`, 'success');
+      log(`Mission started ? Job ${res.jobId.slice(0, 8)}...`, 'success');
       input.value = '';
       setTimeout(() => selectJob(res.jobId), 500);
     }
@@ -4762,7 +5153,7 @@ async function runMission() {
   }
 
   btn.disabled = false;
-  btn.innerHTML = '▶ Run';
+  btn.innerHTML = '? Run';
 }
 
 // ---- Sessions list ----
@@ -4780,7 +5171,7 @@ function renderSessionsList() {
         ${sessionsEditMode ? `<button class="sidebar-action" style="padding:3px 8px;font-size:10px" onclick="deleteChatSession('${s.id}', event)">Delete</button>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-        ${s.automated ? '<span class="session-auto-badge">🕐 Auto</span>' : ''}
+        ${s.automated ? '<span class="session-auto-badge">Auto</span>' : ''}
         <span class="badge badge-queued">${(s.history || []).length} msgs</span>
         <span style="color:var(--muted);font-size:10px">${timeAgo(s.updatedAt || s.createdAt)}</span>
       </div>
@@ -4856,7 +5247,7 @@ function renderJobDetail(data) {
     ${artifacts.map(a => `
       <div class="task-card">
         <div class="task-card-header">
-          <span class="task-card-title">📄 ${escHtml(a.path || a.type)}</span>
+          <span class="task-card-title">${escHtml(a.path || a.type)}</span>
           <span class="badge badge-completed">${a.type}</span>
         </div>
         ${a.content ? `<div class="task-card-desc" style="margin-top:6px">${escHtml(a.content.slice(0, 200))}${a.content.length > 200 ? '...' : ''}</div>` : ''}
@@ -4894,8 +5285,8 @@ async function loadApprovals() {
         <div class="approval-action">${escHtml(a.action)}</div>
         <div class="approval-reason">${escHtml(a.reason || 'Approval required')}</div>
         <div class="approval-buttons">
-          <button class="btn btn-sm btn-green" onclick="resolveApproval('${a.id}','approved')">✓ Approve</button>
-          <button class="btn btn-sm btn-red" onclick="resolveApproval('${a.id}','rejected')">✗ Reject</button>
+          <button class="btn btn-sm btn-green" onclick="resolveApproval('${a.id}','approved')">? Approve</button>
+          <button class="btn btn-sm btn-red" onclick="resolveApproval('${a.id}','rejected')">? Reject</button>
         </div>
       </div>
     `).join('');
@@ -5041,7 +5432,7 @@ async function checkStatus() {
   }
 }
 
-// ─── Orchestration Settings ─────────────────────────────────────────────────
+// --- Orchestration Settings -------------------------------------------------
 
 const SECONDARY_MODEL_DEFAULTS = {
   openai_codex: 'gpt-5.3-codex',
@@ -5212,7 +5603,7 @@ async function loadOrchestrationConfig() {
     const msg  = document.getElementById('orch-eligibility-msg');
     if (msg) {
       if (elig.eligible) {
-        msg.textContent = '✅ Orchestration eligible — enable the skill in the Skills tab.';
+        msg.textContent = '? Orchestration eligible — enable the skill in the Skills tab.';
         msg.style.color = 'var(--green, #4ade80)';
       } else {
         msg.textContent = elig.reason || 'Not eligible.';
@@ -5302,7 +5693,7 @@ async function saveOrchestrationConfig() {
     });
     const msg = document.getElementById('orch-eligibility-msg');
     if (msg) {
-      msg.textContent = '✅ Saved. Now enable the Multi-Agent Orchestrator skill in the Skills tab.';
+      msg.textContent = '? Saved. Now enable the Multi-Agent Orchestrator skill in the Skills tab.';
       msg.style.color = 'var(--green, #4ade80)';
       msg.style.display = 'block';
     }
@@ -5327,7 +5718,7 @@ function syncOrchPreemptControls() {
   if (note) note.style.display = ollamaPrimary ? 'none' : 'block';
 }
 
-// ─── Skill card eligibility rendering ───────────────────────────────────────
+// --- Skill card eligibility rendering ---------------------------------------
 
 function renderSkillEligibility(skills) {
   // Called after skills render — grey out ineligible skill cards
@@ -5353,7 +5744,7 @@ function renderSkillEligibility(skills) {
   }, 50);
 }
 
-// ─── Handle orchestration SSE events ────────────────────────────────────────
+// --- Handle orchestration SSE events ----------------------------------------
 
 function handleOrchestrationEvent(data) {
   const panel =
@@ -5371,16 +5762,16 @@ function handleOrchestrationEvent(data) {
     : '';
   el.innerHTML = `<strong>Advisor (${modeLabel})</strong><br><span style="color:var(--muted)">Trigger: ${data.reason || data.trigger}${routeText}${countText}</span>`;
   if (data.advice?.next_actions?.length) {
-    el.innerHTML += '<br><span style="color:#e2e8f0">→ ' + data.advice.next_actions[0] + '</span>';
+    el.innerHTML += '<br><span style="color:#e2e8f0">? ' + data.advice.next_actions[0] + '</span>';
   }
   if (data.preflight?.quick_plan?.length) {
-    el.innerHTML += '<br><span style="color:#e2e8f0">→ ' + data.preflight.quick_plan[0] + '</span>';
+    el.innerHTML += '<br><span style="color:#e2e8f0">? ' + data.preflight.quick_plan[0] + '</span>';
   }
   panel.appendChild(el);
   panel.scrollTop = panel.scrollHeight;
 }
 
-// ─── Expose to SSE handler ───────────────────────────────────────────────────
+// --- Expose to SSE handler ---------------------------------------------------
 
 if (typeof window !== 'undefined') {
   window._orchEventHandler = handleOrchestrationEvent;
@@ -5441,22 +5832,25 @@ async function loadInstalledSkills() {
     if (skills.length === 0) {
       el.innerHTML = '<div class="empty-state" style="padding:16px">No skills yet.<br>Click "+ Create" to make one!</div>';
     } else {
-      el.innerHTML = skills.map(s => `
+      el.innerHTML = skills.map(s => {
+        const skillEmoji = (s.emoji === '🧩' || s.emoji === '🦞' || s.emoji === '⚠️') ? s.emoji : '🧩';
+        return `
         <div class="skill-card ${s.enabled ? 'enabled' : ''}" data-skill-id="${escHtml(s.id)}" onclick="toggleSkill('${escHtml(s.id)}')">
           <div class="skill-card-top">
-            <div class="skill-card-emoji">${escHtml(s.emoji || '🧩')}</div>
+            <div class="skill-card-emoji">${escHtml(skillEmoji)}</div>
             <div class="skill-card-info">
               <div class="skill-card-name">${escHtml(s.name)}</div>
               <div class="skill-card-desc">${escHtml(s.description || 'No description')}</div>
             </div>
             <div class="skill-card-actions">
-              <button class="skill-mini-btn" onclick="event.stopPropagation();editSkill('${escHtml(s.id)}')" title="Edit">✎</button>
-              <button class="skill-remove-btn" onclick="event.stopPropagation();deleteSkill('${escHtml(s.id)}')" title="Delete">✕</button>
+              <button class="skill-mini-btn" onclick="event.stopPropagation();editSkill('${escHtml(s.id)}')" title="Edit" aria-label="Edit skill">✎</button>
+              <button class="skill-remove-btn" onclick="event.stopPropagation();deleteSkill('${escHtml(s.id)}')" title="Delete" aria-label="Delete skill">✕</button>
               <div class="skill-card-dot"></div>
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
       renderSkillEligibility(skills);
     }
   } catch (err) {
@@ -5537,7 +5931,8 @@ function closeSkillModal() {
 
 async function saveSkillFromModal() {
   const name = document.getElementById('skill-modal-name').value.trim();
-  const emoji = document.getElementById('skill-modal-emoji').value.trim() || '🧩';
+  const rawEmoji = document.getElementById('skill-modal-emoji').value.trim();
+  const emoji = (rawEmoji === '🧩' || rawEmoji === '🦞' || rawEmoji === '⚠️') ? rawEmoji : '🧩';
   const description = document.getElementById('skill-modal-desc').value.trim();
   const instructions = document.getElementById('skill-modal-instructions').value.trim();
 
@@ -5931,7 +6326,7 @@ function updatePinUI() {
       listEl.innerHTML = Array.from(pinnedMessageIndices).map(idx => {
         const msg = chatHistory[idx];
         if (!msg) return '';
-        const icon = msg.role === 'user' ? '👤' : '🦞';
+        const icon = msg.role === 'user' ? '??' : '??';
         const text = msg.content.slice(0, 60) + (msg.content.length > 60 ? '...' : '');
         return `<div class="pin-card">
           <span>${icon}</span>
@@ -6011,9 +6406,9 @@ setInterval(loadApprovals, 5000);
 setMode('chat'); // Start in chat mode
 canvasInitDrop();
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // BACKGROUND TASKS KANBAN SYSTEM
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 
 let bgtTasks = [];           // all task records from server
 let bgtOpenTaskId = null;    // currently open panel task id
@@ -6071,28 +6466,28 @@ document.addEventListener('click', (e) => {
   if (e.target === modal) closeBgtHeartbeatModal();
 });
 
-// ─── Columns config ─────────────────────────────────────────────────────────
+// --- Columns config ---------------------------------------------------------
 const BGT_COLUMNS = [
-  { key: 'running',          label: '▶ In Progress', color: '#0d4faf', bg: '#eaf2ff' },
-  { key: 'queued',           label: '⏳ Queued',      color: '#7c4d00', bg: '#fff8e1' },
-  { key: 'paused',           label: '⏸ Paused',      color: '#555',    bg: '#f5f5f5' },
-  { key: 'stalled',          label: '⚠ Stalled',     color: '#9c1a1a', bg: '#fff0f0' },
-  { key: 'needs_assistance', label: '🙋 Needs You',  color: '#6d2d9e', bg: '#f5eeff' },
-  { key: 'complete',         label: '✅ Complete',    color: '#1a6e35', bg: '#efffea' },
-  { key: 'failed',           label: '❌ Failed',     color: '#9c1a1a', bg: '#fff0f0' },
+  { key: 'running',          label: '? In Progress', color: '#0d4faf', bg: '#eaf2ff' },
+  { key: 'queued',           label: '? Queued',      color: '#7c4d00', bg: '#fff8e1' },
+  { key: 'paused',           label: '? Paused',      color: '#555',    bg: '#f5f5f5' },
+  { key: 'stalled',          label: '? Stalled',     color: '#9c1a1a', bg: '#fff0f0' },
+  { key: 'needs_assistance', label: '🟣 Needs You',  color: '#6d2d9e', bg: '#f5eeff' },
+  { key: 'complete',         label: '? Complete',    color: '#1a6e35', bg: '#efffea' },
+  { key: 'failed',           label: '? Failed',     color: '#9c1a1a', bg: '#fff0f0' },
 ];
 
 const STATUS_ICON = {
-  running: '▶',
-  queued: '⏳',
-  paused: '⏸',
-  stalled: '⚠',
-  needs_assistance: '🙋',
-  complete: '✅',
-  failed: '❌',
+  running: '?',
+  queued: '?',
+  paused: '?',
+  stalled: '?',
+  needs_assistance: '??',
+  complete: '?',
+  failed: '?',
 };
 
-// ─── Fetch & Render ──────────────────────────────────────────────────────────
+// --- Fetch & Render ----------------------------------------------------------
 async function refreshBgTasks() {
   try {
     const data = await api('/api/bg-tasks');
@@ -6122,7 +6517,7 @@ function renderBgTasks() {
   if (hbLabel) {
     const mins = bgtHeartbeatConfig.interval_minutes || 10;
     const on = bgtHeartbeatConfig.enabled;
-    hbLabel.textContent = on ? `⏳ heartbeat: ${mins}min` : '⏸ heartbeat: off';
+    hbLabel.textContent = on ? `? heartbeat: ${mins}min` : '? heartbeat: off';
     hbLabel.style.color = on ? 'var(--brand)' : 'var(--muted)';
   }
 
@@ -6157,7 +6552,7 @@ function renderBgTasks() {
   // If no tasks at all
   if (bgtTasks.length === 0) {
     board.innerHTML = `<div style="text-align:center;padding:60px 24px;color:var(--muted);font-size:13px;flex:1">
-      <div style="font-size:36px;margin-bottom:12px">🗂</div>
+      <div style="font-size:36px;margin-bottom:12px">Tasks</div>
       <div style="font-weight:700;margin-bottom:4px">No background tasks yet</div>
       <div style="font-size:12px">Ask SmallClaw to do something in the background and it'll appear here.</div>
     </div>`;
@@ -6171,7 +6566,7 @@ function bgtCardHTML(t, col) {
   const totalSteps = (t.plan || []).length;
   const pct = totalSteps > 0 ? Math.round(stepsDone / totalSteps * 100) : 0;
   const currentStep = (t.plan || [])[t.currentStepIndex || 0];
-  const channel = t.channel === 'telegram' ? '📱' : '🌐';
+  const channel = t.channel === 'telegram' ? '??' : '??';
 
   return `
   <div onclick="openBgtPanel('${escHtml(t.id)}')" data-bgt-id="${escHtml(t.id)}" style="
@@ -6186,7 +6581,7 @@ function bgtCardHTML(t, col) {
           onclick="event.stopPropagation(); bgtDeleteTask('${escHtml(t.id)}', '${escHtml(t.status)}')"
           title="Remove task"
           style="border:1px solid #fca5a5;background:#fff0f0;color:#9c1a1a;border-radius:7px;padding:1px 6px;font-size:11px;font-weight:700;cursor:pointer"
-        >🗑</button>
+        >??</button>
         <span style="font-size:14px;flex-shrink:0">${STATUS_ICON[t.status] || '?'}</span>
       </div>
     </div>
@@ -6203,7 +6598,7 @@ function bgtCardHTML(t, col) {
   </div>`;
 }
 
-// ─── Side Panel ──────────────────────────────────────────────────────────────
+// --- Side Panel --------------------------------------------------------------
 async function openBgtPanel(taskId) {
   bgtOpenTaskId = taskId;
   const panel = document.getElementById('bgt-panel');
@@ -6254,14 +6649,14 @@ async function bgtRefreshOpenPanel() {
   const stepsDone = plan.filter(s => s.status === 'done' || s.status === 'skipped').length;
   const lastTool = task.lastToolCall || '—';
   const lastToolAt = task.lastToolCallAt ? new Date(task.lastToolCallAt).toLocaleTimeString() : '—';
-  const channel = task.channel === 'telegram' ? '📱 Telegram' : '🌐 Web UI';
+  const channel = task.channel === 'telegram' ? 'Telegram' : 'Web UI';
   const startedAt = task.startedAt ? new Date(task.startedAt).toLocaleString() : '—';
   const statusColor = { running:'#0d4faf', queued:'#7c4d00', paused:'#555', stalled:'#9c1a1a', needs_assistance:'#6d2d9e', complete:'#1a6e35', failed:'#9c1a1a' };
   const sc = statusColor[task.status] || '#555';
 
   // Build plan steps HTML
   const stepsHTML = plan.map((step, i) => {
-    const icon = step.status === 'done' ? '✅' : step.status === 'failed' ? '❌' : step.status === 'skipped' ? '⏭' : i === (task.currentStepIndex || 0) && task.status === 'running' ? '⏳' : '○';
+    const icon = step.status === 'done' ? '?' : step.status === 'failed' ? '?' : step.status === 'skipped' ? '?' : i === (task.currentStepIndex || 0) && task.status === 'running' ? '?' : '?';
     const isCurrent = i === (task.currentStepIndex || 0) && task.status !== 'complete';
     return `<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);${isCurrent?'background:#f0f5ff;margin:0 -8px;padding:7px 8px;border-radius:6px;':''}"
       title="${step.notes ? escHtml(step.notes) : ''}">
@@ -6296,13 +6691,13 @@ async function bgtRefreshOpenPanel() {
 
     <!-- Summary if complete -->
     ${task.finalSummary ? `<div style="background:#efffea;border:1px solid #b2dfb2;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;color:#1a6e35">
-      <div style="font-weight:800;margin-bottom:4px">✅ Summary</div>
+      <div style="font-weight:800;margin-bottom:4px">? Summary</div>
       ${escHtml(task.finalSummary)}
     </div>` : ''}
 
     <!-- Needs assistance -->
     ${task.status === 'needs_assistance' ? `<div style="background:#f5eeff;border:1px solid #cba8f5;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;color:#6d2d9e">
-      <div style="font-weight:800;margin-bottom:4px">🙋 Task needs your input</div>
+      <div style="font-weight:800;margin-bottom:4px">⚠️ Task needs your input</div>
       <div>The task has paused and is waiting for guidance. Check the latest journal entries below for context, then use the chat to provide direction.</div>
     </div>` : ''}
 
@@ -6337,11 +6732,11 @@ async function bgtRefreshOpenPanel() {
 
     <!-- Delete button -->
     ${(task.status === 'complete' || task.status === 'failed') ? `
-    <button onclick="bgtDeleteTask('${escHtml(task.id)}')" style="border:1px solid #fca5a5;background:#fff0f0;color:#9c1a1a;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;align-self:flex-start">🗑 Remove</button>` : ''}
+    <button onclick="bgtDeleteTask('${escHtml(task.id)}')" style="border:1px solid #fca5a5;background:#fff0f0;color:#9c1a1a;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;align-self:flex-start">Remove</button>` : ''}
   `;
 }
 
-// ─── Actions ─────────────────────────────────────────────────────────────────
+// --- Actions -----------------------------------------------------------------
 async function bgtPauseResume() {
   if (!bgtOpenTaskId) return;
   const task = bgtTasks.find(t => t.id === bgtOpenTaskId);
@@ -6368,7 +6763,7 @@ async function bgtDeleteTask(taskId, status) {
   await refreshBgTasks();
 }
 
-// ─── Toast notification ───────────────────────────────────────────────────────
+// --- Toast notification -------------------------------------------------------
 function bgtToast(title, body) {
   const toast = document.createElement('div');
   toast.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;min-width:240px;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,0.12);font-family:var(--font)`;
@@ -6376,6 +6771,347 @@ function bgtToast(title, body) {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 6000);
 }
+// --- Integrations Tab ---------------------------------------------------------
+
+let _integTab = 'webhooks';
+
+function setIntegTab(tab) {
+  _integTab = tab;
+  ['webhooks', 'mcp'].forEach(t => {
+    const btn = document.getElementById('itab-' + t);
+    const panel = document.getElementById('itab-panel-' + t);
+    if (btn) {
+      btn.style.background = t === tab ? '#eaf2ff' : '#fff';
+      btn.style.color = t === tab ? '#0d4faf' : 'var(--muted)';
+      btn.style.borderColor = t === tab ? '#bdd3f6' : 'var(--line)';
+    }
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+async function loadIntegrationsTab() {
+  setIntegTab(_integTab);
+  await loadWebhookSettings();
+  await loadMCPServers();
+}
+
+// --- Webhooks -----------------------------------------------------------------
+
+async function loadWebhookSettings() {
+  try {
+    const data = await api('/api/settings/hooks');
+    const h = data.hooks || {};
+    const cb = document.getElementById('wh-enabled');
+    const inp = document.getElementById('wh-token');
+    const pathInp = document.getElementById('wh-path');
+    if (cb) cb.checked = h.enabled === true;
+    if (inp) inp.value = h.tokenSet ? '••••••••' : '';
+    if (pathInp) pathInp.value = h.path || '/hooks';
+    updateWebhookStatus(h.enabled, h.tokenSet);
+    updateWebhookUrlDisplay(h.enabled, h.tokenSet, h.path || '/hooks');
+  } catch(e) {
+    console.warn('loadWebhookSettings:', e);
+  }
+}
+
+function updateWebhookStatus(enabled, tokenSet) {
+  const dot = document.getElementById('wh-status-dot');
+  const txt = document.getElementById('wh-status-text');
+  if (!dot || !txt) return;
+  if (enabled && tokenSet) {
+    dot.style.background = '#22c55e';
+    txt.textContent = 'Active — endpoint is running';
+    txt.style.color = '#166534';
+  } else if (!enabled) {
+    dot.style.background = '#ccc';
+    txt.textContent = 'Disabled';
+    txt.style.color = 'var(--muted)';
+  } else {
+    dot.style.background = '#f59e0b';
+    txt.textContent = 'Enabled but no token set';
+    txt.style.color = '#92400e';
+  }
+}
+
+function updateWebhookUrlDisplay(enabled, tokenSet, hookPath) {
+  const el = document.getElementById('wh-url-display');
+  if (!el) return;
+  if (enabled && tokenSet) {
+    const origin = window.location.origin || 'http://localhost:18789';
+    el.style.display = 'block';
+    el.textContent = origin + hookPath + '/agent';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function generateWebhookToken() {
+  const arr = new Uint8Array(24);
+  crypto.getRandomValues(arr);
+  const token = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+  const inp = document.getElementById('wh-token');
+  if (inp) { inp.value = token; inp.type = 'text'; setTimeout(() => { inp.type = 'password'; }, 4000); }
+}
+
+async function saveWebhookSettings() {
+  const enabled = document.getElementById('wh-enabled')?.checked ?? false;
+  const rawToken = document.getElementById('wh-token')?.value?.trim() || '';
+  const hookPath = document.getElementById('wh-path')?.value?.trim() || '/hooks';
+  try {
+    const r = await api('/api/settings/hooks', {
+      method: 'POST',
+      body: JSON.stringify({ enabled, token: rawToken, path: hookPath }),
+    });
+    if (r.success) {
+      await loadWebhookSettings();
+      showIntegMsg('? Webhook settings saved — restart gateway to apply', '#166534', '#f0fdf4');
+    } else {
+      showIntegMsg('Error: ' + (r.error || 'Unknown error'), '#991b1b', '#fef2f2');
+    }
+  } catch(e) {
+    showIntegMsg('Save failed: ' + e.message, '#991b1b', '#fef2f2');
+  }
+}
+
+async function testWebhookEndpoint() {
+  try {
+    const r = await api('/api/settings/hooks/test', { method: 'POST' });
+    if (r.success) {
+      showIntegMsg('? ' + (r.message || 'Endpoint is active'), '#166534', '#f0fdf4');
+    } else {
+      showIntegMsg('? ' + (r.error || 'Test failed'), '#991b1b', '#fef2f2');
+    }
+  } catch(e) {
+    showIntegMsg('Test failed: ' + e.message, '#991b1b', '#fef2f2');
+  }
+}
+
+function copyWebhookCurl() {
+  const origin = window.location.origin || 'http://localhost:18789';
+  const hookPath = document.getElementById('wh-path')?.value?.trim() || '/hooks';
+  const curl = `curl -X POST ${origin}${hookPath}/agent \\
+  -H "x-smallclaw-token: YOUR_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"message": "Hello from webhook", "name": "MyApp", "deliver": true}'`;
+  navigator.clipboard?.writeText(curl).then(() => {
+    showIntegMsg('cURL example copied to clipboard', '#1e40af', '#eff6ff');
+  }).catch(() => {
+    showIntegMsg('Could not copy — check browser permissions', '#92400e', '#fffbeb');
+  });
+}
+
+// --- MCP ---------------------------------------------------------------------
+
+let _mcpEditingId = null;
+
+const MCP_PRESETS = {
+  filesystem: { name: 'Filesystem', transport: 'stdio', command: 'npx', args: '-y\n@modelcontextprotocol/server-filesystem\nC:\\Users', env: '', description: 'Read/write local files' },
+  github:     { name: 'GitHub', transport: 'stdio', command: 'npx', args: '-y\n@modelcontextprotocol/server-github', env: 'GITHUB_PERSONAL_ACCESS_TOKEN=', description: 'Repos, PRs, issues' },
+  postgres:   { name: 'PostgreSQL', transport: 'stdio', command: 'npx', args: '-y\n@modelcontextprotocol/server-postgres\npostgresql://localhost/mydb', env: '', description: 'Query PostgreSQL' },
+  sqlite:     { name: 'SQLite', transport: 'stdio', command: 'npx', args: '-y\n@modelcontextprotocol/server-sqlite\n--db-path\nC:\\path\\to\\db.sqlite', env: '', description: 'Local database' },
+  brave:      { name: 'Brave Search', transport: 'stdio', command: 'npx', args: '-y\n@modelcontextprotocol/server-brave-search', env: 'BRAVE_API_KEY=', description: 'Web search' },
+  memory:     { name: 'Memory', transport: 'stdio', command: 'npx', args: '-y\n@modelcontextprotocol/server-memory', env: '', description: 'Persistent knowledge store' },
+};
+
+async function loadMCPServers() {
+  const el = document.getElementById('mcp-server-list');
+  if (!el) return;
+  try {
+    const data = await api('/api/mcp/servers');
+    const servers = data.servers || [];
+    if (servers.length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-style:italic;padding:8px 0">No MCP servers configured yet.<br>Add one above or click a preset on the right.</div>';
+      return;
+    }
+    el.innerHTML = servers.map(s => {
+      const statusColor = s.status === 'connected' ? '#22c55e' : s.status === 'error' ? '#ef4444' : s.status === 'connecting' ? '#f59e0b' : '#9ca3af';
+      const statusLabel = s.status === 'connected' ? `Connected · ${s.toolCount} tool${s.toolCount !== 1 ? 's' : ''}` : s.status === 'error' ? 'Error' : s.status === 'connecting' ? 'Connecting…' : 'Disconnected';
+      const toolTip = s.toolNames?.length ? s.toolNames.join(', ') : '';
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:${s.enabled ? '#fff' : '#fafafa'}">
+        <div style="padding-top:2px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0"></div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:12px;color:var(--text)">${escHtml(s.name)} <span style="font-weight:400;color:var(--muted);font-size:11px">(${escHtml(s.id)})</span></div>
+          <div style="font-size:11px;color:${statusColor};margin-top:1px" title="${escHtml(toolTip)}">${statusLabel}${s.error ? ` — ${escHtml(s.error.slice(0,60))}` : ''}</div>
+          ${toolTip ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(toolTip)}">${escHtml(toolTip.slice(0,80))}${toolTip.length>80?'…':''}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          ${s.status === 'connected'
+            ? `<button onclick="disconnectMCPServer('${s.id}')" style="padding:3px 8px;border:1px solid var(--line);border-radius:5px;background:#fff;font-size:10px;cursor:pointer">Disconnect</button>`
+            : `<button onclick="connectMCPServer('${s.id}')" style="padding:3px 8px;border:1px solid var(--brand);border-radius:5px;background:#fff;color:var(--brand);font-size:10px;font-weight:600;cursor:pointer">Connect</button>`
+          }
+          <button onclick="editMCPServer('${s.id}')" style="padding:3px 8px;border:1px solid var(--line);border-radius:5px;background:#fff;font-size:10px;cursor:pointer">Edit</button>
+          <button onclick="deleteMCPServer('${s.id}')" style="padding:3px 8px;border:1px solid #fecaca;border-radius:5px;background:#fff;color:#ef4444;font-size:10px;cursor:pointer">?</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div style="color:#ef4444">Failed to load: ${escHtml(e.message)}</div>`;
+  }
+}
+
+function showMCPAddForm(editData) {
+  _mcpEditingId = editData?.id || null;
+  document.getElementById('mcp-add-form').style.display = 'block';
+  document.getElementById('mcp-form-title').textContent = _mcpEditingId ? 'Edit MCP Server' : 'Add MCP Server';
+  document.getElementById('mcp-form-msg').textContent = '';
+
+  if (editData) {
+    const v = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+    v('mcp-f-id', editData.id); v('mcp-f-name', editData.name);
+    document.getElementById('mcp-f-transport').value = editData.transport || 'stdio';
+    onMCPTransportChange();
+    v('mcp-f-command', editData.command || '');
+    v('mcp-f-args', (editData.args || []).join('\n'));
+    v('mcp-f-env', Object.entries(editData.env || {}).map(([k,v]) => `${k}=${v}`).join('\n'));
+    v('mcp-f-url', editData.url || '');
+    v('mcp-f-headers', Object.entries(editData.headers || {}).map(([k,v]) => `${k}: ${v}`).join('\n'));
+    const cb = document.getElementById('mcp-f-enabled');
+    if (cb) cb.checked = editData.enabled !== false;
+  } else {
+    ['mcp-f-id','mcp-f-name','mcp-f-command','mcp-f-args','mcp-f-env','mcp-f-url','mcp-f-headers'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('mcp-f-transport').value = 'stdio';
+    onMCPTransportChange();
+    const cb = document.getElementById('mcp-f-enabled'); if (cb) cb.checked = true;
+  }
+  document.getElementById('mcp-f-id').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hideMCPAddForm() {
+  document.getElementById('mcp-add-form').style.display = 'none';
+  _mcpEditingId = null;
+}
+
+function onMCPTransportChange() {
+  const t = document.getElementById('mcp-f-transport')?.value;
+  document.getElementById('mcp-stdio-fields').style.display = t === 'stdio' ? 'block' : 'none';
+  document.getElementById('mcp-sse-fields').style.display = t === 'sse' ? 'block' : 'none';
+}
+
+function prefillMCPServer(presetKey) {
+  const p = MCP_PRESETS[presetKey];
+  if (!p) return;
+  showMCPAddForm();
+  const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  v('mcp-f-id', presetKey);
+  v('mcp-f-name', p.name);
+  document.getElementById('mcp-f-transport').value = p.transport;
+  onMCPTransportChange();
+  v('mcp-f-command', p.command || '');
+  v('mcp-f-args', p.args || '');
+  v('mcp-f-env', p.env || '');
+  v('mcp-f-url', p.url || '');
+  setIntegTab('mcp');
+}
+
+async function saveMCPServer() {
+  const id = document.getElementById('mcp-f-id')?.value?.trim();
+  const name = document.getElementById('mcp-f-name')?.value?.trim();
+  const transport = document.getElementById('mcp-f-transport')?.value || 'stdio';
+  const enabled = document.getElementById('mcp-f-enabled')?.checked ?? true;
+  const msgEl = document.getElementById('mcp-form-msg');
+
+  if (!id || !name) { if (msgEl) msgEl.textContent = 'ID and Name are required.'; return; }
+
+  const cfg = { id, name, transport, enabled };
+
+  if (transport === 'stdio') {
+    cfg.command = document.getElementById('mcp-f-command')?.value?.trim() || '';
+    const argsRaw = document.getElementById('mcp-f-args')?.value || '';
+    cfg.args = argsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+    const envRaw = document.getElementById('mcp-f-env')?.value || '';
+    cfg.env = {};
+    envRaw.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+      const eq = line.indexOf('='); if (eq > 0) cfg.env[line.slice(0,eq).trim()] = line.slice(eq+1);
+    });
+  } else {
+    cfg.url = document.getElementById('mcp-f-url')?.value?.trim() || '';
+    const headersRaw = document.getElementById('mcp-f-headers')?.value || '';
+    cfg.headers = {};
+    headersRaw.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+      const colon = line.indexOf(':'); if (colon > 0) cfg.headers[line.slice(0,colon).trim()] = line.slice(colon+1).trim();
+    });
+  }
+
+  try {
+    const r = await api('/api/mcp/servers', { method: 'POST', body: JSON.stringify(cfg) });
+    if (r.success) {
+      if (msgEl) msgEl.textContent = '? Saved';
+      setTimeout(() => hideMCPAddForm(), 600);
+      await loadMCPServers();
+      // Auto-connect if enabled
+      if (enabled) connectMCPServer(id);
+    } else {
+      if (msgEl) msgEl.textContent = 'Error: ' + (r.error || 'Unknown');
+    }
+  } catch(e) {
+    if (msgEl) msgEl.textContent = 'Save failed: ' + e.message;
+  }
+}
+
+async function editMCPServer(id) {
+  try {
+    const data = await api('/api/mcp/servers');
+    const server = (data.servers || []).find(s => s.id === id);
+    if (server) showMCPAddForm(server);
+  } catch(e) { console.warn('editMCPServer:', e); }
+}
+
+async function deleteMCPServer(id) {
+  if (!confirm(`Delete MCP server "${id}"?`)) return;
+  try {
+    await api(`/api/mcp/servers/${id}`, { method: 'DELETE' });
+    await loadMCPServers();
+  } catch(e) { showIntegMsg('Delete failed: ' + e.message, '#991b1b', '#fef2f2'); }
+}
+
+async function connectMCPServer(id) {
+  showIntegMsg('Connecting to ' + id + '…', '#1e40af', '#eff6ff');
+  try {
+    const r = await api(`/api/mcp/servers/${id}/connect`, { method: 'POST' });
+    if (r.success) {
+      showIntegMsg(`? Connected — ${(r.tools||[]).length} tool(s) available`, '#166534', '#f0fdf4');
+    } else {
+      showIntegMsg('? Connection failed: ' + (r.error || 'Unknown'), '#991b1b', '#fef2f2');
+    }
+    await loadMCPServers();
+  } catch(e) {
+    showIntegMsg('Connect error: ' + e.message, '#991b1b', '#fef2f2');
+    await loadMCPServers();
+  }
+}
+
+async function disconnectMCPServer(id) {
+  try {
+    await api(`/api/mcp/servers/${id}/disconnect`, { method: 'POST' });
+    await loadMCPServers();
+    showIntegMsg('Disconnected from ' + id, '#475569', '#f8fafc');
+  } catch(e) { showIntegMsg('Disconnect error: ' + e.message, '#991b1b', '#fef2f2'); }
+}
+
+// --- Shared helper ------------------------------------------------------------
+
+function showIntegMsg(msg, color, bg) {
+  let el = document.getElementById('integ-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'integ-toast';
+    el.style.cssText = 'position:fixed;bottom:80px;right:24px;z-index:9999;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,0.12);transition:opacity .3s';
+    document.body.appendChild(el);
+  }
+  el.style.background = bg || '#f0fdf4';
+  el.style.color = color || '#166534';
+  el.style.border = `1px solid ${color || '#166534'}33`;
+  el.style.opacity = '1';
+  el.textContent = msg;
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => { el.style.opacity = '0'; }, 3500);
+}
+
 </script>
 </body>
 </html>
+

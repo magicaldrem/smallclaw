@@ -1,7 +1,7 @@
 /**
  * task-store.ts — Persistent background task storage
  *
- * Tasks are stored as individual JSON files in .localclaw/tasks/
+ * Tasks are stored as individual JSON files in .smallclaw/tasks/
  * plus an index file for fast listing.
  *
  * This is the data layer only — no execution logic.
@@ -107,7 +107,7 @@ interface TaskIndex {
 const TASKS_DIR_NAME = 'tasks';
 
 function getTasksDir(): string {
-  const base = path.join(process.cwd(), '.localclaw', TASKS_DIR_NAME);
+  const base = path.join(process.cwd(), '.smallclaw', TASKS_DIR_NAME);
   fs.mkdirSync(base, { recursive: true });
   return base;
 }

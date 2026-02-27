@@ -8,6 +8,8 @@
 # --- SECRETS & CONFIG (NEVER COMMIT) ---
 .localclaw/config.json
 .localclaw/credentials/
+.smallclaw/config.json
+.smallclaw/credentials/
 
 # --- RUNTIME DATA ---
 .localclaw/sessions/
@@ -23,6 +25,23 @@
 .localclaw/heartbeat/
 .localclaw/task-heartbeat.json
 .localclaw/cron/runs/
+.smallclaw/sessions/
+.smallclaw/logs/
+.smallclaw/memory/
+.smallclaw/facts.json
+.smallclaw/self_learning.json
+.smallclaw/jobs.db
+.smallclaw/update_state.json
+.smallclaw/tasks/
+.smallclaw/jobs/
+.smallclaw/ocr-cache/
+.smallclaw/heartbeat/
+.smallclaw/task-heartbeat.json
+.smallclaw/cron/runs/
+.smallclaw/skills/
+.smallclaw/skills_state.json
+.smallclaw/workspace_state.json
+.smallclaw/.migrated-from-localclaw
 
 # --- WORKSPACE RUNTIME FILES ---
 workspace/memory/

@@ -1,4 +1,4 @@
-// Core type definitions for LocalClaw
+// Core type definitions for SmallClaw
 
 export type JobStatus = 'queued' | 'planning' | 'executing' | 'verifying' | 'completed' | 'failed' | 'needs_approval';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -144,7 +144,7 @@ export interface ToolPermissions {
 
 // Config Types
 
-export interface LocalClawConfig {
+export interface SmallClawConfig {
   version: string;
   gateway: {
     port: number;
@@ -208,6 +208,31 @@ export interface LocalClawConfig {
     allowedUserIds: number[];
     streamMode: 'full' | 'partial';
   };
+  channels?: {
+    telegram?: {
+      enabled: boolean;
+      botToken: string;
+      allowedUserIds: number[];
+      streamMode: 'full' | 'partial';
+    };
+    discord?: {
+      enabled: boolean;
+      botToken: string;
+      applicationId?: string;
+      guildId?: string;
+      channelId?: string;
+      webhookUrl?: string;
+    };
+    whatsapp?: {
+      enabled: boolean;
+      accessToken: string;
+      phoneNumberId: string;
+      businessAccountId?: string;
+      verifyToken?: string;
+      webhookSecret?: string;
+      testRecipient?: string;
+    };
+  };
   search?: {
     preferred_provider?: string;
     tavily_api_key?: string;
@@ -268,6 +293,11 @@ export interface LocalClawConfig {
       checkpointing_enabled?: boolean;
     };
   };
+  hooks?: {
+    enabled: boolean;
+    token: string;
+    path: string;
+  };
   agent_policy?: {
     force_web_for_fresh?: boolean;
     memory_fallback_on_search_failure?: boolean;
@@ -276,6 +306,9 @@ export interface LocalClawConfig {
     retrieval_mode?: string;
   };
 }
+
+// Backward-compatible alias while internals migrate.
+export type LocalClawConfig = SmallClawConfig;
 
 // ─── Multi-Provider LLM Config ──────────────────────────────────────────────
 

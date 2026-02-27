@@ -103,7 +103,7 @@ All operations are restricted to `~/localclaw/workspace` by default for safety. 
 ## What's Next?
 
 1. **Read the examples**: Check out `EXAMPLES.md` for more complex use cases
-2. **Customize config**: Edit `~/.localclaw/config.json` to adjust:
+2. **Customize config**: Edit `~/.smallclaw/config.json` to adjust:
    - Which model to use
    - Tool permissions
    - Workspace location
@@ -184,8 +184,8 @@ You know LocalClaw is working when:
 
 ## Getting Help
 
-- Check logs: `~/.localclaw/logs/`
-- Review database: `~/.localclaw/jobs.db` (SQLite)
+- Check logs: `~/.smallclaw/logs/`
+- Review database: `~/.smallclaw/jobs.db` (SQLite)
 - Enable verbose logging: Set environment variable `DEBUG=*`
 
 Happy automating! 🦞

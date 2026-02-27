@@ -36,11 +36,11 @@
   <img src="assets/SmallClawDashboard.png" alt="SmallClaw UI" width="900" />
 </p>
 
-# SmallClaw v1.0.2
+# SmallClaw v1.0.3
 
 **Local AI agent framework with local + cloud provider support** — an open source alternative to cloud AI assistants that runs on your machine with free local models.
 
-**Current release:** `v1.0.2`
+**Current release:** `v1.0.3`
 
 ---
 
@@ -234,7 +234,7 @@ In the web UI, open Settings (⚙️ in the top bar):
 
 ## Configuration
 
-Config is stored in `.localclaw/config.json` in the project folder (or `~/.localclaw/config.json` as a fallback):
+Config is stored in `.smallclaw/config.json` in the project folder (or `~/.smallclaw/config.json` as a fallback):
 
 ```json
 {
@@ -264,6 +264,43 @@ Config is stored in `.localclaw/config.json` in the project folder (or `~/.local
 ```
 
 Most settings can be changed live from the Settings panel without restarting the gateway.
+
+## Self-Updating
+
+SmallClaw includes a built-in updater. In most cases, users can update from any install directory with:
+
+```bash
+smallclaw update
+```
+
+Use this to check first:
+
+```bash
+smallclaw update check
+```
+
+If your install was manually copied or linked from a custom path, `smallclaw update` still works, but make sure the command resolves to the same install you are currently running.
+
+## MCP Integrations (Settings -> Integrations)
+
+SmallClaw supports MCP server connections from the web UI. Open **Settings -> Integrations** to add servers and credentials.
+
+- Add one or more MCP servers (local or remote)
+- Configure auth/env values per server
+- Save and test directly from the panel
+- Use presets for common providers as a quick start
+
+MCP tools become available to the agent after saving valid settings.
+
+## Webhook Channels (Settings -> Channels)
+
+SmallClaw channel connections are managed in **Settings -> Channels** with a channel selector:
+
+- Telegram
+- Discord
+- WhatsApp
+
+Each channel has its own connection fields and setup instructions. Save settings per channel, run **Test**, then **Send Test** to verify outbound delivery and webhook configuration.
 
 ## CLI Commands
 
@@ -302,7 +339,7 @@ smallclaw update
 
 ## Skills
 
-SmallClaw supports drop-in SKILL.md files that give the model extra context and capabilities for specific domains. Place skill files in `.localclaw/skills/<skill-name>/SKILL.md`. The model loads and applies them automatically when relevant.
+SmallClaw supports drop-in SKILL.md files that give the model extra context and capabilities for specific domains. Place skill files in `.smallclaw/skills/<skill-name>/SKILL.md`. The model loads and applies them automatically when relevant.
 
 Skills are plain markdown — write instructions, examples, and constraints in natural language. No code required.
 
@@ -420,5 +457,5 @@ Inspired by [OpenClaw](https://openclaw.ai) and the Anthropic team. Built for th
 
 ---
 
-**Note:** This README reflects SmallClaw `v1.0.1`.
+**Note:** This README reflects SmallClaw `v1.0.3`.
 

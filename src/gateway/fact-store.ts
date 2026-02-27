@@ -48,8 +48,8 @@ let _storeCache: FactStore | null = null;
 let _storeMtime = 0;
 
 function getStorePath(): string {
-  const projectCfg = path.join(process.cwd(), '.localclaw');
-  const cfgDir = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.localclaw');
+  const projectCfg = path.join(process.cwd(), '.smallclaw');
+  const cfgDir = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.smallclaw');
   return path.join(cfgDir, 'facts.json');
 }
 

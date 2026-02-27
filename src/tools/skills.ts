@@ -222,7 +222,7 @@ export async function executeSkillSearch(args: { query: string }): Promise<ToolR
   try {
     const url = `https://clawhub.ai/api/search?q=${encodeURIComponent(args.query)}&limit=8`;
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'LocalClaw/1.0', Accept: 'application/json' },
+      headers: { 'User-Agent': 'SmallClaw/1.0', Accept: 'application/json' },
       signal: AbortSignal.timeout(10_000),
     });
 
@@ -266,7 +266,7 @@ export async function executeSkillInstall(args: { slug: string; confirmed?: bool
   try {
     const rawUrl = `https://clawhub.ai/skills/${slug}/SKILL.md`;
     const res = await fetch(rawUrl, {
-      headers: { 'User-Agent': 'LocalClaw/1.0' },
+      headers: { 'User-Agent': 'SmallClaw/1.0' },
       signal: AbortSignal.timeout(15_000),
     });
 

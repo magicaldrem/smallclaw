@@ -5,6 +5,7 @@ import { webSearchTool, webFetchTool } from './web.js';
 import { memorySearchTool, memoryWriteTool } from './memory.js';
 import { skillListTool, skillSearchTool, skillInstallTool, skillRemoveTool, skillExecTool } from './skills.js';
 import { timeNowTool } from './time.js';
+import { selfUpdateTool } from './self-update.js';
 
 export interface Tool {
   name: string;
@@ -94,6 +95,8 @@ class ToolRegistry {
     this.registerSafe(skillInstallTool);
     this.registerSafe(skillRemoveTool);
     this.registerSafe(skillExecTool);
+    // Self-update tool
+    this.registerSafe(selfUpdateTool);
   }
 
   register(tool: Tool): void {

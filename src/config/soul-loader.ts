@@ -4,8 +4,8 @@ import os from 'os';
 import { resolveSkillsRoot } from '../skills/store.js';
 
 // Prefer config next to the project, fall back to home
-const PROJECT_CONFIG = path.join(process.cwd(), '.localclaw');
-const CONFIG_DIR = fs.existsSync(PROJECT_CONFIG) ? PROJECT_CONFIG : path.join(os.homedir(), '.localclaw');
+const PROJECT_CONFIG = path.join(process.cwd(), '.smallclaw');
+const CONFIG_DIR = fs.existsSync(PROJECT_CONFIG) ? PROJECT_CONFIG : path.join(os.homedir(), '.smallclaw');
 const SOUL_PATHS = [
   path.join(CONFIG_DIR, 'soul.md'),
   path.join(process.cwd(), 'src', 'config', 'soul.md'),
@@ -139,7 +139,7 @@ export function loadSkills(): SkillInfo[] {
 function tokenizeSkillQuery(input: string): string[] {
   const stop = new Set([
     'the', 'a', 'an', 'to', 'for', 'of', 'and', 'or', 'with', 'in', 'on', 'at', 'is', 'are',
-    'be', 'can', 'you', 'please', 'use', 'run', 'help', 'skill', 'skills', 'localclaw',
+    'be', 'can', 'you', 'please', 'use', 'run', 'help', 'skill', 'skills', 'smallclaw',
   ]);
   const tokens = String(input || '')
     .toLowerCase()

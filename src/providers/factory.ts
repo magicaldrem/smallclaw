@@ -1,4 +1,4 @@
-﻿/**
+/**
  * factory.ts
  * Returns the active LLMProvider based on config.
  * All code that needs to talk to an LLM goes through here.
@@ -24,7 +24,7 @@ const LEGACY_BLOCKED_MODELS = new Set(['codex-davinci-002']);
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 const DEFAULT_OPENAI_CODEX_MODEL = 'gpt-5.3-codex';
 
-// â”€â”€â”€ Config Resolution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Config Resolution ─────────────────────────────────────────────────────────
 
 function getProviderConfig(): { active: ProviderID; providers: any } {
   const raw = getConfig().getConfig() as any;
@@ -34,7 +34,7 @@ function getProviderConfig(): { active: ProviderID; providers: any } {
     return { active: raw.llm.provider, providers: raw.llm.providers || {} };
   }
 
-  // Legacy Ollama-only config â€” migrate transparently
+  // Legacy Ollama-only config — migrate transparently
   return {
     active: 'ollama',
     providers: {
@@ -47,12 +47,12 @@ function getProviderConfig(): { active: ProviderID; providers: any } {
 }
 
 function getConfigDir(): string {
-  const PROJECT_CONFIG = path.join(process.cwd(), '.localclaw');
-  const HOME_CONFIG    = path.join(os.homedir(), '.localclaw');
+  const PROJECT_CONFIG = path.join(process.cwd(), '.smallclaw');
+  const HOME_CONFIG    = path.join(os.homedir(), '.smallclaw');
   return fs.existsSync(PROJECT_CONFIG) ? PROJECT_CONFIG : HOME_CONFIG;
 }
 
-// â”€â”€â”€ Factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Factory ───────────────────────────────────────────────────────────────────
 
 let cachedProvider: LLMProvider | null = null;
 let cachedProviderId: ProviderID | null = null;

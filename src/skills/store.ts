@@ -49,8 +49,8 @@ function copyLegacySkillsIfNeeded(projectRoot: string, legacyRoot: string): void
 }
 
 export function resolveSkillsRoot(): string {
-  const projectRoot = path.join(process.cwd(), '.localclaw', 'skills');
-  const legacyRoot = path.join(os.homedir(), '.localclaw', 'skills');
+  const projectRoot = path.join(process.cwd(), '.smallclaw', 'skills');
+  const legacyRoot = path.join(os.homedir(), '.smallclaw', 'skills');
   fs.mkdirSync(projectRoot, { recursive: true });
   copyLegacySkillsIfNeeded(projectRoot, legacyRoot);
   return projectRoot;
@@ -61,7 +61,7 @@ export function resolveSkillDir(skillId: string): string {
 }
 
 export function resolveSkillLockFile(): string {
-  return path.join(process.cwd(), '.localclaw', '.clawhub', 'lock.json');
+  return path.join(process.cwd(), '.smallclaw', '.clawhub', 'lock.json');
 }
 
 export function ensureSkillsRoot(): string {

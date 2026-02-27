@@ -1,11 +1,10 @@
 {
-  "name": "localclaw",
+  "name": "smallclaw",
   "version": "1.0.1",
   "description": "Local AI agent framework powered by Ollama - OpenClaw alternative",
   "main": "dist/index.js",
   "bin": {
-    "smallclaw": "./dist/cli/index.js",
-    "localclaw": "./dist/cli/localclaw.js"
+    "smallclaw": "./dist/cli/index.js"
   },
   "scripts": {
     "build": "tsc",

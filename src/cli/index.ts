@@ -12,16 +12,11 @@ import { getOllamaClient } from '../agents/ollama-client';
 import { AgentOrchestrator } from '../gateway/orchestrator';
 
 const program = new Command();
-const invokedAsLegacyAlias = process.env.SMALLCLAW_INVOKED_AS === 'localclaw';
 
 program
   .name('smallclaw')
   .description('Local AI agent powered by your choice of LLM provider')
   .version('1.0.1');
-
-if (invokedAsLegacyAlias) {
-  console.warn('[Deprecation] `localclaw` is deprecated. Please use `smallclaw`.');
-}
 
 type InstallMode = 'git' | 'npm' | 'unknown';
 type UpdateSource = 'git' | 'npm' | 'none';
@@ -218,7 +213,6 @@ function checkNpmUpdate(ctx: UpdateContext): UpdateCheckResult {
         process.env.SMALLCLAW_NPM_PACKAGE,
         ctx.packageName,
         'smallclaw',
-        'localclaw',
       ].filter(Boolean).map(v => String(v)),
     ),
   );

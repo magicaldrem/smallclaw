@@ -173,8 +173,8 @@ export interface ReadToolArgs {
 type RetrievalMode = 'fast' | 'standard' | 'deep';
 
 function getLocalConfigFilePath(): string {
-  const projectCfg = path.join(process.cwd(), '.localclaw', 'config.json');
-  return fsSync.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.localclaw', 'config.json');
+  const projectCfg = path.join(process.cwd(), '.smallclaw', 'config.json');
+  return fsSync.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.smallclaw', 'config.json');
 }
 
 function getRetrievalMode(): RetrievalMode {

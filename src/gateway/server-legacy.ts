@@ -120,8 +120,8 @@ interface AgentPolicySettings {
 }
 
 function getLocalConfigFilePath(): string {
-  const projectCfg = path.join(process.cwd(), '.localclaw', 'config.json');
-  return fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.localclaw', 'config.json');
+  const projectCfg = path.join(process.cwd(), '.smallclaw', 'config.json');
+  return fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.smallclaw', 'config.json');
 }
 
 function readRawLocalConfig(): any {
@@ -1399,8 +1399,8 @@ const SELF_LEARNING_MAX_RECORDS = envInt('LOCALCLAW_SELF_LEARNING_MAX_RECORDS', 
 const SELF_LEARNING_PROMOTE_REPAIRS = envInt('LOCALCLAW_SELF_LEARNING_PROMOTE_REPAIRS', 2);
 
 function getWorkspaceLedgerPath(): string {
-  const projectCfg = path.join(process.cwd(), '.localclaw');
-  const cfgDir = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.localclaw');
+  const projectCfg = path.join(process.cwd(), '.smallclaw');
+  const cfgDir = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.smallclaw');
   return path.join(cfgDir, 'workspace_state.json');
 }
 
@@ -1426,8 +1426,8 @@ function saveWorkspaceLedger(store: WorkspaceLedger): void {
 }
 
 function getSelfLearningPath(): string {
-  const projectCfg = path.join(process.cwd(), '.localclaw');
-  const cfgDir = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.localclaw');
+  const projectCfg = path.join(process.cwd(), '.smallclaw');
+  const cfgDir = fs.existsSync(projectCfg) ? projectCfg : path.join(os.homedir(), '.smallclaw');
   return path.join(cfgDir, 'self_learning.json');
 }
 
@@ -1715,7 +1715,7 @@ function escapeHtmlText(v: string): string {
 }
 
 function buildBasicHtmlDocument(text: string, opts?: { blackBackground?: boolean; whiteText?: boolean; panel?: boolean }): string {
-  const t = String(text || '').trim() || 'Hello world - i am localclaw';
+  const t = String(text || '').trim() || 'Hello world - i am smallclaw';
   const blackBackground = !!opts?.blackBackground;
   const whiteText = !!opts?.whiteText;
   const panel = opts?.panel !== false;
@@ -1731,7 +1731,7 @@ function buildBasicHtmlDocument(text: string, opts?: { blackBackground?: boolean
     '<head>',
     '  <meta charset="UTF-8" />',
     '  <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-    '  <title>LocalClaw</title>',
+    '  <title>SmallClaw</title>',
     '  <style>',
     '    :root {',
     `      --bg: ${bg};`,
@@ -2417,7 +2417,7 @@ function extractHtmlDisplayText(message: string, fallback?: string): string {
     .replace(/\s*,\s*(?:make|set|put)\b[\s\S]*$/i, '')
     .replace(/\s+\b(?:make|set|put)\b[\s\S]*$/i, '')
     .trim();
-  return out || 'Hello world - i am localclaw';
+  return out || 'Hello world - i am smallclaw';
 }
 
 function extractCreateRequestedContentValue(message: string, maxLen = 260): string {
@@ -2799,7 +2799,7 @@ function normalizeUserRequest(message: string): NormalizedRequest {
   let text = raw.replace(/\s+/g, ' ').trim();
   text = text
     .replace(/^(lol|lmao|bro|hey|yo|okay|ok|cool|nice|sorry)[,!\s-]+/i, '')
-    .replace(/^(openclaw|localclaw|claw)[,!\s-]+/i, '')
+    .replace(/^(openclaw|smallclaw|claw)[,!\s-]+/i, '')
     .replace(/\b(can you|could you|would you|please)\b/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -3837,7 +3837,7 @@ function inferDeterministicFileWriteCall(message: string): { tool: 'write'; para
     const black = /\bbackground\b[\s\S]*\bblack\b|\bblack\b[\s\S]*\bbackground\b/i.test(raw);
     const white = /\btext\b[\s\S]*\bwhite\b|\bwhite\b[\s\S]*\btext\b/i.test(raw);
     const panel = /\b(panel|card|box)\b/i.test(raw);
-    const displayText = extractHtmlDisplayText(raw, content || 'Hello world - i am localclaw');
+    const displayText = extractHtmlDisplayText(raw, content || 'Hello world - i am smallclaw');
     content = buildBasicHtmlDocument(displayText, {
       blackBackground: black,
       whiteText: white,
@@ -4189,7 +4189,7 @@ function inferDeterministicFileBatchCalls(
         const black = /\bbackground\b[\s\S]*\bblack\b|\bblack\b[\s\S]*\bbackground\b/i.test(clause);
         const white = /\btext\b[\s\S]*\bwhite\b|\bwhite\b[\s\S]*\btext\b/i.test(clause);
         const panel = /\b(panel|card|box)\b/i.test(clause);
-        const displayText = extractHtmlDisplayText(clause, content || 'Hello world - i am localclaw');
+        const displayText = extractHtmlDisplayText(clause, content || 'Hello world - i am smallclaw');
         content = buildBasicHtmlDocument(displayText, {
           blackBackground: black,
           whiteText: white,
@@ -4681,7 +4681,7 @@ function inferDeterministicFileBatchCalls(
       const black = /\bbackground\b[\s\S]*\bblack\b|\bblack\b[\s\S]*\bbackground\b/i.test(raw);
       const white = /\btext\b[\s\S]*\bwhite\b|\bwhite\b[\s\S]*\btext\b/i.test(raw);
       const panel = /\b(panel|card|box)\b/i.test(raw);
-      const displayText = extractHtmlDisplayText(raw, content || 'Hello world - i am localclaw');
+      const displayText = extractHtmlDisplayText(raw, content || 'Hello world - i am smallclaw');
       content = buildBasicHtmlDocument(displayText, {
         blackBackground: black,
         whiteText: white,
@@ -5048,7 +5048,7 @@ function buildChatReplyPrompt(message: string, state: AgentSessionState, history
       `When ALL tasks are done, emit plan_done instead of open_tool.`
     : '';
   return [
-    `You are LocalClaw in DISCUSS mode. Respond conversationally.`,
+    `You are SmallClaw in DISCUSS mode. Respond conversationally.`,
     `RULES:`,
     `1. Never run tools yourself in this mode.`,
     `2. If the user needs workspace/file work (create, read, delete, rename, move, list, count, etc.): ALWAYS write open_tool in your reply. This includes destructive operations like removing files — the execute mode handles confirmation, not you.`,
@@ -5081,7 +5081,7 @@ function buildCoachReplyPrompt(message: string, state: AgentSessionState, histor
     ? buildRecentToolActionsContext(state, 2, 3)
     : '';
   return [
-    `You are LocalClaw in DISCUSS mode. Respond with guidance.`,
+    `You are SmallClaw in DISCUSS mode. Respond with guidance.`,
     `RULES:`,
     `1. Never run tools yourself in this mode.`,
     `2. If the user needs workspace/file work (create, read, delete, rename, move, list, count, etc.): ALWAYS write open_tool in your reply. This includes destructive operations — execute mode handles confirmation.`,
@@ -5756,7 +5756,7 @@ function getRuntimeFreshnessInstruction(): string {
   const local = now.toLocaleString();
   const modelId = config.models?.primary || 'unknown';
   return [
-    `You are LocalClaw running locally on the user's machine.`,
+    `You are SmallClaw running locally on the user's machine.`,
     `Current agent model: ${modelId}.`,
     `Local time: ${local}.`,
     `UTC time: ${utcIso}.`,
@@ -6694,7 +6694,7 @@ app.get('/', (req, res) => {
   if (fs.existsSync(UI_PATH)) {
     res.sendFile(UI_PATH);
   } else {
-    res.send('<h1>LocalClaw Gateway</h1><p>UI not found. Place index.html in web-ui/</p>');
+    res.send('<h1>SmallClaw Gateway</h1><p>UI not found. Place index.html in web-ui/</p>');
   }
 });
 
@@ -7228,7 +7228,7 @@ app.post('/api/chat', async (req, res) => {
         }
 
         try {
-          const contSystemPrompt = continuationSystemPrompt || 'You are LocalClaw. Be concise.';
+          const contSystemPrompt = continuationSystemPrompt || 'You are SmallClaw. Be concise.';
           const { reply: contReply, thinking: contThinking } = await runContinuationDiscussPass(
             getOllamaClient(),
             state,
@@ -7349,14 +7349,14 @@ app.post('/api/chat', async (req, res) => {
       // finalize response matches the tone, style, and awareness of the initial chat.
       // This also allows the model to emit open_tool for continuation if the task
       // failed or is incomplete — the trigger system detects it just like in discuss.
-      const soulPrompt = continuationSystemPrompt || 'You are LocalClaw, a helpful local AI assistant. Be direct and conversational.';
+      const soulPrompt = continuationSystemPrompt || 'You are SmallClaw, a helpful local AI assistant. Be direct and conversational.';
       const verified = buildVerifiedFactsHeader(sessionState);
       const planContext = buildPlanContext(sessionState);
       const historyText = summarizeHistoryForPrompt(history || [], 4);
       const recentToolContext = buildRecentToolActionsContext(sessionState, 2, 3);
 
       const prompt = [
-        `You are LocalClaw. You just executed tools for the user's request. Now respond.`,
+        `You are SmallClaw. You just executed tools for the user's request. Now respond.`,
         `RULES:`,
         `1. If the task completed successfully: respond with the result conversationally.`,
         `2. If the task failed or is incomplete: write open_tool somewhere in your reply to go back and fix/continue.`,
@@ -10366,7 +10366,7 @@ wss.on('connection', (ws) => {
   console.log(`[Gateway] Client connected (${clients.size} total)`);
 
   // Send current state on connect
-  ws.send(JSON.stringify({ type: 'connected', message: 'LocalClaw Gateway ready' }));
+  ws.send(JSON.stringify({ type: 'connected', message: 'SmallClaw Gateway ready' }));
 
   ws.on('message', async (raw) => {
     try {
@@ -10443,7 +10443,7 @@ const HOST = config.gateway.host;
 if (process.env.LOCALCLAW_DISABLE_SERVER !== '1') {
   httpServer.listen(PORT, HOST, () => {
     console.log('');
-    console.log('ðŸ¦ž LocalClaw Gateway running!');
+    console.log('ðŸ¦ž SmallClaw Gateway running!');
     console.log(`   Open in browser: http://${HOST}:${PORT}`);
     console.log(`   WebSocket: ws://${HOST}:${PORT}`);
     console.log('');

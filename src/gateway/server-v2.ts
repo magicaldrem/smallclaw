@@ -115,6 +115,7 @@ import { detectGpu, logGpuStatus } from './gpu-detector';
 // ─── Config ────────────────────────────────────────────────────────────────────
 
 const config = getConfig().getConfig();
+const CONFIG_DIR_PATH = getConfig().getConfigDir();
 const PORT = config.gateway.port || 18789;
 const HOST = config.gateway.host || '127.0.0.1';
 const MAX_TOOL_ROUNDS = 12;
@@ -254,8 +255,8 @@ const BLOCKED_PATTERNS = ['del ', 'rm ', 'format', 'shutdown', 'restart', 'rmdir
 const lastFilenameUsed: Map<string, string> = new Map();
 
 // Skills system
-const configuredSkillsDir = (config as any).skills?.directory || path.join(process.cwd(), '.localclaw', 'skills');
-const fallbackSkillsDir = path.join(process.cwd(), '.localclaw', 'skills');
+const configuredSkillsDir = (config as any).skills?.directory || path.join(CONFIG_DIR_PATH, 'skills');
+const fallbackSkillsDir = path.join(CONFIG_DIR_PATH, 'skills');
 
 function samePath(a: string, b: string): boolean {
   return path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
@@ -405,9 +406,84 @@ function broadcastWS(data: object): void {
   });
 }
 
+type TelegramChannelConfig = {
+  enabled: boolean;
+  botToken: string;
+  allowedUserIds: number[];
+  streamMode: 'full' | 'partial';
+};
+
+type DiscordChannelConfig = {
+  enabled: boolean;
+  botToken: string;
+  applicationId: string;
+  guildId: string;
+  channelId: string;
+  webhookUrl: string;
+};
+
+type WhatsAppChannelConfig = {
+  enabled: boolean;
+  accessToken: string;
+  phoneNumberId: string;
+  businessAccountId: string;
+  verifyToken: string;
+  webhookSecret: string;
+  testRecipient: string;
+};
+
+type ChannelsConfig = {
+  telegram: TelegramChannelConfig;
+  discord: DiscordChannelConfig;
+  whatsapp: WhatsAppChannelConfig;
+};
+
+function normalizeTelegramConfig(raw: any): TelegramChannelConfig {
+  return {
+    enabled: raw?.enabled === true,
+    botToken: String(raw?.botToken || ''),
+    allowedUserIds: Array.isArray(raw?.allowedUserIds) ? raw.allowedUserIds.map(Number).filter((n: number) => Number.isFinite(n) && n > 0) : [],
+    streamMode: raw?.streamMode === 'partial' ? 'partial' : 'full',
+  };
+}
+
+function normalizeDiscordConfig(raw: any): DiscordChannelConfig {
+  return {
+    enabled: raw?.enabled === true,
+    botToken: String(raw?.botToken || ''),
+    applicationId: String(raw?.applicationId || ''),
+    guildId: String(raw?.guildId || ''),
+    channelId: String(raw?.channelId || ''),
+    webhookUrl: String(raw?.webhookUrl || ''),
+  };
+}
+
+function normalizeWhatsAppConfig(raw: any): WhatsAppChannelConfig {
+  return {
+    enabled: raw?.enabled === true,
+    accessToken: String(raw?.accessToken || ''),
+    phoneNumberId: String(raw?.phoneNumberId || ''),
+    businessAccountId: String(raw?.businessAccountId || ''),
+    verifyToken: String(raw?.verifyToken || ''),
+    webhookSecret: String(raw?.webhookSecret || ''),
+    testRecipient: String(raw?.testRecipient || ''),
+  };
+}
+
+function resolveChannelsConfig(): ChannelsConfig {
+  const cfg = getConfig().getConfig() as any;
+  const channels = cfg.channels || {};
+  const legacyTelegram = cfg.telegram || {};
+  return {
+    telegram: normalizeTelegramConfig({ ...(channels.telegram || {}), ...legacyTelegram }),
+    discord: normalizeDiscordConfig(channels.discord || {}),
+    whatsapp: normalizeWhatsAppConfig(channels.whatsapp || {}),
+  };
+}
+
 // ─── CronScheduler Init ────────────────────────────────────────────────────────
 
-const cronStorePath = path.join(process.cwd(), '.localclaw', 'cron', 'jobs.json');
+const cronStorePath = path.join(CONFIG_DIR_PATH, 'cron', 'jobs.json');
 const cronScheduler = new CronScheduler({
   storePath: cronStorePath,
   handleChat: (message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode) =>
@@ -436,12 +512,7 @@ const cronScheduler = new CronScheduler({
 // ─── Telegram Channel Init ─────────────────────────────────────────────────────────
 
 const telegramChannel = new TelegramChannel(
-  {
-    enabled: config.telegram?.enabled || false,
-    botToken: config.telegram?.botToken || '',
-    allowedUserIds: config.telegram?.allowedUserIds || [],
-    streamMode: config.telegram?.streamMode || 'full',
-  },
+  resolveChannelsConfig().telegram,
   {
     handleChat: (message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode) =>
       handleChat(message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode),
@@ -453,7 +524,7 @@ const telegramChannel = new TelegramChannel(
 
 const heartbeatRunner = new HeartbeatRunner({
   workspacePath: getConfig().getWorkspacePath(),
-  configPath: path.join(process.cwd(), '.localclaw', 'heartbeat', 'config.json'),
+  configPath: path.join(CONFIG_DIR_PATH, 'heartbeat', 'config.json'),
   handleChat: (message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode) =>
     handleChat(message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode),
   getMainSessionId: () => lastMainSessionId || 'default',
@@ -2443,7 +2514,7 @@ RESPONSE RULES:
         const queuedMessage = preflight.friendly_queued_message
           || `On it! I've queued "${taskTitle}" as a background task. You can track progress in the Tasks panel.`;
         sendSSE('task_queued', { taskId: task.id, title: taskTitle });
-        logToDaily(workspacePath, 'LocalClaw', queuedMessage);
+        logToDaily(workspacePath, 'SmallClaw', queuedMessage);
         addMessage(sessionId, { role: 'assistant', content: queuedMessage, timestamp: Date.now() });
         return { type: 'chat', text: queuedMessage };
       }
@@ -2457,7 +2528,7 @@ RESPONSE RULES:
           message: 'Advisor route selected secondary_chat. Returning secondary response directly.',
         });
         const text = preflight.secondary_response.trim();
-        logToDaily(workspacePath, 'LocalClaw', text);
+        logToDaily(workspacePath, 'SmallClaw', text);
         return { type: 'chat', text };
       }
 
@@ -2489,7 +2560,7 @@ RESPONSE RULES:
           const queuedMessage = preflight.friendly_queued_message
             || `On it! I've queued "${taskTitle}" as a background task. You can track progress in the Tasks panel.`;
           sendSSE('task_queued', { taskId: task.id, title: taskTitle });
-          logToDaily(workspacePath, 'LocalClaw', queuedMessage);
+          logToDaily(workspacePath, 'SmallClaw', queuedMessage);
           addMessage(sessionId, { role: 'assistant', content: queuedMessage, timestamp: Date.now() });
           return { type: 'chat', text: queuedMessage };
         }
@@ -3089,7 +3160,7 @@ RULES:
       if (analysis.exact_files.length) lines.push(`Files: ${analysis.exact_files.join(', ')}`);
       if (analysis.edit_plan.length) lines.push(`Plan: ${analysis.edit_plan.join(' -> ')}`);
       const text = lines.join('\n');
-      logToDaily(workspacePath, 'LocalClaw', text);
+      logToDaily(workspacePath, 'SmallClaw', text);
       return { type: 'chat', text };
     }
     // Secondary unavailable — fail-closed. Spec: FILE_ANALYSIS is always Secondary, no primary fallback.
@@ -3315,7 +3386,7 @@ RULES:
       const finalText = parts.length ? parts.join('. ') + '.' : 'Done.';
 
       console.log(`[v2] FINAL (secondary-owned): ${finalText}`);
-      logToDaily(workspacePath, 'LocalClaw', finalText);
+      logToDaily(workspacePath, 'SmallClaw', finalText);
       return {
         type: 'execute',
         text: finalText,
@@ -3909,7 +3980,7 @@ RULES:
       finalText = sanitizeFinalReply(finalText, { preflightReason: preflightReasonForTurn }) || 'Hey! How can I help?';
       console.log(`[v2] FINAL: ${finalText.slice(0, 150)}`);
 
-      logToDaily(workspacePath, 'LocalClaw', finalText);
+      logToDaily(workspacePath, 'SmallClaw', finalText);
       if (fileOpV2Active) {
         maybeSaveFileOpCheckpoint({
           phase: 'done',
@@ -5055,7 +5126,7 @@ app.get('/api/bg-tasks/:id/stream', (req, res) => {
 });
 
 // Task heartbeat config API
-const taskHeartbeatPath = path.join(process.cwd(), '.localclaw', 'task-heartbeat.json');
+const taskHeartbeatPath = path.join(CONFIG_DIR_PATH, 'task-heartbeat.json');
 
 function loadTaskHeartbeatConfig(): { enabled: boolean; interval_minutes: number } {
   try {
@@ -5225,52 +5296,290 @@ async function runTaskHeartbeat(): Promise<void> {
   scheduleTaskHeartbeat();
 }
 
-// ─── Telegram API ──────────────────────────────────────────────────────────────
+// ─── Channels API ──────────────────────────────────────────────────────────────
 
-app.get('/api/telegram/status', (_req, res) => {
-  const status = telegramChannel.getStatus();
-  const tgConfig = getConfig().getConfig().telegram;
+async function testTelegramConfig(token: string): Promise<{ success: boolean; bot?: any; error?: string }> {
+  if (!token) return { success: false, error: 'No Telegram bot token provided' };
+  try {
+    const resp = await fetch(`https://api.telegram.org/bot${token}/getMe`, { method: 'POST' });
+    const data: any = await resp.json();
+    if (!data.ok) return { success: false, error: data.description || 'Invalid token' };
+    return { success: true, bot: { username: data.result.username, firstName: data.result.first_name, id: data.result.id } };
+  } catch (err: any) {
+    return { success: false, error: String(err?.message || err) };
+  }
+}
+
+async function testDiscordConfig(dc: DiscordChannelConfig): Promise<{ success: boolean; bot?: any; error?: string }> {
+  if (!dc.botToken) return { success: false, error: 'No Discord bot token provided' };
+  try {
+    const meResp = await fetch('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bot ${dc.botToken}` },
+    });
+    const meData: any = await meResp.json();
+    if (!meResp.ok) return { success: false, error: meData?.message || `Discord API ${meResp.status}` };
+
+    return {
+      success: true,
+      bot: { username: meData.username, id: meData.id, discriminator: meData.discriminator },
+    };
+  } catch (err: any) {
+    return { success: false, error: String(err?.message || err) };
+  }
+}
+
+async function testWhatsAppConfig(wa: WhatsAppChannelConfig): Promise<{ success: boolean; account?: any; error?: string }> {
+  if (!wa.accessToken) return { success: false, error: 'No WhatsApp access token provided' };
+  if (!wa.phoneNumberId) return { success: false, error: 'No WhatsApp phone number ID provided' };
+  try {
+    const url = `https://graph.facebook.com/v20.0/${encodeURIComponent(wa.phoneNumberId)}?fields=id,display_phone_number,verified_name`;
+    const resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${wa.accessToken}` },
+    });
+    const data: any = await resp.json();
+    if (!resp.ok) return { success: false, error: data?.error?.message || `WhatsApp API ${resp.status}` };
+    return { success: true, account: data };
+  } catch (err: any) {
+    return { success: false, error: String(err?.message || err) };
+  }
+}
+
+app.get('/api/channels/status', (_req, res) => {
+  const runtimeTelegram = telegramChannel.getStatus();
+  const channels = resolveChannelsConfig();
+
   res.json({
     success: true,
-    ...status,
-    enabled: tgConfig?.enabled || false,
-    hasToken: !!(tgConfig?.botToken),
-    allowedUserIds: tgConfig?.allowedUserIds || [],
+    telegram: {
+      ...runtimeTelegram,
+      enabled: channels.telegram.enabled,
+      hasToken: !!channels.telegram.botToken,
+      allowedUserIds: channels.telegram.allowedUserIds,
+    },
+    discord: {
+      enabled: channels.discord.enabled,
+      hasToken: !!channels.discord.botToken,
+      hasWebhook: !!channels.discord.webhookUrl,
+      applicationId: channels.discord.applicationId,
+      guildId: channels.discord.guildId,
+      channelId: channels.discord.channelId,
+    },
+    whatsapp: {
+      enabled: channels.whatsapp.enabled,
+      hasAccessToken: !!channels.whatsapp.accessToken,
+      phoneNumberId: channels.whatsapp.phoneNumberId,
+      businessAccountId: channels.whatsapp.businessAccountId,
+      verifyTokenSet: !!channels.whatsapp.verifyToken,
+      webhookSecretSet: !!channels.whatsapp.webhookSecret,
+      testRecipient: channels.whatsapp.testRecipient,
+    },
+  });
+});
+
+app.post('/api/channels/config', async (req, res) => {
+  const incoming = req.body?.channels || {};
+  const cm = getConfig();
+  const current = cm.getConfig() as any;
+  const existing = resolveChannelsConfig();
+
+  const mergedTelegram = normalizeTelegramConfig({ ...existing.telegram, ...(incoming.telegram || {}) });
+  const mergedDiscord = normalizeDiscordConfig({ ...existing.discord, ...(incoming.discord || {}) });
+  const mergedWhatsApp = normalizeWhatsAppConfig({ ...existing.whatsapp, ...(incoming.whatsapp || {}) });
+
+  const channels = {
+    ...(current.channels || {}),
+    telegram: mergedTelegram,
+    discord: mergedDiscord,
+    whatsapp: mergedWhatsApp,
+  };
+
+  // Keep legacy top-level telegram key in sync for backward compatibility.
+  cm.updateConfig({
+    channels,
+    telegram: mergedTelegram,
+  } as any);
+
+  telegramChannel.updateConfig(mergedTelegram);
+
+  res.json({
+    success: true,
+    channels: {
+      telegram: { enabled: mergedTelegram.enabled, hasToken: !!mergedTelegram.botToken, allowedUserIds: mergedTelegram.allowedUserIds },
+      discord: { enabled: mergedDiscord.enabled, hasToken: !!mergedDiscord.botToken, hasWebhook: !!mergedDiscord.webhookUrl },
+      whatsapp: { enabled: mergedWhatsApp.enabled, hasAccessToken: !!mergedWhatsApp.accessToken, phoneNumberId: mergedWhatsApp.phoneNumberId },
+    },
+  });
+});
+
+app.post('/api/channels/test/:channel', async (req, res) => {
+  const channel = String(req.params.channel || '').toLowerCase();
+  const channels = resolveChannelsConfig();
+
+  if (channel === 'telegram') {
+    const token = String(req.body?.botToken || channels.telegram.botToken || '');
+    const result = await testTelegramConfig(token);
+    res.json(result);
+    return;
+  }
+
+  if (channel === 'discord') {
+    const dc = normalizeDiscordConfig({ ...channels.discord, ...(req.body || {}) });
+    const result = await testDiscordConfig(dc);
+    res.json(result);
+    return;
+  }
+
+  if (channel === 'whatsapp') {
+    const wa = normalizeWhatsAppConfig({ ...channels.whatsapp, ...(req.body || {}) });
+    const result = await testWhatsAppConfig(wa);
+    res.json(result);
+    return;
+  }
+
+  res.status(400).json({ success: false, error: `Unsupported channel: ${channel}` });
+});
+
+app.post('/api/channels/send-test/:channel', async (req, res) => {
+  const channel = String(req.params.channel || '').toLowerCase();
+  const channels = resolveChannelsConfig();
+
+  if (channel === 'telegram') {
+    try {
+      await telegramChannel.sendToAllowed('🦞 SmallClaw test message - Telegram is connected!');
+      res.json({ success: true });
+    } catch (err: any) {
+      res.json({ success: false, error: String(err?.message || err) });
+    }
+    return;
+  }
+
+  if (channel === 'discord') {
+    const dc = normalizeDiscordConfig({ ...channels.discord, ...(req.body || {}) });
+    const text = String(req.body?.text || '🦞 SmallClaw test message - Discord is connected!');
+    if (dc.webhookUrl) {
+      try {
+        const resp = await fetch(dc.webhookUrl, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ content: text }),
+        });
+        if (!resp.ok) {
+          const body = await resp.text();
+          res.json({ success: false, error: body || `Discord webhook HTTP ${resp.status}` });
+          return;
+        }
+        res.json({ success: true });
+      } catch (err: any) {
+        res.json({ success: false, error: String(err?.message || err) });
+      }
+      return;
+    }
+    if (!dc.botToken || !dc.channelId) {
+      res.json({ success: false, error: 'Provide Discord webhook URL or bot token + channel ID' });
+      return;
+    }
+    try {
+      const resp = await fetch(`https://discord.com/api/v10/channels/${encodeURIComponent(dc.channelId)}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bot ${dc.botToken}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ content: text }),
+      });
+      const data: any = await resp.json();
+      if (!resp.ok) {
+        res.json({ success: false, error: data?.message || `Discord API ${resp.status}` });
+        return;
+      }
+      res.json({ success: true, messageId: data?.id });
+    } catch (err: any) {
+      res.json({ success: false, error: String(err?.message || err) });
+    }
+    return;
+  }
+
+  if (channel === 'whatsapp') {
+    const wa = normalizeWhatsAppConfig({ ...channels.whatsapp, ...(req.body || {}) });
+    const to = String(req.body?.to || wa.testRecipient || '').trim();
+    const text = String(req.body?.text || 'SmallClaw test message - WhatsApp is connected!');
+    if (!wa.accessToken || !wa.phoneNumberId || !to) {
+      res.json({ success: false, error: 'Provide WhatsApp access token, phone number ID, and test recipient number' });
+      return;
+    }
+    try {
+      const resp = await fetch(`https://graph.facebook.com/v20.0/${encodeURIComponent(wa.phoneNumberId)}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${wa.accessToken}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to,
+          type: 'text',
+          text: { body: text },
+        }),
+      });
+      const data: any = await resp.json();
+      if (!resp.ok) {
+        res.json({ success: false, error: data?.error?.message || `WhatsApp API ${resp.status}` });
+        return;
+      }
+      res.json({ success: true, messageId: data?.messages?.[0]?.id || null });
+    } catch (err: any) {
+      res.json({ success: false, error: String(err?.message || err) });
+    }
+    return;
+  }
+
+  res.status(400).json({ success: false, error: `Unsupported channel: ${channel}` });
+});
+
+// Legacy Telegram endpoints (compatibility wrappers)
+app.get('/api/telegram/status', (_req, res) => {
+  const runtimeTelegram = telegramChannel.getStatus();
+  const channels = resolveChannelsConfig();
+  res.json({
+    success: true,
+    ...runtimeTelegram,
+    enabled: channels.telegram.enabled,
+    hasToken: !!channels.telegram.botToken,
+    allowedUserIds: channels.telegram.allowedUserIds,
   });
 });
 
 app.post('/api/telegram/config', async (req, res) => {
-  const { botToken, allowedUserIds, enabled } = req.body;
+  const incoming = req.body || {};
   const cm = getConfig();
-  const current = cm.getConfig();
-  const newTg = {
-    enabled: typeof enabled === 'boolean' ? enabled : (current.telegram?.enabled || false),
-    botToken: typeof botToken === 'string' ? botToken : (current.telegram?.botToken || ''),
-    allowedUserIds: Array.isArray(allowedUserIds) ? allowedUserIds.map(Number).filter(n => !isNaN(n)) : (current.telegram?.allowedUserIds || []),
-    streamMode: 'full' as const,
+  const current = cm.getConfig() as any;
+  const existing = resolveChannelsConfig();
+  const mergedTelegram = normalizeTelegramConfig({ ...existing.telegram, ...incoming });
+  const channels = {
+    ...(current.channels || {}),
+    telegram: mergedTelegram,
+    discord: existing.discord,
+    whatsapp: existing.whatsapp,
   };
-  cm.updateConfig({ telegram: newTg });
-  telegramChannel.updateConfig(newTg);
-  res.json({ success: true, config: { enabled: newTg.enabled, hasToken: !!newTg.botToken, allowedUserIds: newTg.allowedUserIds } });
+  cm.updateConfig({ channels, telegram: mergedTelegram } as any);
+  telegramChannel.updateConfig(mergedTelegram);
+  res.json({ success: true, config: { enabled: mergedTelegram.enabled, hasToken: !!mergedTelegram.botToken, allowedUserIds: mergedTelegram.allowedUserIds } });
 });
 
 app.post('/api/telegram/test', async (req, res) => {
-  const { botToken } = req.body;
-  const token = botToken || getConfig().getConfig().telegram?.botToken;
-  if (!token) { res.json({ success: false, error: 'No bot token provided' }); return; }
-  try {
-    const resp = await fetch(`https://api.telegram.org/bot${token}/getMe`, { method: 'POST' });
-    const data: any = await resp.json();
-    if (!data.ok) { res.json({ success: false, error: data.description || 'Invalid token' }); return; }
-    res.json({ success: true, bot: { username: data.result.username, firstName: data.result.first_name, id: data.result.id } });
-  } catch (err: any) { res.json({ success: false, error: err.message }); }
+  const channels = resolveChannelsConfig();
+  const token = String(req.body?.botToken || channels.telegram.botToken || '');
+  const result = await testTelegramConfig(token);
+  res.json(result);
 });
 
 app.post('/api/telegram/send-test', async (req, res) => {
   try {
-    await telegramChannel.sendToAllowed('🦞 SmallClaw test message — Telegram is connected!');
+    await telegramChannel.sendToAllowed('🦞 SmallClaw test message - Telegram is connected!');
     res.json({ success: true });
-  } catch (err: any) { res.json({ success: false, error: err.message }); }
+  } catch (err: any) {
+    res.json({ success: false, error: String(err?.message || err) });
+  }
 });
 
 // ─── Settings API ────────────────────────────────────────────────────────────────
@@ -5582,6 +5891,8 @@ app.post('/api/open-path', async (req, res) => {
 // trigger the OpenAI OAuth flow.
 
 import { getProvider, resetProvider, buildProviderForLLM } from '../providers/factory';
+import { buildWebhookRouter, resolveHookConfig } from './webhook-handler';
+import { getMCPManager } from './mcp-manager';
 import { startOAuthFlow, isConnected, clearTokens, loadTokens, exchangeManualCodeFromPending } from '../auth/openai-oauth';
 
 function sanitizeLLMConfig(llm: any): any {
@@ -5634,7 +5945,7 @@ app.post('/api/models/test', async (req, res) => {
 
 // GET /api/auth/openai/status  — is the user connected via OAuth?
 app.get('/api/auth/openai/status', (_req, res) => {
-  const configDir = path.join(process.cwd(), '.localclaw');
+  const configDir = CONFIG_DIR_PATH;
   const connected = isConnected(configDir);
   const tokens    = connected ? loadTokens(configDir) : null;
   res.json({ connected, account_id: tokens?.account_id || null, expires_at: tokens?.expires_at || null });
@@ -5642,7 +5953,7 @@ app.get('/api/auth/openai/status', (_req, res) => {
 
 // POST /api/auth/openai/start  — kick off OAuth flow (opens browser)
 app.post('/api/auth/openai/start', async (_req, res) => {
-  const configDir = path.join(process.cwd(), '.localclaw');
+  const configDir = CONFIG_DIR_PATH;
   try {
     const result = await startOAuthFlow(configDir);
     if (result.needsManualPaste) {
@@ -5657,7 +5968,7 @@ app.post('/api/auth/openai/start', async (_req, res) => {
 
 // POST /api/auth/openai/manual  — manual paste fallback token exchange
 app.post('/api/auth/openai/manual', async (req, res) => {
-  const configDir = path.join(process.cwd(), '.localclaw');
+  const configDir = CONFIG_DIR_PATH;
   const redirectedUrl = String(req.body?.url || '').trim();
   if (!redirectedUrl) {
     res.status(400).json({ success: false, error: 'Missing redirect URL' });
@@ -5673,10 +5984,147 @@ app.post('/api/auth/openai/manual', async (req, res) => {
 
 // POST /api/auth/openai/disconnect  — revoke stored tokens
 app.post('/api/auth/openai/disconnect', (_req, res) => {
-  const configDir = path.join(process.cwd(), '.localclaw');
+  const configDir = CONFIG_DIR_PATH;
   clearTokens(configDir);
   res.json({ success: true });
 });
+
+// ─── Webhook Settings API ────────────────────────────────────────────────────
+
+app.get('/api/settings/hooks', (_req, res) => {
+  const cfg = (getConfig().getConfig() as any).hooks || {};
+  res.json({
+    success: true,
+    hooks: {
+      enabled: cfg.enabled === true,
+      token: cfg.token ? '••••••••' : '',           // never return the real token
+      tokenSet: !!cfg.token,
+      path: cfg.path || '/hooks',
+    },
+  });
+});
+
+app.post('/api/settings/hooks', (req, res) => {
+  try {
+    const { enabled, token, path: hookPath } = req.body || {};
+    const current = (getConfig().getConfig() as any).hooks || {};
+    const updated = {
+      enabled: enabled === true,
+      // If the user sent the masked placeholder, keep the existing token
+      token: token && token !== '••••••••' ? String(token).trim() : (current.token || ''),
+      path: hookPath ? String(hookPath).trim() : (current.path || '/hooks'),
+    };
+    getConfig().updateConfig({ hooks: updated } as any);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/settings/hooks/test', async (req, res) => {
+  try {
+    const cfg = (getConfig().getConfig() as any).hooks || {};
+    if (!cfg.enabled) { res.json({ success: false, error: 'Webhooks are disabled' }); return; }
+    if (!cfg.token)   { res.json({ success: false, error: 'No token configured' }); return; }
+    res.json({ success: true, message: 'Webhook endpoint is active', path: cfg.path || '/hooks' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── MCP API ──────────────────────────────────────────────────────────────────
+
+app.get('/api/mcp/servers', (_req, res) => {
+  try {
+    const mgr = getMCPManager();
+    const configs = mgr.getConfigs();
+    const status = mgr.getStatus();
+    const merged = configs.map(cfg => {
+      const s = status.find(x => x.id === cfg.id);
+      return { ...cfg, status: s?.status || 'disconnected', toolCount: s?.tools || 0, toolNames: s?.toolNames || [], error: s?.error };
+    });
+    res.json({ success: true, servers: merged });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/mcp/servers', (req, res) => {
+  try {
+    const mgr = getMCPManager();
+    const cfg = req.body;
+    if (!cfg.id || !cfg.name) { res.status(400).json({ success: false, error: 'id and name are required' }); return; }
+    if (!cfg.id.match(/^[a-z0-9_-]+$/i)) { res.status(400).json({ success: false, error: 'id must be alphanumeric/underscore/dash only' }); return; }
+    mgr.upsertConfig(cfg);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/mcp/servers/:id', (req, res) => {
+  try {
+    const mgr = getMCPManager();
+    const deleted = mgr.deleteConfig(req.params.id);
+    res.json({ success: deleted, error: deleted ? undefined : 'Server not found' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/mcp/servers/:id/connect', async (req, res) => {
+  try {
+    const mgr = getMCPManager();
+    const result = await mgr.connect(req.params.id);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/mcp/servers/:id/disconnect', async (req, res) => {
+  try {
+    const mgr = getMCPManager();
+    await mgr.disconnect(req.params.id);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/mcp/tools', (_req, res) => {
+  try {
+    const mgr = getMCPManager();
+    res.json({ success: true, tools: mgr.getAllTools() });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── Webhook Routes ──────────────────────────────────────────────────────────
+// Mounted dynamically so the path is always read fresh from config.
+// Must be registered BEFORE the SPA catch-all below.
+(() => {
+  const hookCfg = resolveHookConfig();
+  if (!hookCfg.enabled) {
+    console.log('[Webhooks] Disabled — set hooks.enabled=true in config to activate.');
+    return;
+  }
+  if (!hookCfg.token) {
+    console.warn('[Webhooks] hooks.enabled=true but no hooks.token set — webhooks will be disabled until a token is configured.');
+    return;
+  }
+  const webhookRouter = buildWebhookRouter({
+    handleChat: (message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode) =>
+      handleChat(message, sessionId, sendSSE, pinnedMessages, abortSignal, callerContext, modelOverride, executionMode),
+    addMessage,
+    getIsModelBusy: () => isModelBusy,
+    broadcast: broadcastWS,
+    deliverTelegram: (text: string) => telegramChannel.sendToAllowed(text),
+  });
+  app.use(hookCfg.path, webhookRouter);
+  console.log(`[Webhooks] Listening at ${hookCfg.path} (wake, agent, status)`);
+})();
 
 app.get('*', (_req, res) => { res.sendFile(path.join(webUiPath, 'index.html')); });
 
@@ -5726,7 +6174,7 @@ server.listen(PORT, HOST, () => {
 ╔════════════════════════════════════════════════════════════════╗
 ║              SmallClaw v2 Gateway (Native Tools)              ║
 ╠════════════════════════════════════════════════════════════════╣
-║  Tasks:   Cron scheduler active, jobs at .localclaw/cron/     ║
+║  Tasks:   Cron scheduler active, jobs at .smallclaw/cron/     ║
 ║  Skills: ${String(skillsManager.getAll().length + ' loaded, ' + skillsManager.getEnabledSkills().length + ' enabled').padEnd(49)}║
 ║  Search:  ${hasSearch.padEnd(49)}║
 ║  Memory:  SOUL.md + IDENTITY.md + USER.md + MEMORY.md         ║
@@ -5736,11 +6184,38 @@ server.listen(PORT, HOST, () => {
 ║  Workspace: ${liveConfig.workspace.path.slice(0, 43).padEnd(45)}║
 ╚════════════════════════════════════════════════════════════════╝
 `);
+  // Auto-connect enabled MCP servers
+  getMCPManager().startEnabledServers().catch(err => console.warn('[MCP] Startup error:', err?.message));
+
   cronScheduler.start();
   console.log('[CronScheduler] Tick loop started — heartbeat:', cronScheduler.getConfig().enabled ? 'ON' : 'OFF');
   heartbeatRunner.start();
   console.log('[HeartbeatRunner] Started — interval:', heartbeatRunner.getConfig().intervalMinutes, 'min');
-  telegramChannel.start().catch(err => console.error('[Telegram] Start failed:', err.message));
+  telegramChannel.start().then(() => {
+    // Check if we just restarted after a self-update
+    const selfUpdateStatusFile = path.join(require('os').homedir(), '.smallclaw', 'last_self_update.txt');
+    if (fs.existsSync(selfUpdateStatusFile)) {
+      try {
+        const statusContent = fs.readFileSync(selfUpdateStatusFile, 'utf-8').trim();
+        fs.unlinkSync(selfUpdateStatusFile); // consume it — only notify once
+        if (statusContent.startsWith('UPDATE_SUCCESS')) {
+          const lines = statusContent.split('\n');
+          const timestamp = lines[1] || '';
+          const msg = `✅ SmallClaw self-update complete!\n\nI ran the update, rebuilt, and have restarted the gateway. I'm back online and up to date.\n\n🕐 Updated at: ${timestamp.trim()}`;
+          setTimeout(() => telegramChannel.sendToAllowed(msg).catch(() => {}), 3000);
+          console.log('[Gateway] Post-update Telegram notification queued.');
+        } else if (statusContent.startsWith('UPDATE_FAILED')) {
+          const lines = statusContent.split('\n');
+          const timestamp = lines[1] || '';
+          const msg = `❌ SmallClaw self-update failed.\n\nThe update process encountered an error. Gateway has restarted with the previous version. Check the terminal for details.\n\n🕐 Attempted at: ${timestamp.trim()}`;
+          setTimeout(() => telegramChannel.sendToAllowed(msg).catch(() => {}), 3000);
+          console.log('[Gateway] Post-update failure Telegram notification queued.');
+        }
+      } catch (e: any) {
+        console.warn('[Gateway] Could not read self-update status file:', e.message);
+      }
+    }
+  }).catch(err => console.error('[Telegram] Start failed:', err.message));
   scheduleTaskHeartbeat();
   console.log('[TaskHeartbeat] Scheduled — interval:', loadTaskHeartbeatConfig().interval_minutes, 'min');
 
@@ -5760,6 +6235,7 @@ function gracefulShutdown(signal: 'SIGINT' | 'SIGTERM'): void {
   console.log(`[Gateway] Received ${signal}; shutting down...`);
   try { skillsManager.persistState(); } catch {}
   try { telegramChannel.stop(); } catch {}
+  try { getMCPManager().disconnectAll(); } catch {}
   try { cronScheduler.stop(); } catch {}
   try { heartbeatRunner.stop(); } catch {}
   try { if (wss) wss.close(); } catch {}

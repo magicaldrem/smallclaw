@@ -1,7 +1,7 @@
 /**
- * skills-manager.ts - Skills System for LocalClaw
+ * skills-manager.ts - Skills System for SmallClaw
  * 
- * Reads SKILL.md files from .localclaw/skills/<name>/SKILL.md
+ * Reads SKILL.md files from .smallclaw/skills/<name>/SKILL.md
  * Parses YAML frontmatter + markdown instructions
  * Tracks enabled/disabled state in config
  * Injects enabled skills into system prompt

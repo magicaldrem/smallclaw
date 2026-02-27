@@ -1,18 +1,61 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { LocalClawConfig } from '../types.js';
+import { SmallClawConfig } from '../types.js';
+
+function migrateLegacyDir(legacyDir: string, targetDir: string): void {
+  try {
+    if (!fs.existsSync(legacyDir)) return;
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+
+    const marker = path.join(targetDir, '.migrated-from-localclaw');
+    if (fs.existsSync(marker)) return;
+
+    // One-time migration: preserve existing users by carrying over all legacy data,
+    // including config, credentials, skills, logs, and state files.
+    fs.cpSync(legacyDir, targetDir, { recursive: true, force: true });
+    fs.writeFileSync(marker, new Date().toISOString(), 'utf-8');
+    console.log(`[Config] Migrated legacy data: ${legacyDir} -> ${targetDir}`);
+  } catch (err: any) {
+    console.warn(`[Config] Legacy migration failed (${legacyDir} -> ${targetDir}): ${String(err?.message || err)}`);
+  }
+}
+
+function migrateLegacyData(): void {
+  const projectLegacy = path.join(__dirname, '..', '..', '.localclaw');
+  const projectTarget = path.join(__dirname, '..', '..', '.smallclaw');
+  const homeLegacy = path.join(os.homedir(), '.localclaw');
+  const homeTarget = path.join(os.homedir(), '.smallclaw');
+
+  if (process.env.SMALLCLAW_DATA_DIR) {
+    const dataRoot = process.env.SMALLCLAW_DATA_DIR;
+    migrateLegacyDir(path.join(dataRoot, '.localclaw'), path.join(dataRoot, '.smallclaw'));
+    return;
+  }
+
+  // Prefer project-local migration when this repo has (or previously had)
+  // project-scoped state; otherwise migrate home-scoped state.
+  const hasProjectScopedState = fs.existsSync(projectLegacy) || fs.existsSync(projectTarget);
+  if (hasProjectScopedState) {
+    migrateLegacyDir(projectLegacy, projectTarget);
+    return;
+  }
+
+  migrateLegacyDir(homeLegacy, homeTarget);
+}
+
+migrateLegacyData();
 
 // ── Config & workspace directory resolution ──────────────────────────────────
 // Priority:
 //   1. SMALLCLAW_DATA_DIR env var   (set by Docker / CI)
-//   2. .localclaw/ next to the project root
-//   3. ~/.localclaw in the user's home directory
-const PROJECT_CONFIG = path.join(__dirname, '..', '..', '.localclaw');
-const HOME_CONFIG    = path.join(os.homedir(), '.localclaw');
+//   2. .smallclaw/ next to the project root
+//   3. ~/.smallclaw in the user's home directory
+const PROJECT_CONFIG = path.join(__dirname, '..', '..', '.smallclaw');
+const HOME_CONFIG    = path.join(os.homedir(), '.smallclaw');
 const CONFIG_DIR =
   process.env.SMALLCLAW_DATA_DIR
-    ? path.join(process.env.SMALLCLAW_DATA_DIR, '.localclaw')
+    ? path.join(process.env.SMALLCLAW_DATA_DIR, '.smallclaw')
     : fs.existsSync(PROJECT_CONFIG)
       ? PROJECT_CONFIG
       : HOME_CONFIG;
@@ -24,7 +67,7 @@ const WORKSPACE_DIR =
   process.env.SMALLCLAW_WORKSPACE_DIR ??
   path.join(CONFIG_DIR, '..', 'workspace');
 
-export const DEFAULT_CONFIG: LocalClawConfig = {
+export const DEFAULT_CONFIG: SmallClawConfig = {
   version: '1.0.1',
   gateway: {
     port: 18789,
@@ -124,6 +167,31 @@ export const DEFAULT_CONFIG: LocalClawConfig = {
     compactionThreshold: 0.7,
     memoryFlushThreshold: 0.75,
   },
+  channels: {
+    telegram: {
+      enabled: false,
+      botToken: '',
+      allowedUserIds: [],
+      streamMode: 'full',
+    },
+    discord: {
+      enabled: false,
+      botToken: '',
+      applicationId: '',
+      guildId: '',
+      channelId: '',
+      webhookUrl: '',
+    },
+    whatsapp: {
+      enabled: false,
+      accessToken: '',
+      phoneNumberId: '',
+      businessAccountId: '',
+      verifyToken: '',
+      webhookSecret: '',
+      testRecipient: '',
+    },
+  },
   orchestration: {
     enabled: false,
     secondary: {
@@ -174,21 +242,43 @@ export const DEFAULT_CONFIG: LocalClawConfig = {
       watchdog_no_progress_cycles: 3,
       checkpointing_enabled: true,
     },
-  }
+  },
+  hooks: {
+    enabled: false,
+    token: '',
+    path: '/hooks',
+  },
 };
 
+function normalizeLegacyPathsInConfig(loaded: any): any {
+  const out = { ...(loaded || {}) };
+
+  const skillsDir = String(out?.skills?.directory || '');
+  if (skillsDir && skillsDir.includes('.localclaw')) {
+    out.skills = { ...(out.skills || {}), directory: path.join(CONFIG_DIR, 'skills') };
+  }
+
+  const memoryPath = String(out?.memory?.path || '');
+  if (memoryPath && memoryPath.includes('.localclaw')) {
+    out.memory = { ...(out.memory || {}), path: path.join(CONFIG_DIR, 'memory') };
+  }
+
+  return out;
+}
+
 export class ConfigManager {
-  private config: LocalClawConfig;
+  private config: SmallClawConfig;
 
   constructor() {
     this.config = this.loadConfig();
   }
 
-  private loadConfig(): LocalClawConfig {
+  private loadConfig(): SmallClawConfig {
     try {
       if (fs.existsSync(CONFIG_FILE)) {
         const data = fs.readFileSync(CONFIG_FILE, 'utf-8');
-        const loaded = JSON.parse(data);
+        const loadedRaw = JSON.parse(data);
+        const loaded = normalizeLegacyPathsInConfig(loadedRaw);
 
         // Deep-merge the llm.providers block so env-var defaults for
         // providers not present in config.json are preserved.
@@ -203,7 +293,23 @@ export class ConfigManager {
             }
           : DEFAULT_CONFIG.llm;
 
-        return { ...DEFAULT_CONFIG, ...loaded, llm: mergedLlm };
+        const mergedChannels = {
+          ...(DEFAULT_CONFIG.channels || {}),
+          ...(loaded.channels || {}),
+          telegram: {
+            ...((DEFAULT_CONFIG.channels as any)?.telegram || {}),
+            ...((loaded.channels as any)?.telegram || {}),
+            ...(loaded.telegram || {}),
+          },
+        };
+
+        return {
+          ...DEFAULT_CONFIG,
+          ...loaded,
+          llm: mergedLlm,
+          channels: mergedChannels as any,
+          telegram: (mergedChannels as any).telegram,
+        };
       }
     } catch (error) {
       console.warn('Failed to load config, using defaults:', error);
@@ -211,11 +317,11 @@ export class ConfigManager {
     return DEFAULT_CONFIG;
   }
 
-  public getConfig(): LocalClawConfig {
+  public getConfig(): SmallClawConfig {
     return this.config;
   }
 
-  public updateConfig(updates: Partial<LocalClawConfig>): void {
+  public updateConfig(updates: Partial<SmallClawConfig>): void {
     this.config = { ...this.config, ...updates };
     this.saveConfig();
   }
