@@ -11,6 +11,7 @@ Ce guide est conçu pour les étudiants et les développeurs souhaitant comprend
 3. [Exploration du Code Source](#exploration-du-code-source)
    - [Structure des Répertoires](#structure-des-répertoires)
    - [Composants Clés](#composants-clés)
+   - [Implémentation du CLI](#implémentation-du-cli)
 4. [Concepts Fondamentaux](#concepts-fondamentaux)
    - [Tool Calling Natif](#tool-calling-natif)
    - [Surgical File Editing (Édition Chirurgicale)](#surgical-file-editing-édition-chirurgicale)
@@ -89,6 +90,20 @@ Si vous souhaitez explorer le code, voici les fichiers les plus importants :
 - `src/agents/executor.ts` : Définit le comportement de l'agent primaire qui exécute les outils.
 - `src/providers/factory.ts` : Responsable de la création de l'instance du fournisseur LLM approprié selon la configuration.
 - `src/tools/registry.ts` : Répertorie tous les outils disponibles et les expose au framework.
+
+### Implémentation du CLI
+
+L'interface en ligne de commande (CLI) de SmallClaw est le point d'entrée pour les opérations système. Elle est implémentée dans `src/cli/index.ts` en utilisant la bibliothèque **Commander.js**.
+
+#### Fonctionnement technique :
+1. **Définition des commandes** : Chaque commande (`gateway`, `agent`, `onboard`, etc.) est définie avec ses arguments et options.
+2. **Liaison globale** : Grâce au champ `bin` dans le `package.json` et à la commande `npm link`, le script `dist/cli/index.js` devient disponible globalement sous le nom `smallclaw`.
+3. **Interactions avec le cœur** :
+   - La commande `gateway start` lance le serveur Express en important `src/gateway/server-v2.ts`.
+   - La commande `agent <mission>` instancie un `AgentOrchestrator` pour exécuter une tâche directement sans interface web.
+   - La commande `update` gère la mise à jour automatique via `git pull` ou `npm install` selon le mode d'installation détecté.
+
+C'est un excellent exemple de la manière de transformer une application Node.js complexe en un outil système facile à utiliser.
 
 ---
 
