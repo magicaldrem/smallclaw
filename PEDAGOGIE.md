@@ -8,19 +8,22 @@ Ce guide est conçu pour les étudiants et les développeurs souhaitant comprend
 2. [Architecture : La Philosophie du "Small Model First"](#architecture--la-philosophie-du-small-model-first)
    - [Le Concept "Single-Pass"](#le-concept-single-pass)
    - [Orchestration Multi-Agents (Optionnelle)](#orchestration-multi-agents-optionnelle)
-3. [Concepts Fondamentaux](#concepts-fondamentaux)
+3. [Exploration du Code Source](#exploration-du-code-source)
+   - [Structure des Répertoires](#structure-des-répertoires)
+   - [Composants Clés](#composants-clés)
+4. [Concepts Fondamentaux](#concepts-fondamentaux)
    - [Tool Calling Natif](#tool-calling-natif)
    - [Surgical File Editing (Édition Chirurgicale)](#surgical-file-editing-édition-chirurgicale)
    - [Gestion de la Mémoire et du Contexte](#gestion-de-la-mémoire-et-du-contexte)
-4. [Le Système de Skills (Compétences)](#le-système-de-skills-compétences)
+5. [Le Système de Skills (Compétences)](#le-système-de-skills-compétences)
    - [Anatomie d'un SKILL.md](#anatomie-dun-skillmd)
    - [Cycle de vie d'une Skill : Du Markdown au Manifeste](#cycle-de-vie-dune-skill--du-markdown-au-manifeste)
-5. [Tutoriel Pratique : Créer votre première Skill](#tutoriel-pratique--créer-votre-première-skill)
+6. [Tutoriel Pratique : Créer votre première Skill](#tutoriel-pratique--créer-votre-première-skill)
    - [Étape 1 : Définition du besoin](#étape-1--définition-du-besoin)
    - [Étape 2 : Rédaction du fichier SKILL.md](#étape-2--rédaction-du-fichier-skillmd)
    - [Étape 3 : Installation et Validation](#étape-3--installation-et-validation)
    - [Étape 4 : Test en conditions réelles](#étape-4--test-en-conditions-réelles)
-6. [Conclusion et Perspectives](#conclusion-et-perspectives)
+7. [Conclusion et Perspectives](#conclusion-et-perspectives)
 
 ---
 
@@ -55,6 +58,37 @@ Pour les tâches complexes, SmallClaw propose une orchestration **Conseiller (Ad
     *   **Rescue (Sauvetage)** : Si l'exécuteur échoue plusieurs fois (erreur d'outil, boucle infinie, stagnation), le conseiller est appelé pour diagnostiquer le problème et donner une nouvelle direction à l'exécuteur.
 
 **Important** : Le conseiller n'exécute jamais d'outils lui-même. Il ne fait que donner des "indices de contexte" invisibles pour l'utilisateur mais injectés dans le prompt de l'exécuteur.
+
+---
+
+## Exploration du Code Source
+
+Comprendre l'organisation des fichiers est essentiel pour naviguer dans le projet et savoir où apporter des modifications.
+
+### Structure des Répertoires
+
+Voici une vue d'ensemble des principaux dossiers du projet :
+
+- `src/` : Le cœur du framework, écrit en TypeScript.
+  - `agents/` : Contient la logique des différents rôles (Exécuteur, Manager, Vérificateur).
+  - `gateway/` : Gère le serveur Express, les flux SSE (Server-Sent Events) et l'orchestration des tâches. C'est ici que se trouve le "cerveau" opérationnel.
+  - `providers/` : Adaptateurs pour les différents fournisseurs de modèles (Ollama, OpenAI, etc.). C'est la couche d'abstraction LLM.
+  - `tools/` : Implémentation de tous les outils que l'agent peut utiliser (fichiers, web, shell, etc.).
+  - `skills/` : Logique de gestion et de traitement des "Skills" Markdown.
+  - `config/` : Gestion de la configuration du système.
+  - `cli/` : Code de l'interface en ligne de commande (`smallclaw`).
+- `web-ui/` : Le code source de l'interface graphique (frontend).
+- `assets/` : Images et ressources statiques pour la documentation et l'UI.
+- `workspace/` : Le répertoire de travail par défaut où l'agent effectue ses opérations de fichiers.
+
+### Composants Clés
+
+Si vous souhaitez explorer le code, voici les fichiers les plus importants :
+
+- `src/gateway/server-v2.ts` : Le point d'entrée principal du serveur. Il gère les sessions de chat et coordonne les appels au LLM.
+- `src/agents/executor.ts` : Définit le comportement de l'agent primaire qui exécute les outils.
+- `src/providers/factory.ts` : Responsable de la création de l'instance du fournisseur LLM approprié selon la configuration.
+- `src/tools/registry.ts` : Répertorie tous les outils disponibles et les expose au framework.
 
 ---
 
